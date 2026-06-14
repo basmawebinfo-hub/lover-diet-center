@@ -4,7 +4,7 @@ import { Leaf, ArrowLeft } from 'lucide-react'
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4 text-center">
-      <span className="flex size-16 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
+      <span className="flex size-16 items-center justify-center rounded-2xl bg-lime-50 text-lime-600">
         <Leaf className="size-8" />
       </span>
       <h1 className="mt-6 text-3xl font-bold tracking-tight text-neutral-900">Page not found</h1>

@@ -107,7 +107,7 @@ export default function WeightPage() {
                   step="0.1"
                   min="30"
                   max="300"
-                  className="w-full text-5xl font-black text-neutral-900 border-b-2 border-teal-400 bg-transparent focus:outline-none focus:border-teal-600 pb-2"
+                  className="w-full text-5xl font-black text-neutral-900 border-b-2 border-lime-400 bg-transparent focus:outline-none focus:border-lime-600 pb-2"
                 />
                 <span className="text-2xl font-bold text-neutral-400 pb-2">kg</span>
               </div>
@@ -116,7 +116,7 @@ export default function WeightPage() {
               {lastLog && diff !== 0 && (
                 <div className={cn(
                   "mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold",
-                  diff < 0 ? "bg-teal-50 text-teal-700" : "bg-orange-50 text-orange-600"
+                  diff < 0 ? "bg-lime-50 text-lime-700" : "bg-orange-50 text-orange-600"
                 )}>
                   {diff < 0 ? <TrendingDown className="size-4" /> : <TrendingUp className="size-4" />}
                   {diff < 0 ? `${Math.abs(diff).toFixed(1)} kg less than last log` : `${diff.toFixed(1)} kg more than last log`}
@@ -130,7 +130,7 @@ export default function WeightPage() {
                 <button
                   key={delta}
                   onClick={() => setInput((prev) => (Math.max(30, Number(prev) + delta)).toFixed(1))}
-                  className="rounded-xl border border-neutral-200 py-2 text-sm font-semibold text-neutral-600 hover:border-teal-400 hover:text-teal-700 transition-colors"
+                  className="rounded-xl border border-neutral-200 py-2 text-sm font-semibold text-neutral-600 hover:border-lime-400 hover:text-lime-700 transition-colors"
                 >
                   {delta > 0 ? `+${delta}` : delta}
                 </button>
@@ -144,8 +144,8 @@ export default function WeightPage() {
               className={cn(
                 "w-full flex items-center justify-center gap-2 rounded-2xl py-4 text-base font-bold transition-all",
                 savedFor === today
-                  ? "bg-teal-100 text-teal-700 cursor-default"
-                  : "bg-teal-600 text-white hover:bg-teal-700 active:scale-95"
+                  ? "bg-lime-100 text-lime-700 cursor-default"
+                  : "bg-lime-600 text-white hover:bg-lime-700 active:scale-95"
               )}
             >
               {savedFor === today ? (
@@ -163,7 +163,7 @@ export default function WeightPage() {
               </div>
               <div className="text-center">
                 <p className="text-xs text-neutral-400">Lost</p>
-                <p className="text-lg font-bold text-teal-600">
+                <p className="text-lg font-bold text-lime-600">
                   {Math.max(0, user.startWeightKg - inputWeight).toFixed(1)} kg
                 </p>
               </div>
@@ -194,7 +194,7 @@ export default function WeightPage() {
                       </span>
                       <div className="flex items-center gap-3">
                         {change !== 0 && (
-                          <span className={cn("text-xs font-medium", change < 0 ? "text-teal-600" : "text-orange-500")}>
+                          <span className={cn("text-xs font-medium", change < 0 ? "text-lime-600" : "text-orange-500")}>
                             {change < 0 ? "" : "+"}{change.toFixed(1)} kg
                           </span>
                         )}

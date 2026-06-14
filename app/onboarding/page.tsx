@@ -116,8 +116,8 @@ export default function OnboardingPage() {
             />
           </div>
           <div className="mt-6 mb-2 lg:hidden">
-            <span className="text-xl font-bold text-teal-700 tracking-tight">
-              lovers<span className="text-teal-500">dc</span>
+            <span className="text-xl font-bold text-lime-700 tracking-tight">
+              lovers<span className="text-lime-500">dc</span>
             </span>
           </div>
         </div>
@@ -218,15 +218,15 @@ function AIAnalysisStep({ data }: { data: any }) {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
       <div className="relative mb-6">
-        <div className="absolute -inset-4 rounded-full bg-teal-400/20 blur-xl animate-pulse" />
-        <Sparkles className="relative mx-auto h-16 w-16 text-teal-600 animate-bounce" />
+        <div className="absolute -inset-4 rounded-full bg-lime-400/20 blur-xl animate-pulse" />
+        <Sparkles className="relative mx-auto h-16 w-16 text-lime-600 animate-bounce" />
       </div>
       <h2 className="text-2xl font-bold text-neutral-900">AI Analysis</h2>
       <p className="mt-2 text-sm text-neutral-500">
         Computing your personalized diet plan...
       </p>
-      <div className="mt-6 w-full max-w-xs h-2 rounded-full bg-teal-100 overflow-hidden">
-        <div className="h-full bg-teal-500 animate-pulse rounded-full" style={{ width: '60%' }} />
+      <div className="mt-6 w-full max-w-xs h-2 rounded-full bg-lime-100 overflow-hidden">
+        <div className="h-full bg-lime-500 animate-pulse rounded-full" style={{ width: '60%' }} />
       </div>
     </div>
   )
@@ -261,11 +261,11 @@ function PreviewPanel({
   return (
     <div className="hidden lg:flex sticky top-0 h-screen flex-col items-center justify-center bg-[#0D4F4A] text-white p-8">
       <div
-        className="absolute -top-20 -start-20 size-64 rounded-full bg-teal-600/30 blur-3xl"
+        className="absolute -top-20 -start-20 size-64 rounded-full bg-lime-600/30 blur-3xl"
         aria-hidden
       />
       <div
-        className="absolute -bottom-20 -end-20 size-64 rounded-full bg-teal-400/20 blur-3xl"
+        className="absolute -bottom-20 -end-20 size-64 rounded-full bg-lime-400/20 blur-3xl"
         aria-hidden
       />
       <div className="relative z-10 flex w-full max-w-sm flex-col">
@@ -289,7 +289,7 @@ function PreviewPanel({
 
         {step >= 5 && (
           <div className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-4 text-sm">
-            <p className="font-semibold text-teal-200">AI Analysis</p>
+            <p className="font-semibold text-lime-200">AI Analysis</p>
             <p className="mt-1 text-white/80 leading-relaxed">{analysis.summaryEn}</p>
             <div className="mt-3 flex items-center justify-between text-xs text-white/60">
               <span>Daily target</span>
@@ -344,7 +344,7 @@ function NameStep({
         value={data.name}
         onChange={(e) => update("name", e.target.value)}
         placeholder="e.g. Ahmed Ahmed"
-        className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3.5 text-base text-neutral-900 outline-none transition focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+        className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3.5 text-base text-neutral-900 outline-none transition focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
         autoFocus
       />
     </StepFrame>
@@ -445,8 +445,8 @@ function GoalStep({
               className={cn(
                 "flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all",
                 active
-                  ? "border-teal-500 bg-teal-50 shadow-sm"
-                  : "border-neutral-200 bg-white hover:border-teal-300"
+                  ? "border-lime-500 bg-lime-50 shadow-sm"
+                  : "border-neutral-200 bg-white hover:border-lime-300"
               )}
             >
               <span className="text-2xl">{goalCopy[g].icon}</span>
@@ -455,7 +455,7 @@ function GoalStep({
                 <p className="text-xs text-neutral-500">{goalCopy[g].ar}</p>
               </div>
               {active && (
-                <Check className="size-5 text-teal-600" />
+                <Check className="size-5 text-lime-600" />
               )}
             </button>
           )
@@ -488,8 +488,8 @@ function ActivityStep({
               className={cn(
                 "flex w-full items-center gap-3 rounded-xl border-2 p-3.5 text-left transition-all",
                 active
-                  ? "border-teal-500 bg-teal-50"
-                  : "border-neutral-200 bg-white hover:border-teal-300"
+                  ? "border-lime-500 bg-lime-50"
+                  : "border-neutral-200 bg-white hover:border-lime-300"
               )}
             >
               <span className="text-xl">{activityCopy[a].emoji}</span>
@@ -497,7 +497,7 @@ function ActivityStep({
                 <p className="font-semibold text-neutral-900">{activityCopy[a].en}</p>
                 <p className="text-xs text-neutral-500">{activityCopy[a].ar}</p>
               </div>
-              {active && <Check className="size-5 text-teal-600" />}
+              {active && <Check className="size-5 text-lime-600" />}
             </button>
           )
         })}
@@ -534,7 +534,7 @@ function ReviewStep({
       title="Ready to meet your future self?"
       subtitle="Here's a quick summary of what we computed."
     >
-      <div className="rounded-2xl border border-teal-100 bg-teal-50/50 p-4">
+      <div className="rounded-2xl border border-lime-100 bg-lime-50/50 p-4">
         <div className="grid grid-cols-2 gap-3 text-sm">
           <Row label="Name" value={data.name} />
           <Row label="BMI" value={bmi.toFixed(1)} />

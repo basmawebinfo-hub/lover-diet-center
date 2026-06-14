@@ -69,7 +69,7 @@ export default function DashboardOverviewPage() {
 
         {/* Greeting */}
         <header className="flex flex-col gap-1">
-          <p className="text-sm font-medium text-teal-700">
+          <p className="text-sm font-medium text-lime-700">
             {greetingForTime()} · {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" })}
           </p>
           <h1 className="text-3xl font-bold text-neutral-900 sm:text-4xl">
@@ -104,7 +104,7 @@ export default function DashboardOverviewPage() {
 
             <Link
               href="/dashboard/weight"
-              className="inline-flex items-center gap-1.5 rounded-full bg-teal-600 text-white px-4 py-2 text-sm font-semibold hover:bg-teal-700 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full bg-lime-600 text-white px-4 py-2 text-sm font-semibold hover:bg-lime-700 transition-colors"
             >
               <Scale className="size-3.5" />
               Log today's weight
@@ -161,7 +161,7 @@ export default function DashboardOverviewPage() {
           <div className="rounded-3xl border border-neutral-100 bg-white p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-neutral-900">Weight Progress</h2>
-              <TrendingDown className="size-5 text-teal-600" />
+              <TrendingDown className="size-5 text-lime-600" />
             </div>
             <p className="mt-1 text-sm text-neutral-500">
               Last 7 days · {Math.max(0, user.startWeightKg - user.currentWeightKg).toFixed(1)} kg total
@@ -175,7 +175,7 @@ export default function DashboardOverviewPage() {
                 return (
                   <div key={log.id} className="flex flex-1 flex-col items-center gap-1">
                     <div
-                      className="w-full rounded-t-md bg-gradient-to-t from-teal-600 to-teal-400"
+                      className="w-full rounded-t-md bg-gradient-to-t from-lime-600 to-lime-400"
                       style={{ height: `${heightPct}%` }}
                     />
                     <span className="text-[10px] text-neutral-400">
@@ -191,8 +191,8 @@ export default function DashboardOverviewPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-neutral-100 bg-gradient-to-br from-teal-700 to-teal-900 p-6 text-white">
-            <p className="text-xs font-semibold uppercase tracking-wider text-teal-200">AI Analysis</p>
+          <div className="rounded-3xl border border-neutral-100 bg-gradient-to-br from-lime-700 to-lime-900 p-6 text-white">
+            <p className="text-xs font-semibold uppercase tracking-wider text-lime-200">AI Analysis</p>
             <h2 className="mt-2 text-xl font-bold leading-snug">{analysis.summaryEn}</h2>
             <p className="mt-3 text-sm leading-relaxed text-white/80">{analysis.motivationEn}</p>
             <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/10 pt-4 text-center text-xs">
@@ -230,11 +230,11 @@ function StatCard({ icon, label, value, delta, deltaTone = "neutral" }: {
 }) {
   return (
     <div className="rounded-2xl border border-neutral-100 bg-white p-4">
-      <span className="flex size-9 items-center justify-center rounded-lg bg-teal-50 text-teal-600">{icon}</span>
+      <span className="flex size-9 items-center justify-center rounded-lg bg-lime-50 text-lime-600">{icon}</span>
       <p className="mt-3 text-xs text-neutral-500">{label}</p>
       <p className="mt-0.5 text-2xl font-bold text-neutral-900">{value}</p>
       <p className={cn("mt-1 text-xs font-medium",
-        deltaTone === "positive" && "text-teal-600",
+        deltaTone === "positive" && "text-lime-600",
         deltaTone === "negative" && "text-red-500",
         deltaTone === "neutral" && "text-neutral-500"
       )}>{delta}</p>
@@ -246,13 +246,13 @@ function QuickAction({ href, icon, label, subtitle }: {
   href: string; icon: React.ReactNode; label: string; subtitle: string
 }) {
   return (
-    <Link href={href} className="group flex flex-col items-start gap-2 rounded-2xl border border-neutral-100 bg-white p-4 transition-all hover:border-teal-300 hover:shadow-md">
-      <span className="flex size-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600 group-hover:bg-teal-100">{icon}</span>
+    <Link href={href} className="group flex flex-col items-start gap-2 rounded-2xl border border-neutral-100 bg-white p-4 transition-all hover:border-lime-300 hover:shadow-md">
+      <span className="flex size-10 items-center justify-center rounded-xl bg-lime-50 text-lime-600 group-hover:bg-lime-100">{icon}</span>
       <div>
         <p className="font-semibold text-neutral-900">{label}</p>
         <p className="text-xs text-neutral-500">{subtitle}</p>
       </div>
-      <ArrowRight className="mt-1 size-4 text-neutral-300 transition-transform group-hover:translate-x-0.5 group-hover:text-teal-600" />
+      <ArrowRight className="mt-1 size-4 text-neutral-300 transition-transform group-hover:translate-x-0.5 group-hover:text-lime-600" />
     </Link>
   )
 }

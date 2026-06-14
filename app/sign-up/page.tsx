@@ -7,7 +7,7 @@ import { Check } from 'lucide-react'
 function SignUpLoadingFallback() {
   return (
     <div className="flex items-center justify-center py-12">
-      <div className="size-8 animate-spin rounded-full border-2 border-teal-200 border-t-teal-600" />
+      <div className="size-8 animate-spin rounded-full border-2 border-lime-200 border-t-lime-600" />
     </div>
   )
 }
@@ -104,7 +104,7 @@ export default function SignUpPage() {
           {/* Logo/Brand */}
           <div className="mb-10">
             <span className="text-2xl font-bold text-white tracking-tight">
-              lovers<span className="text-teal-200">dc</span>
+              lovers<span className="text-lime-200">dc</span>
             </span>
           </div>
 
@@ -140,11 +140,11 @@ export default function SignUpPage() {
 
         {/* Decorative gradient orbs */}
         <div
-          className="absolute -bottom-20 -left-20 size-64 rounded-full bg-teal-600/30 blur-3xl"
+          className="absolute -bottom-20 -left-20 size-64 rounded-full bg-lime-600/30 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="absolute -top-10 -right-10 size-48 rounded-full bg-teal-400/20 blur-2xl"
+          className="absolute -top-10 -right-10 size-48 rounded-full bg-lime-400/20 blur-2xl"
           aria-hidden="true"
         />
       </div>
@@ -154,8 +154,8 @@ export default function SignUpPage() {
         <div className="w-full max-w-sm lg:max-w-md mx-auto">
           {/* Mobile logo */}
           <div className="lg:hidden mb-8 text-center">
-            <span className="text-2xl font-bold text-teal-700 tracking-tight">
-              lovers<span className="text-teal-500">dc</span>
+            <span className="text-2xl font-bold text-lime-700 tracking-tight">
+              lovers<span className="text-lime-500">dc</span>
             </span>
           </div>
 

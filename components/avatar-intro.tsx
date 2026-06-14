@@ -35,11 +35,11 @@ export function AvatarIntro({ name, startingConfig, targetConfig, onContinue }: 
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#0D4F4A] via-[#0a3d38] to-[#082f2c] p-6 text-white">
       {/* Decorative orbs */}
       <div
-        className="absolute -top-32 -left-32 size-96 rounded-full bg-teal-400/20 blur-3xl"
+        className="absolute -top-32 -left-32 size-96 rounded-full bg-lime-400/20 blur-3xl"
         aria-hidden
       />
       <div
-        className="absolute -bottom-32 -right-32 size-96 rounded-full bg-teal-600/20 blur-3xl"
+        className="absolute -bottom-32 -right-32 size-96 rounded-full bg-lime-600/20 blur-3xl"
         aria-hidden
       />
 
@@ -67,7 +67,7 @@ export function AvatarIntro({ name, startingConfig, targetConfig, onContinue }: 
               aria-hidden
             >
               <div
-                className="absolute inset-x-0 h-1 bg-gradient-to-b from-transparent via-teal-300 to-transparent"
+                className="absolute inset-x-0 h-1 bg-gradient-to-b from-transparent via-lime-300 to-transparent"
                 style={{
                   animation: "scanLine 1.6s ease-in-out infinite",
                   boxShadow: "0 0 24px rgba(94, 234, 212, 0.6)",
@@ -79,9 +79,9 @@ export function AvatarIntro({ name, startingConfig, targetConfig, onContinue }: 
           {/* Pulse rings */}
           {phase === "analyze" && (
             <>
-              <div className="absolute size-40 animate-ping rounded-full border border-teal-300/30" />
+              <div className="absolute size-40 animate-ping rounded-full border border-lime-300/30" />
               <div
-                className="absolute size-52 animate-ping rounded-full border border-teal-300/20"
+                className="absolute size-52 animate-ping rounded-full border border-lime-300/20"
                 style={{ animationDelay: "0.4s" }}
               />
             </>
@@ -101,19 +101,19 @@ export function AvatarIntro({ name, startingConfig, targetConfig, onContinue }: 
             <p className="text-sm text-white/60">Loading your data…</p>
           )}
           {phase === "analyze" && (
-            <div className="flex items-center gap-2 text-sm text-teal-200">
-              <span className="size-1.5 animate-pulse rounded-full bg-teal-300" />
+            <div className="flex items-center gap-2 text-sm text-lime-200">
+              <span className="size-1.5 animate-pulse rounded-full bg-lime-300" />
               Computing BMI · body composition · goal timeline
             </div>
           )}
           {phase === "reveal" && (
-            <p className="text-sm text-teal-200">This is your starting point.</p>
+            <p className="text-sm text-lime-200">This is your starting point.</p>
           )}
           {phase === "ready" && (
             <button
               type="button"
               onClick={onContinue}
-              className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-teal-900 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
+              className="rounded-xl bg-white px-6 py-3 text-sm font-semibold text-lime-900 shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98]"
             >
               Open my dashboard →
             </button>

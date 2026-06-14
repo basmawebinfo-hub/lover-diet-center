@@ -4,7 +4,7 @@ import { WHATSAPP_NUMBER } from '@/lib/site'
 
 export function FinalCTA() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-teal-800 via-teal-900 to-teal-950 py-20 sm:py-28">
+    <section className="relative overflow-hidden bg-gradient-to-br from-lime-800 via-lime-900 to-lime-950 py-20 sm:py-28">
       {/* Cross-hatch pattern — plus marks like screenshot */}
       <div
         className="absolute inset-0 opacity-[0.08]"
@@ -29,13 +29,13 @@ export function FinalCTA() {
           starts with{' '}
           <span className="text-orange-400">one message</span>
         </h2>
-        <p className="mx-auto mt-6 max-w-2xl text-pretty text-base text-teal-100/70 sm:text-lg">
+        <p className="mx-auto mt-6 max-w-2xl text-pretty text-base text-lime-100/70 sm:text-lg">
           Book a free discovery call, get matched with a certified nutritionist
           in under 24 hours, and walk away with a clear plan — no commitment,
           no payment up front.
         </p>
 
-        <ul className="mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-teal-50">
+        <ul className="mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-lime-50">
           <li className="flex items-center gap-2 rounded-full border border-white/8 bg-black/20 px-4 py-1.5 text-white/85 backdrop-blur-sm">
             <CheckCircle2 className="size-4 text-orange-400" />
             Free 15-min discovery call

@@ -30,7 +30,7 @@ export function Testimonials() {
     >
       <div className="mx-auto max-w-7xl px-4">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50/60 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-teal-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-200 bg-lime-50/60 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-lime-700">
             Real Results
           </span>
           <h2
@@ -38,7 +38,7 @@ export function Testimonials() {
             className="mt-4 text-balance text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl"
           >
             What our members{' '}
-            <span className="text-teal-600">actually say</span>
+            <span className="text-lime-600">actually say</span>
           </h2>
           <p className="mt-4 text-pretty text-neutral-600">
             Thousands of real transformations, not stock photos. Every review
@@ -50,10 +50,10 @@ export function Testimonials() {
           {testimonials.map((t) => (
             <figure
               key={t.name}
-              className="group flex flex-col rounded-3xl border border-teal-100/60 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+              className="group flex flex-col rounded-3xl border border-lime-100/60 bg-white p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
             >
               <Quote
-                className="size-8 text-teal-200 transition-colors group-hover:text-teal-300"
+                className="size-8 text-lime-200 transition-colors group-hover:text-lime-300"
                 aria-hidden="true"
               />
               <div
@@ -70,9 +70,9 @@ export function Testimonials() {
               <blockquote className="mt-4 grow text-pretty leading-relaxed text-neutral-700">
                 {t.body}
               </blockquote>
-              <figcaption className="mt-6 flex items-center gap-3 border-t border-teal-50 pt-5">
+              <figcaption className="mt-6 flex items-center gap-3 border-t border-lime-50 pt-5">
                 <div
-                  className="flex size-10 items-center justify-center rounded-full bg-teal-100 text-sm font-semibold text-teal-700"
+                  className="flex size-10 items-center justify-center rounded-full bg-lime-100 text-sm font-semibold text-lime-700"
                   aria-hidden="true"
                 >
                   {t.name.charAt(0)}
@@ -89,12 +89,12 @@ export function Testimonials() {
         </div>
 
         {/* Trust strip — single banner */}
-        <div className="mx-auto mt-12 flex max-w-3xl flex-col items-center gap-3 rounded-2xl border border-teal-100 bg-white px-6 py-5 text-center shadow-sm sm:flex-row sm:gap-6 sm:text-start">
+        <div className="mx-auto mt-12 flex max-w-3xl flex-col items-center gap-3 rounded-2xl border border-lime-100 bg-white px-6 py-5 text-center shadow-sm sm:flex-row sm:gap-6 sm:text-start">
           <div className="flex -space-x-2 rtl:space-x-reverse">
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-teal-50 text-xs font-semibold text-teal-700"
+                className="flex size-9 items-center justify-center rounded-full border-2 border-white bg-lime-50 text-xs font-semibold text-lime-700"
                 aria-hidden="true"
               >
                 {String.fromCharCode(65 + i)}

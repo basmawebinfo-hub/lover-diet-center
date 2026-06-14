@@ -46,8 +46,8 @@ export default function CartPage() {
       <DashboardShell>
         <MobileNav />
         <div className="mx-auto max-w-md py-20 text-center">
-          <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-teal-100">
-            <Check className="size-10 text-teal-700" />
+          <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-lime-100">
+            <Check className="size-10 text-lime-700" />
           </div>
           <h1 className="text-3xl font-bold text-neutral-900">Order placed</h1>
           <p className="mt-2 text-neutral-500">
@@ -93,7 +93,7 @@ export default function CartPage() {
             </p>
             <a
               href="/dashboard/products"
-              className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-lime-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-lime-800"
             >
               Browse products
             </a>
@@ -106,7 +106,7 @@ export default function CartPage() {
                   key={item.productId}
                   className="flex items-center gap-4 rounded-2xl border border-neutral-100 bg-white p-4"
                 >
-                  <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-white text-2xl">
+                  <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-lime-50 to-white text-2xl">
                     {item.product.category === "snack"
                       ? "🥨"
                       : item.product.category === "drink"
@@ -118,7 +118,7 @@ export default function CartPage() {
                   <div className="flex-1">
                     <p className="font-semibold text-neutral-900">{item.product.nameEn}</p>
                     <p className="text-xs text-neutral-500">{item.product.nameAr}</p>
-                    <p className="mt-1 text-sm font-bold text-teal-700">
+                    <p className="mt-1 text-sm font-bold text-lime-700">
                       {item.product.price} AED
                     </p>
                   </div>

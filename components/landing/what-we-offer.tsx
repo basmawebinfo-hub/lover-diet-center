@@ -58,12 +58,12 @@ export function WhatWeOffer() {
 
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-teal-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-200 bg-lime-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-lime-700">
             Our Services
           </span>
           <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
             Everything you need,{' '}
-            <span className="text-teal-600">in one place</span>
+            <span className="text-lime-600">in one place</span>
           </h2>
           <p className="mt-4 text-pretty text-neutral-500">
             From your first consultation to your daily meals — we cover every part of your health journey.
@@ -78,10 +78,10 @@ export function WhatWeOffer() {
               <Link
                 key={service.title}
                 href={service.href}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-200 hover:shadow-xl hover:shadow-teal-900/8"
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-lime-200 hover:shadow-xl hover:shadow-lime-900/8"
               >
                 {/* Image */}
-                <div className="relative h-48 overflow-hidden bg-teal-50">
+                <div className="relative h-48 overflow-hidden bg-lime-50">
                   <Image
                     src={service.image}
                     alt={service.title}
@@ -102,7 +102,7 @@ export function WhatWeOffer() {
                 {/* Content */}
                 <div className="flex flex-1 flex-col p-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600 transition-colors group-hover:bg-teal-100">
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-lime-50 text-lime-600 transition-colors group-hover:bg-lime-100">
                       <Icon className="size-5" />
                     </div>
                     <div>
@@ -115,7 +115,7 @@ export function WhatWeOffer() {
                     {service.desc}
                   </p>
 
-                  <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-teal-600 transition-colors group-hover:text-teal-700">
+                  <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-lime-600 transition-colors group-hover:text-lime-700">
                     Learn more
                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                   </div>

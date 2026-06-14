@@ -42,7 +42,7 @@ export function FAQ() {
     >
       <div className="mx-auto max-w-3xl px-4">
         <div className="text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50/60 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-teal-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-lime-200 bg-lime-50/60 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-lime-700">
             FAQ
           </span>
           <h2
@@ -50,7 +50,7 @@ export function FAQ() {
             className="mt-4 text-balance text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl"
           >
             Questions,{' '}
-            <span className="text-teal-600">answered honestly</span>
+            <span className="text-lime-600">answered honestly</span>
           </h2>
           <p className="mt-4 text-pretty text-neutral-600">
             Everything we get asked most often. If yours is not here, message
@@ -64,7 +64,7 @@ export function FAQ() {
             return (
               <li
                 key={item.q}
-                className="overflow-hidden rounded-2xl border border-teal-100/60 bg-white shadow-sm transition-colors hover:border-teal-200"
+                className="overflow-hidden rounded-2xl border border-lime-100/60 bg-white shadow-sm transition-colors hover:border-lime-200"
               >
                 <button
                   type="button"
@@ -80,7 +80,7 @@ export function FAQ() {
                     className={cn(
                       'flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors',
                       isOpen
-                        ? 'border-teal-200 bg-teal-50 text-teal-700'
+                        ? 'border-lime-200 bg-lime-50 text-lime-700'
                         : 'border-neutral-200 text-neutral-500',
                     )}
                     aria-hidden="true"

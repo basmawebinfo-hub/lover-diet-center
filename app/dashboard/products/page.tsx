@@ -64,7 +64,7 @@ export default function ProductsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search products…"
-              className="w-full rounded-xl border border-neutral-200 bg-white py-2.5 ps-10 pe-4 text-sm text-neutral-900 outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+              className="w-full rounded-xl border border-neutral-200 bg-white py-2.5 ps-10 pe-4 text-sm text-neutral-900 outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
             />
           </div>
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -77,8 +77,8 @@ export default function ProductsPage() {
                 className={cn(
                   "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition",
                   category === c.id
-                    ? "bg-teal-700 text-white"
-                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-teal-300"
+                    ? "bg-lime-700 text-white"
+                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-lime-300"
                 )}
               >
                 {c.label}
@@ -116,14 +116,14 @@ function ProductCard({
 }) {
   const emoji = emojiForCategory(product.category)
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white transition hover:border-teal-300 hover:shadow-md">
-      <div className="flex h-40 items-center justify-center bg-gradient-to-br from-teal-50 to-white text-5xl">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white transition hover:border-lime-300 hover:shadow-md">
+      <div className="flex h-40 items-center justify-center bg-gradient-to-br from-lime-50 to-white text-5xl">
         {emoji}
       </div>
       <div className="flex flex-1 flex-col p-4">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-neutral-900">{product.nameEn}</h3>
-          <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-teal-700">
+          <span className="rounded-full bg-lime-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-lime-700">
             {product.category}
           </span>
         </div>
@@ -143,7 +143,7 @@ function ProductCard({
             className={cn(
               "inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-semibold transition",
               product.inStock
-                ? "bg-teal-700 text-white hover:bg-teal-800"
+                ? "bg-lime-700 text-white hover:bg-lime-800"
                 : "cursor-not-allowed bg-neutral-100 text-neutral-400"
             )}
           >

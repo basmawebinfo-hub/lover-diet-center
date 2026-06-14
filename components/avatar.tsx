@@ -252,7 +252,7 @@ export function Avatar({
       </div>
 
       {showLabel && (
-        <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+        <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-lime-50 px-3 py-1 text-xs font-semibold text-lime-700">
           {showLabel}
         </span>
       )}
@@ -406,7 +406,7 @@ export function AvatarComparison({
           showProgressRing
           progress={progress}
         />
-        <span className="text-xs font-semibold uppercase tracking-wider text-teal-600">
+        <span className="text-xs font-semibold uppercase tracking-wider text-lime-600">
           Now · {Math.round(progress)}%
         </span>
       </div>

@@ -79,7 +79,7 @@ export function FooterSimple() {
           {/* Brand column */}
           <div>
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-teal-600 text-white">
+              <div className="flex size-9 items-center justify-center rounded-xl bg-lime-600 text-white">
                 <svg viewBox="0 0 24 24" fill="none" className="size-5" aria-hidden="true">
                   <path d="M12 3C8 3 5 6 5 10c0 5 7 11 7 11s7-6 7-11c0-4-3-7-7-7z" fill="currentColor" opacity=".9"/>
                   <path d="M12 8v8M9 11h6" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
@@ -104,7 +104,7 @@ export function FooterSimple() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="flex size-9 items-center justify-center rounded-xl border border-white/10 text-neutral-400 transition-colors hover:border-teal-500/40 hover:text-teal-400"
+                  className="flex size-9 items-center justify-center rounded-xl border border-white/10 text-neutral-400 transition-colors hover:border-lime-500/40 hover:text-lime-400"
                 >
                   {s.icon}
                 </a>
@@ -140,11 +140,11 @@ export function FooterSimple() {
             © {new Date().getFullYear()} Lover Diet Center. All rights reserved.
           </p>
           <div className="flex items-center gap-4 text-sm text-neutral-500">
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-teal-400">
+            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-lime-400">
               WhatsApp
             </a>
             <span className="text-neutral-700">·</span>
-            <a href="mailto:support@loverdiet.com" className="transition-colors hover:text-teal-400">
+            <a href="mailto:support@loverdiet.com" className="transition-colors hover:text-lime-400">
               Email
             </a>
             <span className="text-neutral-700">·</span>

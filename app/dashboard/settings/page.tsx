@@ -132,7 +132,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={() => setEditing(true)}
-              className="rounded-xl border border-teal-200 bg-white px-4 py-2.5 text-sm font-semibold text-teal-700 transition hover:bg-teal-50"
+              className="rounded-xl border border-lime-200 bg-white px-4 py-2.5 text-sm font-semibold text-lime-700 transition hover:bg-lime-50"
             >
               Edit
             </button>
@@ -151,7 +151,7 @@ export default function SettingsPage() {
               <button
                 type="button"
                 onClick={save}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-800"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-lime-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-lime-800"
               >
                 <Save className="size-4" />
                 Save
@@ -289,8 +289,8 @@ export default function SettingsPage() {
         </section>
 
         {/* AI summary */}
-        <section className="rounded-3xl border border-neutral-100 bg-gradient-to-br from-teal-50 to-white p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-teal-700">
+        <section className="rounded-3xl border border-neutral-100 bg-gradient-to-br from-lime-50 to-white p-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-lime-700">
             AI Summary
           </p>
           <h2 className="mt-2 text-xl font-bold text-neutral-900">{analysis.summaryEn}</h2>
@@ -325,7 +325,7 @@ function AvatarStage({
     <div
       className={cn(
         "flex flex-col items-center gap-3 rounded-2xl p-4 transition",
-        highlight ? "bg-teal-50 ring-2 ring-teal-300" : "bg-neutral-50"
+        highlight ? "bg-lime-50 ring-2 ring-lime-300" : "bg-neutral-50"
       )}
     >
       <Avatar
@@ -339,7 +339,7 @@ function AvatarStage({
         <p
           className={cn(
             "text-xs font-semibold uppercase tracking-wider",
-            highlight ? "text-teal-700" : "text-neutral-500"
+            highlight ? "text-lime-700" : "text-neutral-500"
           )}
         >
           {label}
@@ -373,7 +373,7 @@ function Row({
           type={inputType}
           value={value.replace(/[^\d.]/g, "")}
           onChange={(e) => onChange(e.target.value)}
-          className="w-32 rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-right text-sm font-semibold text-neutral-900 outline-none focus:border-teal-400"
+          className="w-32 rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-right text-sm font-semibold text-neutral-900 outline-none focus:border-lime-400"
         />
       ) : (
         <p className="font-semibold text-neutral-900">{value}</p>

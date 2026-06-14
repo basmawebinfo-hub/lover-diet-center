@@ -47,14 +47,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:border-r lg:border-neutral-100 lg:bg-white">
         <div className="flex items-center gap-2 px-6 py-6">
-          <Link href="/" className="text-xl font-bold text-teal-700 tracking-tight hover:opacity-80 transition-opacity">
-            lovers<span className="text-teal-500">dc</span>
+          <Link href="/" className="text-xl font-bold text-lime-700 tracking-tight hover:opacity-80 transition-opacity">
+            lovers<span className="text-lime-500">dc</span>
           </Link>
         </div>
 
         {user && (
-          <div className="mx-4 mb-4 rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 to-white p-4">
-            <p className="text-xs font-semibold text-teal-700">Welcome back</p>
+          <div className="mx-4 mb-4 rounded-2xl border border-lime-100 bg-gradient-to-br from-lime-50 to-white p-4">
+            <p className="text-xs font-semibold text-lime-700">Welcome back</p>
             <p className="mt-0.5 truncate text-base font-bold text-neutral-900">
               {user.nameEn}
             </p>
@@ -75,14 +75,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                   active
-                    ? "bg-teal-50 text-teal-700"
+                    ? "bg-lime-50 text-lime-700"
                     : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
                 )}
               >
                 <Icon
                   className={cn(
                     "size-4.5",
-                    active ? "text-teal-600" : "text-neutral-400 group-hover:text-neutral-600"
+                    active ? "text-lime-600" : "text-neutral-400 group-hover:text-neutral-600"
                   )}
                 />
                 <span className="flex-1">{item.label}</span>
@@ -114,8 +114,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile top bar */}
       <div className="sticky top-0 z-20 flex items-center justify-between border-b border-neutral-100 bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
-        <Link href="/" className="text-lg font-bold text-teal-700 tracking-tight">
-          lovers<span className="text-teal-500">dc</span>
+        <Link href="/" className="text-lg font-bold text-lime-700 tracking-tight">
+          lovers<span className="text-lime-500">dc</span>
         </Link>
         <div className="flex items-center gap-2">
           <button
@@ -157,7 +157,7 @@ export function MobileNav() {
             href={item.href}
             className={cn(
               "flex flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 text-[10px] font-semibold",
-              active ? "text-teal-700" : "text-neutral-500"
+              active ? "text-lime-700" : "text-neutral-500"
             )}
           >
             <Icon className="size-4" />

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
@@ -99,15 +100,17 @@ export function SegmentedHeader() {
 
         {/* ── Logo ── */}
         <Link href="/" className="flex items-center gap-2.5 shrink-0 group" aria-label="Lover Diet Center home">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-teal-600 text-white shadow-sm transition-transform group-hover:scale-105">
-            <svg viewBox="0 0 24 24" fill="none" className="size-5" aria-hidden="true">
-              <path d="M12 3C8 3 5 6 5 10c0 5 7 11 7 11s7-6 7-11c0-4-3-7-7-7z" fill="currentColor" opacity=".9"/>
-              <path d="M12 8v8M9 11h6" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-          </div>
+          <Image
+            src="/ldc-logo.png"
+            alt="Lover Diet Center logo"
+            width={44}
+            height={44}
+            priority
+            className="size-10 rounded-full object-cover shadow-sm transition-transform group-hover:scale-105"
+          />
           <div className="leading-none">
-            <span className="block text-base font-bold tracking-tight text-teal-700">Lover Diet</span>
-            <span className="block text-[10px] font-medium tracking-widest text-neutral-400 uppercase">Center</span>
+            <span className="block text-base font-bold tracking-tight text-neutral-900">Lover Diet <span className="text-orange-500">Center</span></span>
+            <span className="block text-[10px] font-medium tracking-widest text-neutral-400 uppercase">Together for a better life</span>
           </div>
         </Link>
 
@@ -123,7 +126,7 @@ export function SegmentedHeader() {
                   className={cn(
                     'flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors',
                     dropdownOpen
-                      ? 'bg-teal-50 text-teal-700'
+                      ? 'bg-lime-50 text-lime-700'
                       : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900',
                   )}
                 >
@@ -141,9 +144,9 @@ export function SegmentedHeader() {
                       key={item.href}
                       href={item.href}
                       onClick={() => setDropdownOpen(false)}
-                      className="flex flex-col rounded-xl px-4 py-3 transition-colors hover:bg-teal-50 group"
+                      className="flex flex-col rounded-xl px-4 py-3 transition-colors hover:bg-lime-50 group"
                     >
-                      <span className="text-sm font-semibold text-neutral-800 group-hover:text-teal-700">{item.label}</span>
+                      <span className="text-sm font-semibold text-neutral-800 group-hover:text-lime-700">{item.label}</span>
                       <span className="mt-0.5 text-xs text-neutral-400">{item.desc}</span>
                     </Link>
                   ))}
@@ -157,7 +160,7 @@ export function SegmentedHeader() {
                 className={cn(
                   'rounded-full px-4 py-2 text-sm font-medium transition-colors',
                   isActive(link.href)
-                    ? 'bg-teal-50 text-teal-700'
+                    ? 'bg-lime-50 text-lime-700'
                     : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900',
                 )}
               >
@@ -177,7 +180,7 @@ export function SegmentedHeader() {
           </Link>
           <Link
             href="/sign-up"
-            className="inline-flex items-center gap-1.5 rounded-full bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-teal-700 hover:shadow-md active:translate-y-0"
+            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
           >
             Get Started
             <ArrowRight className="size-3.5" />
@@ -219,7 +222,7 @@ export function SegmentedHeader() {
               className={cn(
                 'rounded-xl px-4 py-3 text-base font-medium transition-colors',
                 isActive(link.href)
-                  ? 'bg-teal-50 text-teal-700'
+                  ? 'bg-lime-50 text-lime-700'
                   : 'text-neutral-700 hover:bg-neutral-50',
               )}
             >
@@ -232,7 +235,7 @@ export function SegmentedHeader() {
             <Link
               href="/sign-up"
               onClick={closeMenu}
-              className="flex items-center justify-center gap-2 rounded-xl bg-teal-600 py-3.5 text-base font-semibold text-white shadow-sm"
+              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-lime-400 to-lime-500 py-3.5 text-base font-bold text-lime-950 shadow-sm"
             >
               Get Started Free
               <ArrowRight className="size-4" />

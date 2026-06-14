@@ -6,7 +6,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'About Us',
-  description: 'Learn about Lover Diet Center — UAE's leading nutrition and wellness center founded by Dr. Wael Mostafa.',
+  description: "Learn about Lover Diet Center — UAE's leading nutrition and wellness center founded by Dr. Wael Mostafa.",
 }
 
 const stats = [

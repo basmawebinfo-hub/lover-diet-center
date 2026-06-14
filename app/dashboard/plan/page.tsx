@@ -70,14 +70,14 @@ export default function PlanPage() {
           <MacroCard
             icon={<Beef className="size-4" />}
             label="Protein"
-            value="140"
+            value={`${Math.round(plan.dailyCalories * 0.30 / 4)}`}
             unit="g"
             color="teal"
           />
           <MacroCard
             icon={<Wheat className="size-4" />}
             label="Carbs"
-            value="180"
+            value={`${Math.round(plan.dailyCalories * 0.45 / 4)}`}
             unit="g"
             color="yellow"
           />

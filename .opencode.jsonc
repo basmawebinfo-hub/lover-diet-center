@@ -1,0 +1,8 @@
+{
+  "agents": {
+    "enabled": true
+  },
+  "skills": {
+    "directory": ".opencode/skills"
+  }
+}

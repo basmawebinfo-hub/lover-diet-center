@@ -1,0 +1,16 @@
+{
+  "name": "LoverDiet — Science-Based Nutrition",
+  "short_name": "LoverDiet",
+  "description": "Personalized diet plans, healthy meal delivery, premium supplements, and expert nutrition guidance.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f0a",
+  "theme_color": "#0a0f0a",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

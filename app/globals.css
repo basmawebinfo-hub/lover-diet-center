@@ -1,0 +1,200 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+@custom-variant light-mode (&:is(:not(.dark) *));
+
+@theme inline {
+  /* Fonts */
+  --font-sans: var(--font-host-grotesk), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Teal palette */
+  --color-teal-50: oklch(0.95 0.02 200);
+  --color-teal-100: oklch(0.9 0.04 200);
+  --color-teal-200: oklch(0.85 0.06 200);
+  --color-teal-300: oklch(0.75 0.09 200);
+  --color-teal-400: oklch(0.65 0.11 200);
+  --color-teal-500: oklch(0.55 0.12 200);
+  --color-teal-600: oklch(0.45 0.1 200);
+  --color-teal-700: oklch(0.38 0.08 200);
+
+  /* Orange palette */
+  --color-orange-50: oklch(0.95 0.03 55);
+  --color-orange-100: oklch(0.88 0.06 55);
+  --color-orange-200: oklch(0.8 0.1 55);
+  --color-orange-300: oklch(0.72 0.14 55);
+  --color-orange-400: oklch(0.65 0.16 55);
+  --color-orange-500: oklch(0.58 0.17 55);
+  --color-orange-600: oklch(0.5 0.15 55);
+
+  /* Neutral palette */
+  --color-neutral-50: oklch(0.97 0.005 200);
+  --color-neutral-100: oklch(0.93 0.005 200);
+  --color-neutral-200: oklch(0.88 0.006 200);
+  --color-neutral-300: oklch(0.78 0.006 200);
+  --color-neutral-400: oklch(0.65 0.007 200);
+  --color-neutral-500: oklch(0.52 0.008 200);
+  --color-neutral-600: oklch(0.42 0.008 200);
+  --color-neutral-700: oklch(0.32 0.007 200);
+  --color-neutral-800: oklch(0.22 0.006 200);
+  --color-neutral-900: oklch(0.14 0.005 200);
+
+  /* Pink / Fuchsia palette — NEW dark mode accent */
+  --color-pink-50: oklch(0.96 0.015 350);
+  --color-pink-100: oklch(0.93 0.03 350);
+  --color-pink-200: oklch(0.88 0.06 350);
+  --color-pink-300: oklch(0.78 0.12 350);
+  --color-pink-400: oklch(0.68 0.18 350);
+  --color-pink-500: oklch(0.58 0.22 350);
+  --color-pink-600: oklch(0.50 0.22 350);
+  --color-pink-700: oklch(0.42 0.18 350);
+
+  /* Yellow */
+  --color-yellow-100: oklch(0.92 0.06 85);
+  --color-yellow-400: oklch(0.75 0.18 85);
+  --color-yellow-500: oklch(0.68 0.2 85);
+
+  /* Semantic aliases — DARK defaults (dark landing page) */
+  --color-background: oklch(0.07 0.01 250);
+  --color-foreground: oklch(0.97 0 0);
+  --color-card: oklch(0.11 0.01 250);
+  --color-card-foreground: oklch(0.97 0 0);
+  --color-popover: oklch(0.11 0.01 250);
+  --color-popover-foreground: oklch(0.97 0 0);
+  --color-primary: oklch(0.65 0.22 10);   /* hot pink accent */
+  --color-primary-foreground: oklch(0.97 0 0);
+  --color-secondary: oklch(0.16 0.01 250);
+  --color-secondary-foreground: oklch(0.80 0.01 250);
+  --color-muted: oklch(0.14 0.01 250);
+  --color-muted-foreground: oklch(0.55 0.01 250);
+  --color-accent: oklch(0.65 0.22 10);
+  --color-accent-foreground: oklch(0.97 0 0);
+  --color-destructive: oklch(0.60 0.2 25);
+  --color-border: oklch(0.20 0.01 250);
+  --color-input: oklch(0.20 0.01 250 / 50%);
+  --color-ring: oklch(0.65 0.22 10);
+
+  /* Charts */
+  --color-chart-1: oklch(0.65 0.22 10);
+  --color-chart-2: oklch(0.75 0.18 350);
+  --color-chart-3: oklch(0.75 0.15 180);
+  --color-chart-4: oklch(0.70 0.12 50);
+  --color-chart-5: oklch(0.60 0.12 280);
+
+  /* Radius */
+  --radius: 0.875rem;
+}
+
+/* Light mode override — keep light pages light */
+.light-mode {
+  --color-background: oklch(0.99 0.003 200);
+  --color-foreground: oklch(0.14 0.005 200);
+  --color-card: oklch(0.97 0.004 200);
+  --color-card-foreground: oklch(0.14 0.005 200);
+  --color-popover: oklch(0.97 0.004 200);
+  --color-popover-foreground: oklch(0.14 0.005 200);
+  --color-primary: oklch(0.55 0.12 200);
+  --color-primary-foreground: oklch(0.99 0.003 200);
+  --color-secondary: oklch(0.92 0.01 200);
+  --color-secondary-foreground: oklch(0.14 0.006 200);
+  --color-muted: oklch(0.95 0.006 200);
+  --color-muted-foreground: oklch(0.45 0.012 200);
+  --color-accent: oklch(0.56 0.18 55);
+  --color-accent-foreground: oklch(0.99 0.003 200);
+  --color-destructive: oklch(0.58 0.2 25);
+  --color-border: oklch(0.85 0.008 200 / 80%);
+  --color-input: oklch(0.85 0.008 200 / 50%);
+  --color-ring: oklch(0.55 0.12 200);
+}
+
+/* Dark theme */
+.dark {
+  --color-background: oklch(0.07 0.01 250);
+  --color-foreground: oklch(0.97 0 0);
+  --color-card: oklch(0.11 0.01 250);
+  --color-card-foreground: oklch(0.97 0 0);
+  --color-popover: oklch(0.11 0.01 250);
+  --color-popover-foreground: oklch(0.97 0 0);
+  --color-primary: oklch(0.65 0.22 10);
+  --color-primary-foreground: oklch(0.97 0 0);
+  --color-secondary: oklch(0.16 0.01 250);
+  --color-secondary-foreground: oklch(0.80 0.01 250);
+  --color-muted: oklch(0.14 0.01 250);
+  --color-muted-foreground: oklch(0.55 0.01 250);
+  --color-accent: oklch(0.65 0.22 10);
+  --color-accent-foreground: oklch(0.97 0 0);
+  --color-destructive: oklch(0.60 0.2 25);
+  --color-border: oklch(0.20 0.01 250);
+  --color-input: oklch(0.20 0.01 250 / 50%);
+  --color-ring: oklch(0.65 0.22 10);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  /* Respect users who prefer no motion */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  /* Better focus visibility for keyboard users */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer utilities {
+  /* Floating animation for WhatsApp button */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Subtle grid pattern for backgrounds */
+  .grid-pattern {
+    background-image:
+      linear-gradient(to right, oklch(1 0 0 / 4%) 1px, transparent 1px),
+      linear-gradient(to bottom, oklch(1 0 0 / 4%) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+  /* Pink glow for primary elements */
+  .glow-primary {
+    box-shadow:
+      0 0 0 1px oklch(0.65 0.22 10 / 40%),
+      0 8px 40px oklch(0.65 0.22 10 / 30%);
+  }
+  /* Hide custom cursor on touch devices */
+  @media (hover: none) {
+    #custom-cursor-dot, #custom-cursor-ring {
+      display: none !important;
+    }
+    html { cursor: auto !important; }
+  }
+  /* Arabic typography */
+  html[lang='ar'],
+  html[dir='rtl'],
+  html[lang='ar'] body,
+  html[dir='rtl'] body,
+  [dir='rtl'] {
+    font-family: var(--font-arabic);
+  }
+}

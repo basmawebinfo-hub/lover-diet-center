@@ -46,13 +46,13 @@ export default function HealthyMealsPage() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-[#f0faf7] to-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-[#1A7A6E]/10 text-[#1A7A6E] text-sm font-semibold px-4 py-2 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-[#4d7c0f]/10 text-[#4d7c0f] text-sm font-semibold px-4 py-2 rounded-full mb-6">
             <ChefHat className="w-4 h-4" />
             Healthy Meals
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
             Chef-Prepared Meals,{' '}
-            <span className="text-[#1A7A6E]">Delivered Fresh</span>
+            <span className="text-[#4d7c0f]">Delivered Fresh</span>
           </h1>
           <p className="text-lg text-neutral-600 mb-8 max-w-2xl mx-auto">
             Every meal is designed by certified nutritionists and prepared by professional chefs. Macro-balanced, delicious, and delivered to your door across the UAE.
@@ -61,7 +61,7 @@ export default function HealthyMealsPage() {
             href={WHATSAPP_DIRECT}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 bg-[#1A7A6E] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-[#4d7c0f] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
           >
             Order Now
             <ArrowRight className="w-4 h-4" />
@@ -80,7 +80,7 @@ export default function HealthyMealsPage() {
                   <Image src={meal.image} alt={meal.nameEn} fill className="object-cover" />
                 </div>
                 <div className="p-4">
-                  <span className="text-xs font-semibold text-[#1A7A6E] bg-[#1A7A6E]/10 px-2 py-1 rounded-full">
+                  <span className="text-xs font-semibold text-[#4d7c0f] bg-[#4d7c0f]/10 px-2 py-1 rounded-full">
                     {meal.type}
                   </span>
                   <h3 className="font-bold text-neutral-900 mt-2">{meal.nameEn}</h3>
@@ -94,13 +94,13 @@ export default function HealthyMealsPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-[#1A7A6E] py-16 px-4 text-center">
+      <section className="bg-[#4d7c0f] py-16 px-4 text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold text-white mb-4">Get Your Personalized Meal Plan</h2>
           <p className="text-white/80 mb-8">Tell us your goals and we'll design a full weekly meal plan just for you.</p>
           <Link
             href="/sign-up"
-            className="inline-flex items-center gap-2 bg-white text-[#1A7A6E] font-bold px-8 py-4 rounded-2xl hover:bg-neutral-100 transition-colors"
+            className="inline-flex items-center gap-2 bg-white text-[#4d7c0f] font-bold px-8 py-4 rounded-2xl hover:bg-neutral-100 transition-colors"
           >
             Start Free
             <ArrowRight className="w-4 h-4" />

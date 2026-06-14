@@ -46,20 +46,20 @@ export default function HealthySnacksPage() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-[#f0faf7] to-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-[#1A7A6E]/10 text-[#1A7A6E] text-sm font-semibold px-4 py-2 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-[#4d7c0f]/10 text-[#4d7c0f] text-sm font-semibold px-4 py-2 rounded-full mb-6">
             <Cookie className="w-4 h-4" />
             Healthy Snacks & Supplements
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
             Snacks That Work{' '}
-            <span className="text-[#1A7A6E]">For Your Goals</span>
+            <span className="text-[#4d7c0f]">For Your Goals</span>
           </h1>
           <p className="text-lg text-neutral-600 mb-8 max-w-2xl mx-auto">
             Protein bars, dried fruits, nuts, and certified supplements — all curated by our nutrition team to support your health journey.
           </p>
           <Link
             href="/sign-up"
-            className="inline-flex items-center justify-center gap-2 bg-[#1A7A6E] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
+            className="inline-flex items-center justify-center gap-2 bg-[#4d7c0f] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
           >
             Shop Now
             <ArrowRight className="w-4 h-4" />
@@ -78,12 +78,12 @@ export default function HealthySnacksPage() {
                   <Image src={product.image} alt={product.nameEn} fill className="object-cover" />
                 </div>
                 <div className="p-4">
-                  <span className="text-xs font-semibold text-[#1A7A6E] bg-[#1A7A6E]/10 px-2 py-1 rounded-full">
+                  <span className="text-xs font-semibold text-[#4d7c0f] bg-[#4d7c0f]/10 px-2 py-1 rounded-full">
                     {product.category}
                   </span>
                   <h3 className="font-bold text-neutral-900 mt-2">{product.nameEn}</h3>
                   <p className="text-sm text-neutral-500">{product.nameAr}</p>
-                  <p className="text-lg font-bold text-[#1A7A6E] mt-2">{product.price} AED</p>
+                  <p className="text-lg font-bold text-[#4d7c0f] mt-2">{product.price} AED</p>
                 </div>
               </div>
             ))}
@@ -91,7 +91,7 @@ export default function HealthySnacksPage() {
           <div className="text-center mt-10">
             <Link
               href="/sign-up"
-              className="inline-flex items-center gap-2 bg-[#1A7A6E] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#4d7c0f] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
             >
               View All Products in Dashboard
               <ArrowRight className="w-4 h-4" />

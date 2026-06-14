@@ -23,7 +23,7 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex">
       {/* LEFT HALF - Decorative health-themed panel (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0D4F4A] to-[#1A7A6E]">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0D4F4A] to-[#4d7c0f]">
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-10" aria-hidden="true">
           <svg
@@ -142,7 +142,7 @@ export default function SignUpPage() {
           {/* Bottom badge */}
           <div className="mt-12">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm">
-              Trusted by 2,000+ clients
+              Trusted by 3,000+ clients
             </span>
           </div>
         </div>

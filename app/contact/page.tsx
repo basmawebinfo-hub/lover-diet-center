@@ -39,7 +39,7 @@ export default function ContactPage() {
         <div className="max-w-3xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
             We're Here to{' '}
-            <span className="text-[#1A7A6E]">Help You</span>
+            <span className="text-[#4d7c0f]">Help You</span>
           </h1>
           <p className="text-lg text-neutral-600 mb-8">
             Have a question? Want to book a consultation? Reach out to us on WhatsApp — we typically respond within minutes.
@@ -64,8 +64,8 @@ export default function ContactPage() {
               const Icon = item.icon
               return (
                 <div key={i} className="bg-[#f0faf7] rounded-3xl p-6 text-center">
-                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#1A7A6E]/10 rounded-2xl mb-4">
-                    <Icon className="w-6 h-6 text-[#1A7A6E]" />
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-[#4d7c0f]/10 rounded-2xl mb-4">
+                    <Icon className="w-6 h-6 text-[#4d7c0f]" />
                   </div>
                   <h3 className="font-bold text-neutral-900 mb-1">{item.title}</h3>
                   <p className="text-neutral-600 text-sm mb-3">{item.value}</p>
@@ -74,7 +74,7 @@ export default function ContactPage() {
                       href={item.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#1A7A6E] font-semibold text-sm hover:underline"
+                      className="text-[#4d7c0f] font-semibold text-sm hover:underline"
                     >
                       {item.linkLabel}
                     </a>
@@ -96,7 +96,7 @@ export default function ContactPage() {
               href={socialLinks.facebook}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-white border border-neutral-200 rounded-2xl font-semibold text-neutral-700 hover:border-[#1A7A6E] hover:text-[#1A7A6E] transition-colors"
+              className="px-6 py-3 bg-white border border-neutral-200 rounded-2xl font-semibold text-neutral-700 hover:border-[#4d7c0f] hover:text-[#4d7c0f] transition-colors"
             >
               Facebook
             </a>
@@ -104,7 +104,7 @@ export default function ContactPage() {
               href={socialLinks.tiktok}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-white border border-neutral-200 rounded-2xl font-semibold text-neutral-700 hover:border-[#1A7A6E] hover:text-[#1A7A6E] transition-colors"
+              className="px-6 py-3 bg-white border border-neutral-200 rounded-2xl font-semibold text-neutral-700 hover:border-[#4d7c0f] hover:text-[#4d7c0f] transition-colors"
             >
               TikTok
             </a>
@@ -112,7 +112,7 @@ export default function ContactPage() {
               href={socialLinks.youtube}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-white border border-neutral-200 rounded-2xl font-semibold text-neutral-700 hover:border-[#1A7A6E] hover:text-[#1A7A6E] transition-colors"
+              className="px-6 py-3 bg-white border border-neutral-200 rounded-2xl font-semibold text-neutral-700 hover:border-[#4d7c0f] hover:text-[#4d7c0f] transition-colors"
             >
               YouTube
             </a>
@@ -120,7 +120,7 @@ export default function ContactPage() {
               href={socialLinks.pinterest}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-6 py-3 bg-white border border-neutral-200 rounded-2xl font-semibold text-neutral-700 hover:border-[#1A7A6E] hover:text-[#1A7A6E] transition-colors"
+              className="px-6 py-3 bg-white border border-neutral-200 rounded-2xl font-semibold text-neutral-700 hover:border-[#4d7c0f] hover:text-[#4d7c0f] transition-colors"
             >
               Pinterest
             </a>

@@ -23,13 +23,13 @@ export default function AboutPage() {
       <section className="bg-gradient-to-br from-[#f0faf7] to-white py-20 px-4">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 bg-[#1A7A6E]/10 text-[#1A7A6E] text-sm font-semibold px-4 py-2 rounded-full mb-6">
+            <div className="inline-flex items-center gap-2 bg-[#4d7c0f]/10 text-[#4d7c0f] text-sm font-semibold px-4 py-2 rounded-full mb-6">
               <Award className="w-4 h-4" />
               About Us
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
               Science-Based Nutrition,{' '}
-              <span className="text-[#1A7A6E]">Real Results</span>
+              <span className="text-[#4d7c0f]">Real Results</span>
             </h1>
             <p className="text-lg text-neutral-600 mb-6">
               Lover Diet Center was founded with one mission: to make expert nutrition guidance accessible to everyone in the UAE. We combine cutting-edge science with personalized care to help you reach your health goals.
@@ -38,7 +38,7 @@ export default function AboutPage() {
               href={WHATSAPP_DIRECT}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#1A7A6E] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#4d7c0f] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
             >
               Talk to Us
               <ArrowRight className="w-4 h-4" />
@@ -56,7 +56,7 @@ export default function AboutPage() {
       </section>
 
       {/* Stats */}
-      <section className="py-16 px-4 bg-[#1A7A6E]">
+      <section className="py-16 px-4 bg-[#4d7c0f]">
         <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {stats.map((stat, i) => (
             <div key={i}>
@@ -92,7 +92,7 @@ export default function AboutPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/sign-up"
-              className="inline-flex items-center gap-2 bg-[#1A7A6E] text-white font-bold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#4d7c0f] text-white font-bold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
             >
               Create Free Account
               <ArrowRight className="w-4 h-4" />
@@ -101,7 +101,7 @@ export default function AboutPage() {
               href={WHATSAPP_DIRECT}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border-2 border-[#1A7A6E] text-[#1A7A6E] font-bold px-8 py-4 rounded-2xl hover:bg-[#1A7A6E]/5 transition-colors"
+              className="inline-flex items-center gap-2 border-2 border-[#4d7c0f] text-[#4d7c0f] font-bold px-8 py-4 rounded-2xl hover:bg-[#4d7c0f]/5 transition-colors"
             >
               Chat on WhatsApp
             </a>

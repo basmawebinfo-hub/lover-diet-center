@@ -29,13 +29,13 @@ export default function BodySculptingPage() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-[#f0faf7] to-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-[#1A7A6E]/10 text-[#1A7A6E] text-sm font-semibold px-4 py-2 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-[#4d7c0f]/10 text-[#4d7c0f] text-sm font-semibold px-4 py-2 rounded-full mb-6">
             <Activity className="w-4 h-4" />
             Body Sculpting Sessions
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
             Reshape Your Body,{' '}
-            <span className="text-[#1A7A6E]">Without Surgery</span>
+            <span className="text-[#4d7c0f]">Without Surgery</span>
           </h1>
           <p className="text-lg text-neutral-600 mb-8 max-w-2xl mx-auto">
             Advanced non-invasive fat-breaking technology combined with expert nutrition guidance. See real changes in your body measurements from the very first session.
@@ -45,7 +45,7 @@ export default function BodySculptingPage() {
               href={WHATSAPP_DIRECT}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-[#1A7A6E] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-[#4d7c0f] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
             >
               Book a Session
               <ArrowRight className="w-4 h-4" />
@@ -61,7 +61,7 @@ export default function BodySculptingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {benefits.map((b, i) => (
               <div key={i} className="flex items-start gap-3 p-4 bg-[#f0faf7] rounded-2xl">
-                <CheckCircle className="w-5 h-5 text-[#1A7A6E] mt-0.5 shrink-0" />
+                <CheckCircle className="w-5 h-5 text-[#4d7c0f] mt-0.5 shrink-0" />
                 <div>
                   <p className="font-semibold text-neutral-800">{b.en}</p>
                   <p className="text-sm text-neutral-500 mt-0.5">{b.ar}</p>
@@ -81,23 +81,23 @@ export default function BodySculptingPage() {
               <div
                 key={i}
                 className={`relative bg-white rounded-3xl p-6 shadow-sm border-2 transition-shadow hover:shadow-md ${
-                  pkg.popular ? 'border-[#1A7A6E]' : 'border-neutral-100'
+                  pkg.popular ? 'border-[#4d7c0f]' : 'border-neutral-100'
                 }`}
               >
                 {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#1A7A6E] text-white text-xs font-bold px-4 py-1 rounded-full">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#4d7c0f] text-white text-xs font-bold px-4 py-1 rounded-full">
                     Most Popular
                   </div>
                 )}
                 <h3 className="text-xl font-bold text-neutral-900">{pkg.nameEn}</h3>
                 <p className="text-sm text-neutral-500 mb-4">{pkg.nameAr}</p>
-                <p className="text-3xl font-bold text-[#1A7A6E] mb-1">{pkg.price} <span className="text-base font-normal">AED</span></p>
+                <p className="text-3xl font-bold text-[#4d7c0f] mb-1">{pkg.price} <span className="text-base font-normal">AED</span></p>
                 <p className="text-sm text-neutral-500 mb-6">{pkg.sessions} sessions</p>
                 <a
                   href={WHATSAPP_DIRECT}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-center bg-[#1A7A6E] text-white font-semibold py-3 rounded-xl hover:bg-[#155f56] transition-colors"
+                  className="block text-center bg-[#4d7c0f] text-white font-semibold py-3 rounded-xl hover:bg-[#155f56] transition-colors"
                 >
                   Book Now
                 </a>

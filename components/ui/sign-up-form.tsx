@@ -79,7 +79,7 @@ export function SignUpForm() {
     }
   }
 
-  const inputClass = "w-full pl-11 pr-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#1A7A6E]/30 focus:border-[#1A7A6E] transition-shadow text-sm"
+  const inputClass = "w-full pl-11 pr-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#4d7c0f]/30 focus:border-[#4d7c0f] transition-shadow text-sm"
 
   return (
     <div className="w-full max-w-sm mx-auto">
@@ -154,7 +154,7 @@ export function SignUpForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 bg-[#1A7A6E] text-white font-semibold py-3.5 rounded-xl hover:bg-[#155f56] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-[#4d7c0f] text-white font-semibold py-3.5 rounded-xl hover:bg-[#155f56] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? (
             <>
@@ -172,7 +172,7 @@ export function SignUpForm() {
 
       <p className="text-center text-sm text-neutral-500 mt-6">
         Already have an account?{' '}
-        <a href="/sign-in" className="text-[#1A7A6E] font-semibold hover:underline">
+        <a href="/sign-in" className="text-[#4d7c0f] font-semibold hover:underline">
           Sign in
         </a>
       </p>

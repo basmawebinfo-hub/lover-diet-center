@@ -73,7 +73,7 @@ export function Avatar({
             <defs>
               <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#0D4F4A" />
-                <stop offset="100%" stopColor="#1A7A6E" />
+                <stop offset="100%" stopColor="#4d7c0f" />
               </linearGradient>
             </defs>
           </svg>
@@ -98,7 +98,7 @@ export function Avatar({
               <stop offset="100%" stopColor={config.skinTone} stopOpacity="0.7" />
             </linearGradient>
             <linearGradient id="shirtColor" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#1A7A6E" />
+              <stop offset="0%" stopColor="#4d7c0f" />
               <stop offset="100%" stopColor="#0D4F4A" />
             </linearGradient>
             <linearGradient id="pantsColor" x1="0%" y1="0%" x2="0%" y2="100%">

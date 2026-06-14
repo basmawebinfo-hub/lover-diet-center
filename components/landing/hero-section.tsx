@@ -79,7 +79,7 @@ export function HeroSection() {
             {/* Floating review card */}
             <div className="absolute -top-2 right-2 z-20 flex items-center gap-3 rounded-2xl bg-white px-3.5 py-2.5 shadow-xl shadow-neutral-900/15 sm:right-6">
               <div className="flex -space-x-2.5">
-                {[['S','#0d9488'],['A','#c97a1f'],['N','#9bcf24']].map(([l,c],i) => (
+                {[['S','#65a30d'],['A','#c97a1f'],['N','#9bcf24']].map(([l,c],i) => (
                   <span
                     key={i}
                     className="flex size-8 items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white"

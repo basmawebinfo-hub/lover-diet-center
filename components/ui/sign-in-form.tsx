@@ -69,8 +69,8 @@ export function SignIn2() {
     <div className="w-full max-w-md mx-auto px-6 py-8">
       {/* Heading */}
       <div className="mb-8">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-[#1A7A6E]/10 rounded-2xl mb-4">
-          <LogIn className="w-6 h-6 text-[#1A7A6E]" />
+        <div className="inline-flex items-center justify-center w-12 h-12 bg-[#4d7c0f]/10 rounded-2xl mb-4">
+          <LogIn className="w-6 h-6 text-[#4d7c0f]" />
         </div>
         <h1 className="text-2xl font-bold text-neutral-900">Welcome back</h1>
         <p className="text-neutral-500 mt-1">Sign in to access your personalized health plan.</p>
@@ -92,14 +92,14 @@ export function SignIn2() {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="you@example.com"
-            className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#1A7A6E]/30 focus:border-[#1A7A6E] transition-shadow"
+            className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#4d7c0f]/30 focus:border-[#4d7c0f] transition-shadow"
           />
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-sm font-semibold text-neutral-700">Password</label>
-            <a href="/forgot-password" className="text-xs text-[#1A7A6E] hover:underline">
+            <a href="/forgot-password" className="text-xs text-[#4d7c0f] hover:underline">
               Forgot password?
             </a>
           </div>
@@ -109,14 +109,14 @@ export function SignIn2() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="••••••••"
-            className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#1A7A6E]/30 focus:border-[#1A7A6E] transition-shadow"
+            className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#4d7c0f]/30 focus:border-[#4d7c0f] transition-shadow"
           />
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 bg-[#1A7A6E] text-white font-semibold py-3.5 rounded-xl hover:bg-[#155f56] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+          className="w-full flex items-center justify-center gap-2 bg-[#4d7c0f] text-white font-semibold py-3.5 rounded-xl hover:bg-[#155f56] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? (
             <>
@@ -135,7 +135,7 @@ export function SignIn2() {
       {/* Sign up link */}
       <p className="text-center text-sm text-neutral-500 mt-6">
         Don&apos;t have an account?{' '}
-        <a href="/sign-up" className="text-[#1A7A6E] font-semibold hover:underline">
+        <a href="/sign-up" className="text-[#4d7c0f] font-semibold hover:underline">
           Create one
         </a>
       </p>

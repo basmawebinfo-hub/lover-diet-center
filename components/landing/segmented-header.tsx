@@ -26,12 +26,14 @@ const MOBILE_NAV_LINKS = [
 export function SegmentedHeader() {
   const pathname = usePathname()
   const isAuthPage = pathname === '/sign-in' || pathname.startsWith('/sign-in?')
-  if (isAuthPage) return null
 
+  // All hooks must be called before any early return (Rules of Hooks)
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
+
+  if (isAuthPage) return null
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)

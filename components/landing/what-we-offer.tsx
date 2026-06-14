@@ -71,7 +71,7 @@ export function WhatWeOffer() {
         </div>
 
         {/* Services grid */}
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {SERVICES.map((service) => {
             const Icon = service.icon
             return (
@@ -81,12 +81,12 @@ export function WhatWeOffer() {
                 className="group relative flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-lime-200 hover:shadow-xl hover:shadow-lime-900/8"
               >
                 {/* Image */}
-                <div className="relative h-48 overflow-hidden bg-lime-50">
+                <div className="relative h-40 overflow-hidden bg-lime-50">
                   <Image
                     src={service.image}
                     alt={service.title}
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
@@ -100,7 +100,7 @@ export function WhatWeOffer() {
                 </div>
 
                 {/* Content */}
-                <div className="flex flex-1 flex-col p-6">
+                <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-center gap-3">
                     <div className="flex size-10 items-center justify-center rounded-xl bg-lime-50 text-lime-600 transition-colors group-hover:bg-lime-100">
                       <Icon className="size-5" />

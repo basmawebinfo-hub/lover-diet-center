@@ -4,6 +4,12 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, UserPlus, User, Mail, Lock } from 'lucide-react'
 
+function setAuthCookie(email: string) {
+  const token = btoa(`${email}:${Date.now()}`)
+  document.cookie = `ldc_auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+  localStorage.setItem('ldc_auth_email', email)
+}
+
 export function SignUpForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -42,12 +48,35 @@ export function SignUpForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
     if (!validate()) return
 
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1200))
-    router.push(redirect)
+    try {
+      // Check if email already registered
+      const storedUsers = JSON.parse(localStorage.getItem('ldc_users') || '[]') as Array<{ email: string; password: string; name: string }>
+      const exists = storedUsers.find((u) => u.email.toLowerCase() === form.email.toLowerCase())
+      if (exists) {
+        setError('An account with this email already exists. Please sign in.')
+        return
+      }
+
+      // Save new user
+      storedUsers.push({
+        email: form.email.toLowerCase(),
+        password: form.password,
+        name: form.name.trim(),
+      })
+      localStorage.setItem('ldc_users', JSON.stringify(storedUsers))
+
+      // Set auth cookie and redirect to onboarding
+      setAuthCookie(form.email)
+      router.push(redirect)
+      router.refresh()
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const inputClass = "w-full pl-11 pr-4 py-3 rounded-xl border border-neutral-200 text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#1A7A6E]/30 focus:border-[#1A7A6E] transition-shadow text-sm"
@@ -60,112 +89,76 @@ export function SignUpForm() {
           <UserPlus className="size-6 text-[#0D4F4A]" />
         </div>
         <h1 className="text-2xl font-semibold text-neutral-900">Create your account</h1>
-        <p className="mt-2 text-sm text-neutral-500">
-          Start your personalized health journey today.
-        </p>
+        <p className="text-sm text-neutral-500 mt-1">Start your health journey today.</p>
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
 
-        {/* Full Name */}
+        {/* Name */}
         <div className="relative">
-          <label htmlFor="name" className="block text-sm font-medium text-neutral-700 mb-1.5">
-            Full Name
-          </label>
-          <div className="relative">
-            <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <User className="size-4 text-neutral-400" />
-            </div>
-            <input
-              id="name"
-              type="text"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              required
-              placeholder="Sarah Al Maktoum"
-              className={inputClass}
-            />
-          </div>
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+          <input
+            type="text"
+            placeholder="Full name"
+            value={form.name}
+            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+            required
+            className={inputClass}
+          />
         </div>
 
         {/* Email */}
         <div className="relative">
-          <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">
-            Email
-          </label>
-          <div className="relative">
-            <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <Mail className="size-4 text-neutral-400" />
-            </div>
-            <input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              required
-              placeholder="sarah@example.com"
-              className={inputClass}
-            />
-          </div>
+          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+          <input
+            type="email"
+            placeholder="Email address"
+            value={form.email}
+            onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
+            required
+            className={inputClass}
+          />
         </div>
 
         {/* Password */}
         <div className="relative">
-          <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1.5">
-            Password
-          </label>
-          <div className="relative">
-            <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <Lock className="size-4 text-neutral-400" />
-            </div>
-            <input
-              id="password"
-              type="password"
-              value={form.password}
-              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              required
-              placeholder="Min. 8 characters"
-              className={inputClass}
-            />
-          </div>
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+          <input
+            type="password"
+            placeholder="Password (min. 8 characters)"
+            value={form.password}
+            onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
+            required
+            className={inputClass}
+          />
         </div>
 
         {/* Confirm Password */}
         <div className="relative">
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-neutral-700 mb-1.5">
-            Confirm Password
-          </label>
-          <div className="relative">
-            <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <Lock className="size-4 text-neutral-400" />
-            </div>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={form.confirmPassword}
-              onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
-              required
-              placeholder="Repeat password"
-              className={inputClass}
-            />
-          </div>
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+          <input
+            type="password"
+            placeholder="Confirm password"
+            value={form.confirmPassword}
+            onChange={(e) => setForm((p) => ({ ...p, confirmPassword: e.target.value }))}
+            required
+            className={inputClass}
+          />
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-[#0D4F4A] hover:bg-[#0a3d38] text-white font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+          className="w-full flex items-center justify-center gap-2 bg-[#1A7A6E] text-white font-semibold py-3.5 rounded-xl hover:bg-[#155f56] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? (
             <>
-              <Loader2 className="size-5 animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
               Creating account...
             </>
           ) : (
@@ -177,13 +170,9 @@ export function SignUpForm() {
         </button>
       </form>
 
-      {/* Sign in link */}
-      <p className="mt-6 text-center text-sm text-neutral-500">
+      <p className="text-center text-sm text-neutral-500 mt-6">
         Already have an account?{' '}
-        <a
-          href={`/sign-in${redirect ? `?redirect=${redirect}` : ''}`}
-          className="text-[#0D4F4A] font-medium hover:text-[#0a3d38] transition-colors"
-        >
+        <a href="/sign-in" className="text-[#1A7A6E] font-semibold hover:underline">
           Sign in
         </a>
       </p>

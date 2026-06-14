@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import {
@@ -25,9 +25,20 @@ const NAV_ITEMS = [
   { href: "/dashboard/cart", label: "Cart", labelAr: "السلة", icon: ShoppingCart },
 ] as const
 
+function signOut(router: ReturnType<typeof useRouter>) {
+  // Clear auth cookie
+  document.cookie = "ldc_auth_token=; path=/; max-age=0; SameSite=Lax"
+  // Clear local storage auth data
+  localStorage.removeItem("ldc_auth_email")
+  // Redirect to sign-in
+  router.push("/sign-in")
+  router.refresh()
+}
+
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const { state, resetOnboarding } = useApp()
+  const router = useRouter()
+  const { state } = useApp()
   const user = state.user
   const cartCount = state.cart.reduce((s, c) => s + c.quantity, 0)
 
@@ -36,9 +47,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:border-r lg:border-neutral-100 lg:bg-white">
         <div className="flex items-center gap-2 px-6 py-6">
-          <span className="text-xl font-bold text-teal-700 tracking-tight">
+          <Link href="/" className="text-xl font-bold text-teal-700 tracking-tight hover:opacity-80 transition-opacity">
             lovers<span className="text-teal-500">dc</span>
-          </span>
+          </Link>
         </div>
 
         {user && (
@@ -85,35 +96,45 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="border-t border-neutral-100 p-3">
+        <div className="border-t border-neutral-100 p-3 space-y-1">
           <button
             type="button"
             onClick={() => {
-              if (confirm("Reset your onboarding data? This will clear the demo data.")) {
-                resetOnboarding()
-                window.location.href = "/onboarding"
+              if (confirm("Sign out of your account?")) {
+                signOut(router)
               }
             }}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-neutral-50 hover:text-neutral-700"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-red-50 hover:text-red-600"
           >
             <LogOut className="size-4.5" />
-            <span>Reset demo</span>
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>
 
       {/* Mobile top bar */}
       <div className="sticky top-0 z-20 flex items-center justify-between border-b border-neutral-100 bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
-        <span className="text-lg font-bold text-teal-700 tracking-tight">
+        <Link href="/" className="text-lg font-bold text-teal-700 tracking-tight">
           lovers<span className="text-teal-500">dc</span>
-        </span>
-        <Link
-          href="/dashboard/cart"
-          className="relative flex items-center gap-1.5 rounded-full bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white"
-        >
-          <ShoppingCart className="size-3.5" />
-          {cartCount > 0 && <span>{cartCount}</span>}
         </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              if (confirm("Sign out?")) signOut(router)
+            }}
+            className="p-2 rounded-xl text-neutral-500 hover:bg-neutral-100"
+          >
+            <LogOut className="size-4" />
+          </button>
+          <Link
+            href="/dashboard/cart"
+            className="relative flex items-center gap-1.5 rounded-full bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white"
+          >
+            <ShoppingCart className="size-3.5" />
+            {cartCount > 0 && <span>{cartCount}</span>}
+          </Link>
+        </div>
       </div>
 
       {/* Main */}

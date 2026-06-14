@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    unoptimized: true,
+    // Allow images from any domain (update with specific domains when backend is added)
+    remotePatterns: [],
   },
   experimental: {
     // Avoid stale chunk URLs in Turbopack HMR

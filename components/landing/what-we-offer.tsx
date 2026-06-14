@@ -1,108 +1,128 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } from 'lucide-react'
 
-const services = [
+const SERVICES = [
   {
-    title: 'Nutritional Consultations',
-    description: 'One-on-one sessions with certified experts for personalized meal plans.',
-    image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400&q=80',
-    redirect: '/onboarding',
-    tag: '★ Most Popular',
+    icon: Stethoscope,
+    title: 'Nutrition Consultations',
+    titleAr: 'الاستشارات الغذائية',
+    desc: 'One-on-one sessions with certified nutritionists. Get a plan built around your body, goals, and lifestyle.',
+    href: '/nutrition-consultations',
+    tag: 'Most Popular',
+    image: '/course-nutrition.png',
+    color: 'teal',
   },
   {
+    icon: UtensilsCrossed,
     title: 'Healthy Meals',
-    description: 'Chef-prepared macro-balanced meals delivered fresh to your door.',
-    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80',
-    redirect: '/healthy-meals',
+    titleAr: 'الوجبات الصحية',
+    desc: 'Chef-prepared, macro-balanced meals delivered fresh to your door across the UAE.',
+    href: '/healthy-meals',
+    image: '/meal-bowl.png',
+    color: 'orange',
   },
   {
-    title: 'Healthy Snack Products',
-    description: 'Curated protein bars, nuts, and organic snacks with clear nutrition info.',
-    image: 'https://images.unsplash.com/photo-1604480132736-44c188fe4d20?w=400&q=80',
-    redirect: '/healthy-snacks',
+    icon: Cookie,
+    title: 'Healthy Snacks',
+    titleAr: 'منتجات صحية',
+    desc: 'Protein bars, nuts, dried fruits, and certified supplements — all curated by our nutrition team.',
+    href: '/healthy-snacks',
+    image: '/snack-nuts.png',
+    color: 'teal',
   },
   {
-    title: 'Fat Burning & Body Sculpting',
-    description: 'Non-invasive specialist sessions with visible results in weeks.',
-    image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&q=80',
-    redirect: '/body-sculpting',
+    icon: Activity,
+    title: 'Body Sculpting',
+    titleAr: 'نحت الجسم',
+    desc: 'Non-invasive fat reduction sessions with visible results in measurements from the first session.',
+    href: '/body-sculpting',
+    image: '/body-sculpting.png',
+    color: 'orange',
   },
   {
+    icon: GraduationCap,
     title: 'Training Courses',
-    description: 'Online and in-person programs from beginner to advanced with certificates.',
-    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&q=80',
-    redirect: '/training-courses',
+    titleAr: 'دورات تدريبية',
+    desc: 'Online and in-person programs from beginner to advanced — with certificates.',
+    href: '/contact',
+    image: '/course-fitness.png',
+    color: 'teal',
   },
 ]
 
 export function WhatWeOffer() {
-  const router = useRouter()
-
   return (
-    <section className="bg-white py-20">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="mb-12 text-center">
-          <h2 className="text-balance text-3xl font-semibold text-neutral-900">
-            What We Offer
+    <section className="bg-white py-20 sm:py-28">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+
+        {/* Header */}
+        <div className="mx-auto max-w-2xl text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-teal-700">
+            Our Services
+          </span>
+          <h2 className="mt-4 text-balance text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+            Everything you need,{' '}
+            <span className="text-teal-600">in one place</span>
           </h2>
-          <p className="mt-2 text-neutral-500">
-            Everything you need to reach your health goals — all in one place
+          <p className="mt-4 text-pretty text-neutral-500">
+            From your first consultation to your daily meals — we cover every part of your health journey.
           </p>
         </div>
 
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-thin sm:grid sm:grid-cols-3 lg:grid-cols-5 sm:overflow-visible sm:pb-0">
-          {services.map((service) => (
-            <div
-              key={service.title}
-              onClick={() => router.push(`/sign-in?redirect=${service.redirect}`)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  router.push(`/sign-in?redirect=${service.redirect}`)
-                }
-              }}
-              tabIndex={0}
-              role="button"
-              className="group flex w-[260px] shrink-0 snap-start cursor-pointer flex-col rounded-xl border border-neutral-200/60 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md sm:w-auto"
-            >
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
-                <Image
-                  src={service.image}
-                  alt={service.title}
-                  fill
-                  sizes="(max-width: 640px) 260px, (max-width: 1024px) 33vw, 20vw"
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-
-              {service.tag && (
-                <span className="mt-3 inline-flex w-fit items-center gap-1 rounded-full bg-orange-500 px-2.5 py-0.5 text-[11px] font-semibold text-white">
-                  {service.tag}
-                </span>
-              )}
-
-              <h3 className="mt-2 text-base font-semibold text-neutral-900">
-                {service.title}
-              </h3>
-
-              <p className="mt-1 line-clamp-2 text-sm text-neutral-500">
-                {service.description}
-              </p>
-
+        {/* Services grid */}
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {SERVICES.map((service) => {
+            const Icon = service.icon
+            return (
               <Link
-                href={`/sign-in?redirect=${service.redirect}`}
-                onClick={(e) => e.stopPropagation()}
-                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-teal-600 transition-colors hover:text-teal-700"
+                key={service.title}
+                href={service.href}
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-200 hover:shadow-xl hover:shadow-teal-900/8"
               >
-                {service.tag ? 'Book →' : 'View →'}
-                <ArrowRight className="size-3.5" />
+                {/* Image */}
+                <div className="relative h-48 overflow-hidden bg-teal-50">
+                  <Image
+                    src={service.image}
+                    alt={service.title}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+
+                  {/* Tag */}
+                  {service.tag && (
+                    <span className="absolute left-4 top-4 rounded-full bg-orange-500 px-3 py-1 text-xs font-bold text-white shadow-sm">
+                      {service.tag}
+                    </span>
+                  )}
+                </div>
+
+                {/* Content */}
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-xl bg-teal-50 text-teal-600 transition-colors group-hover:bg-teal-100">
+                      <Icon className="size-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-neutral-900">{service.title}</h3>
+                      <p className="text-xs text-neutral-400">{service.titleAr}</p>
+                    </div>
+                  </div>
+
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-neutral-500">
+                    {service.desc}
+                  </p>
+
+                  <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-teal-600 transition-colors group-hover:text-teal-700">
+                    Learn more
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </div>
+                </div>
               </Link>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

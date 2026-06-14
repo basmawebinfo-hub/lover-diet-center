@@ -1,7 +1,7 @@
+"use client"
+
 // App store — simple React context + useReducer with localStorage persistence.
 // Replace with Zustand or RTK Query once the backend lands.
-
-"use client"
 
 import {
   createContext,

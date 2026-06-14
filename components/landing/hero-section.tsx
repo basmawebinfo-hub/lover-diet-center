@@ -5,7 +5,7 @@ import { WHATSAPP_NUMBER } from '@/lib/site'
 
 // Real Lover Diet Center stats
 const STATS = [
-  { value: '25,000+', label: 'Happy Clients',     labelAr: 'عميل سعيد' },
+  { value: '3,000+', label: 'Happy Clients',     labelAr: 'عميل سعيد' },
   { value: '150+',    label: 'Certified Experts',  labelAr: 'خبير معتمد' },
   { value: '96%',     label: 'Success Rate',       labelAr: 'معدل النجاح' },
 ]
@@ -115,7 +115,7 @@ export function HeroSection() {
         {/* ── Trust strip ── */}
         <div className="border-t border-neutral-100 py-7 text-center">
           <p className="text-sm text-neutral-500">
-            Trusted by 25,000+ clients across the UAE for science-backed nutrition.
+            Trusted by 3,000+ clients across the UAE for science-backed nutrition.
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-bold text-neutral-400">
             {TRUST_TAGS.map((t, i) => (

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { WHATSAPP_NUMBER, socialLinks } from '@/lib/site'
 
@@ -79,12 +80,13 @@ export function FooterSimple() {
           {/* Brand column */}
           <div>
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-xl bg-lime-600 text-white">
-                <svg viewBox="0 0 24 24" fill="none" className="size-5" aria-hidden="true">
-                  <path d="M12 3C8 3 5 6 5 10c0 5 7 11 7 11s7-6 7-11c0-4-3-7-7-7z" fill="currentColor" opacity=".9"/>
-                  <path d="M12 8v8M9 11h6" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
-                </svg>
-              </div>
+              <Image
+                src="/ldc-logo.png"
+                alt="Lover Diet Center logo"
+                width={40}
+                height={40}
+                className="size-10 rounded-full object-cover"
+              />
               <div className="leading-none">
                 <span className="block text-base font-bold tracking-tight text-white">Lover Diet</span>
                 <span className="block text-[10px] font-medium tracking-widest text-neutral-500 uppercase">Center</span>

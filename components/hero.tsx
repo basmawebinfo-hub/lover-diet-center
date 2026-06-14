@@ -57,7 +57,7 @@ export function Hero() {
             {/* Stats */}
             <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center backdrop-blur-sm">
-                <div className="text-2xl font-bold text-pink-500">25K+</div>
+                <div className="text-2xl font-bold text-pink-500">3,000+</div>
                 <p className="mt-0.5 text-xs text-white/50">Happy Clients</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center backdrop-blur-sm">

@@ -102,7 +102,7 @@ export function Testimonials() {
             ))}
           </div>
           <p className="text-sm text-neutral-600">
-            <span className="font-semibold text-neutral-900">25,000+ members</span>{' '}
+            <span className="font-semibold text-neutral-900">3,000+ members</span>{' '}
             have transformed with LoverDiet — join the next chapter.
           </p>
         </div>

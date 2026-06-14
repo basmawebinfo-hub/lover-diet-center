@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useApp } from "@/lib/store"
@@ -46,9 +47,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#F0FAF8] lg:grid lg:grid-cols-[280px_1fr]">
       {/* Sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:border-r lg:border-neutral-100 lg:bg-white">
-        <div className="flex items-center gap-2 px-6 py-6">
-          <Link href="/" className="text-xl font-bold text-lime-700 tracking-tight hover:opacity-80 transition-opacity">
-            lovers<span className="text-lime-500">dc</span>
+        <div className="flex items-center gap-2.5 px-6 py-6">
+          <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+            <Image
+              src="/ldc-logo.png"
+              alt="Lover Diet Center logo"
+              width={36}
+              height={36}
+              className="size-9 rounded-full object-cover"
+            />
+            <span className="text-xl font-bold text-lime-700 tracking-tight">
+              lovers<span className="text-lime-500">dc</span>
+            </span>
           </Link>
         </div>
 

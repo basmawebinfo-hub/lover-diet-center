@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: '%s | Lover Diet Center',
   },
   description:
-    'Personalized nutrition consultations, chef-prepared healthy meals, healthy snacks, body sculpting sessions, and training courses. 150+ certified nutritionists. 25,000+ members.',
+    'Personalized nutrition consultations, chef-prepared healthy meals, healthy snacks, body sculpting sessions, and training courses. 150+ certified nutritionists. 3,000+ members.',
   keywords: [
     'nutritionist UAE',
     'healthy meals Dubai',
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Lover Diet Center — Transform Your Health',
     description:
-      'Expert nutrition consultations, healthy meal delivery, and body sculpting in the UAE. Join 25,000+ members.',
+      'Expert nutrition consultations, healthy meal delivery, and body sculpting in the UAE. Join 3,000+ members.',
     url: siteUrl,
     siteName: 'Lover Diet Center',
     locale: 'en_AE',

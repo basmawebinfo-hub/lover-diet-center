@@ -1,6 +1,7 @@
 'use client'
 
 import { Suspense } from 'react'
+import Image from 'next/image'
 import { SignIn2 } from '@/components/ui/sign-in-form'
 import { Check } from 'lucide-react'
 
@@ -102,7 +103,15 @@ export default function SignInPage() {
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16">
           {/* Logo/Brand */}
-          <div className="mb-10">
+          <div className="mb-10 flex items-center gap-3">
+            <Image
+              src="/ldc-logo.png"
+              alt="Lover Diet Center logo"
+              width={48}
+              height={48}
+              priority
+              className="size-12 rounded-full object-cover shadow-md ring-2 ring-white/30"
+            />
             <span className="text-2xl font-bold text-white tracking-tight">
               lovers<span className="text-lime-200">dc</span>
             </span>

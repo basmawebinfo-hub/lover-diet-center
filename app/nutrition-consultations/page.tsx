@@ -78,7 +78,7 @@ export default function NutritionConsultationsPage() {
       <section className="bg-[#1A7A6E] py-16 px-4 text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Start Your Journey?</h2>
-          <p className="text-white/80 mb-8">Join 25,000+ members who transformed their health with Lover Diet Center.</p>
+          <p className="text-white/80 mb-8">Join 3,000+ members who transformed their health with Lover Diet Center.</p>
           <a
             href={WHATSAPP_DIRECT}
             target="_blank"

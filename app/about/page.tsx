@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 }
 
 const stats = [
-  { value: '25,000+', label: 'Happy Clients', labelAr: 'عميل سعيد' },
+  { value: '3,000+', label: 'Happy Clients', labelAr: 'عميل سعيد' },
   { value: '150+', label: 'Certified Experts', labelAr: 'خبير معتمد' },
   { value: '96%', label: 'Success Rate', labelAr: 'معدل النجاح' },
   { value: '4.9', label: 'Average Rating', labelAr: 'متوسط التقييم' },
@@ -76,7 +76,7 @@ export default function AboutPage() {
             Founded by Dr. Wael Mostafa, Lover Diet Center started as a small clinic in the UAE with a simple belief: that every person deserves a personalized approach to nutrition. No generic diets, no one-size-fits-all plans.
           </p>
           <p className="text-neutral-600 leading-relaxed mb-4">
-            Today, we are proud to serve over 25,000 clients across the UAE with a team of 150+ certified nutritionists, dietitians, and wellness coaches. Our approach combines the latest nutritional science with cultural sensitivity and practical lifestyle guidance.
+            Today, we are proud to serve over 3,000 clients across the UAE with a team of 150+ certified nutritionists, dietitians, and wellness coaches. Our approach combines the latest nutritional science with cultural sensitivity and practical lifestyle guidance.
           </p>
           <p className="text-neutral-600 leading-relaxed">
             Whether you want to lose weight, build muscle, manage a health condition, or simply eat better — we are here to guide you every step of the way.

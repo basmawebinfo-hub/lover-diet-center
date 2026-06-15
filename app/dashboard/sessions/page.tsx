@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { Suspense, useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Calendar, Clock, Video, MapPin, Check, X, Plus } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
@@ -15,13 +15,16 @@ const TYPE_EMOJI: Record<Session["type"], string> = {
   training: "🏋️",
 }
 
-export default function SessionsPage() {
+function SessionsInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { state, addSession } = useApp()
   const user = state.user
-  const [showForm, setShowForm] = useState(false)
+  const initialType = (searchParams.get("type") as Session["type"]) || "consultation"
+  const autoBook = searchParams.get("book") === "1"
+  const [showForm, setShowForm] = useState(autoBook)
   const [draft, setDraft] = useState({
-    type: "consultation" as Session["type"],
+    type: initialType,
     date: "",
     time: "10:00",
     location: "clinic" as Session["location"],
@@ -270,5 +273,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       </label>
       <div className="mt-1">{children}</div>
     </div>
+  )
+}
+
+export default function SessionsPage() {
+  return (
+    <Suspense fallback={null}>
+      <SessionsInner />
+    </Suspense>
   )
 }

@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
+import { createClient } from '@/lib/supabase/client'
 
 // Pages that hide the header completely
 const HIDE_ON = ['/sign-in', '/sign-up', '/onboarding']
@@ -48,12 +49,23 @@ export function SegmentedHeader() {
   const menuRef    = useRef<HTMLDivElement>(null)
   const toggleRef  = useRef<HTMLButtonElement>(null)
   const dropRef    = useRef<HTMLDivElement>(null)
+  const [isAuthed, setIsAuthed] = useState(false)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Track Supabase auth session for the dynamic Dashboard button
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => setIsAuthed(!!data.user))
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session?.user)
+    })
+    return () => sub.subscription.unsubscribe()
   }, [])
 
   // Close dropdown on outside click
@@ -174,19 +186,31 @@ export function SegmentedHeader() {
 
         {/* ── Desktop right actions ── */}
         <div className="hidden items-center gap-2 md:flex">
-          <Link
-            href="/sign-in"
-            className="rounded-full px-4 py-2 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
-          >
-            Sign in
-          </Link>
-          <Link
-            href="/sign-up"
-            className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
-          >
-            Get Started
-            <ArrowRight className="size-3.5" />
-          </Link>
+          {isAuthed ? (
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+            >
+              Dashboard
+              <ArrowRight className="size-3.5" />
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className="rounded-full px-4 py-2 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/sign-up"
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+              >
+                Get Started
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </>
+          )}
         </div>
 
         {/* ── Mobile hamburger ── */}
@@ -235,11 +259,11 @@ export function SegmentedHeader() {
           {/* Mobile CTA buttons */}
           <div className="mt-3 flex flex-col gap-2 border-t border-neutral-100 pt-4">
             <Link
-              href="/sign-up"
+              href={isAuthed ? "/dashboard" : "/sign-up"}
               onClick={closeMenu}
               className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-lime-400 to-lime-500 py-3.5 text-base font-bold text-lime-950 shadow-sm"
             >
-              Get Started Free
+              {isAuthed ? "Go to Dashboard" : "Get Started Free"}
               <ArrowRight className="size-4" />
             </Link>
             <a
@@ -254,6 +278,7 @@ export function SegmentedHeader() {
               </svg>
               Chat on WhatsApp
             </a>
+            {!isAuthed && (
             <Link
               href="/sign-in"
               onClick={closeMenu}
@@ -261,6 +286,7 @@ export function SegmentedHeader() {
             >
               Already have an account? Sign in
             </Link>
+            )}
           </div>
         </nav>
       </div>

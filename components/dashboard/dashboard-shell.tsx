@@ -26,12 +26,10 @@ const NAV_ITEMS = [
   { href: "/dashboard/cart", label: "Cart", labelAr: "السلة", icon: ShoppingCart },
 ] as const
 
-function signOut(router: ReturnType<typeof useRouter>) {
-  // Clear auth cookie
-  document.cookie = "ldc_auth_token=; path=/; max-age=0; SameSite=Lax"
-  // Clear local storage auth data
-  localStorage.removeItem("ldc_auth_email")
-  // Redirect to sign-in
+async function signOut(router: ReturnType<typeof useRouter>) {
+  const { createClient } = await import("@/lib/supabase/client")
+  const supabase = createClient()
+  await supabase.auth.signOut()
   router.push("/sign-in")
   router.refresh()
 }

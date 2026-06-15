@@ -3,12 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, UserPlus, User, Mail, Lock } from 'lucide-react'
-
-function setAuthCookie(email: string) {
-  const token = btoa(`${email}:${Date.now()}`)
-  document.cookie = `ldc_auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-  localStorage.setItem('ldc_auth_email', email)
-}
+import { createClient } from '@/lib/supabase/client'
 
 export function SignUpForm() {
   const router = useRouter()
@@ -52,24 +47,22 @@ export function SignUpForm() {
 
     setIsLoading(true)
     try {
-      // Check if email already registered
-      const storedUsers = JSON.parse(localStorage.getItem('ldc_users') || '[]') as Array<{ email: string; password: string; name: string }>
-      const exists = storedUsers.find((u) => u.email.toLowerCase() === form.email.toLowerCase())
-      if (exists) {
-        setError('An account with this email already exists. Please sign in.')
+      const supabase = createClient()
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: form.email.toLowerCase().trim(),
+        password: form.password,
+        options: {
+          data: { name: form.name.trim() },
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined,
+        },
+      })
+
+      if (signUpError) {
+        setError(signUpError.message)
         return
       }
 
-      // Save new user
-      storedUsers.push({
-        email: form.email.toLowerCase(),
-        password: form.password,
-        name: form.name.trim(),
-      })
-      localStorage.setItem('ldc_users', JSON.stringify(storedUsers))
-
-      // Set auth cookie and redirect to onboarding
-      setAuthCookie(form.email)
+      // Session is set automatically (email confirmation OFF). Go to onboarding.
       router.push(redirect)
       router.refresh()
     } catch {

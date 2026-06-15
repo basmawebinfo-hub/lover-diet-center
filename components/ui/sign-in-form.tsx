@@ -3,16 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, LogIn } from 'lucide-react'
-
-// Simple auth helper — sets a cookie so middleware can protect routes.
-// Replace this with a real Supabase/API call once the backend is ready.
-function setAuthCookie(email: string) {
-  const token = btoa(`${email}:${Date.now()}`)
-  // httpOnly can't be set from JS — this is a client-side cookie for now.
-  // When Supabase is added, the server will set a proper httpOnly cookie.
-  document.cookie = `ldc_auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-  localStorage.setItem('ldc_auth_email', email)
-}
+import { createClient } from '@/lib/supabase/client'
 
 export function SignIn2() {
   const router = useRouter()
@@ -40,22 +31,17 @@ export function SignIn2() {
         return
       }
 
-      // Check if user exists in localStorage (pre-Supabase flow)
-      const storedUsers = JSON.parse(localStorage.getItem('ldc_users') || '[]') as Array<{ email: string; password: string; name: string }>
-      const user = storedUsers.find((u) => u.email.toLowerCase() === email.toLowerCase())
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase().trim(),
+        password,
+      })
 
-      if (!user) {
-        setError('No account found with this email. Please sign up first.')
+      if (signInError) {
+        setError('Invalid email or password. Please try again.')
         return
       }
 
-      if (user.password !== password) {
-        setError('Incorrect password. Please try again.')
-        return
-      }
-
-      // Set auth cookie & redirect
-      setAuthCookie(email)
       router.push(redirect)
       router.refresh()
     } catch {

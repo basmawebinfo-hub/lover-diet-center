@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { WHATSAPP_DIRECT } from '@/lib/site'
+import { InAppActionButton } from '@/components/in-app-action-button'
 import { ArrowRight, Activity, CheckCircle } from 'lucide-react'
 import type { Metadata } from 'next'
 
@@ -41,15 +41,7 @@ export default function BodySculptingPage() {
             Advanced non-invasive fat-breaking technology combined with expert nutrition guidance. See real changes in your body measurements from the very first session.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href={WHATSAPP_DIRECT}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-[#4d7c0f] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
-            >
-              Book a Session
-              <ArrowRight className="w-4 h-4" />
-            </a>
+            <InAppActionButton mode="session" sessionType="body_sculpting" label="Book a Session" />
           </div>
         </div>
       </section>
@@ -93,14 +85,7 @@ export default function BodySculptingPage() {
                 <p className="text-sm text-neutral-500 mb-4">{pkg.nameAr}</p>
                 <p className="text-3xl font-bold text-[#4d7c0f] mb-1">{pkg.price} <span className="text-base font-normal">AED</span></p>
                 <p className="text-sm text-neutral-500 mb-6">{pkg.sessions} sessions</p>
-                <a
-                  href={WHATSAPP_DIRECT}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-center bg-[#4d7c0f] text-white font-semibold py-3 rounded-xl hover:bg-[#155f56] transition-colors"
-                >
-                  Book Now
-                </a>
+                <div className="mt-2"><InAppActionButton mode="session" sessionType="body_sculpting" label="Book Now" className="w-full px-4 py-3 text-sm" /></div>
               </div>
             ))}
           </div>

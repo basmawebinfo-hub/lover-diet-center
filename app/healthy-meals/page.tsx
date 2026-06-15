@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { WHATSAPP_DIRECT } from '@/lib/site'
+import { InAppActionButton } from '@/components/in-app-action-button'
 import { ArrowRight, ChefHat } from 'lucide-react'
 import type { Metadata } from 'next'
 
@@ -69,15 +69,7 @@ export default function HealthyMealsPage() {
           <p className="text-lg text-neutral-600 mb-8 max-w-2xl mx-auto">
             Every meal is designed by certified nutritionists and prepared by professional chefs. Macro-balanced, delicious, and delivered to your door across the UAE.
           </p>
-          <a
-            href={WHATSAPP_DIRECT}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 bg-[#4d7c0f] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
-          >
-            Order Now
-            <ArrowRight className="w-4 h-4" />
-          </a>
+          <InAppActionButton mode="shop" label="Order Now" variant="light" />
         </div>
       </section>
 

@@ -1,7 +1,6 @@
-import Link from 'next/link'
 import Image from 'next/image'
-import { WHATSAPP_DIRECT } from '@/lib/site'
-import { ArrowRight, Cookie } from 'lucide-react'
+import { Cookie } from 'lucide-react'
+import { InAppActionButton } from '@/components/in-app-action-button'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -57,13 +56,7 @@ export default function HealthySnacksPage() {
           <p className="text-lg text-neutral-600 mb-8 max-w-2xl mx-auto">
             Protein bars, dried fruits, nuts, and certified supplements — all curated by our nutrition team to support your health journey.
           </p>
-          <Link
-            href="/sign-up"
-            className="inline-flex items-center justify-center gap-2 bg-[#4d7c0f] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
-          >
-            Shop Now
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <InAppActionButton mode="shop" label="Shop Now" />
         </div>
       </section>
 
@@ -89,13 +82,7 @@ export default function HealthySnacksPage() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <Link
-              href="/sign-up"
-              className="inline-flex items-center gap-2 bg-[#4d7c0f] text-white font-semibold px-8 py-4 rounded-2xl hover:bg-[#155f56] transition-colors"
-            >
-              View All Products in Dashboard
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            <InAppActionButton mode="shop" label="View All Products" variant="light" />
           </div>
         </div>
       </section>

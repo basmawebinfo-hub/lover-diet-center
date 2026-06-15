@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"
 import { Trash2, Minus, Plus, CreditCard, Check, ShoppingBag } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
+import { createClient } from "@/lib/supabase/client"
+import { placeOrder } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 
 export default function CartPage() {
@@ -33,8 +35,26 @@ export default function CartPage() {
   const shipping = subtotal > 0 ? 15 : 0
   const total = subtotal + shipping
 
-  function checkout() {
+  async function checkout() {
     setCheckedOut(true)
+    // Persist the order to Supabase if signed in (non-blocking for UX)
+    try {
+      const supabase = createClient()
+      const { data } = await supabase.auth.getUser()
+      if (data.user) {
+        await placeOrder(
+          data.user.id,
+          cartItems.map((it) => ({
+            productId: it.product.id,
+            quantity: it.quantity,
+            price: it.product.price,
+          })),
+          total,
+        )
+      }
+    } catch {
+      // ignore — order still clears locally
+    }
     setTimeout(() => {
       clearCart()
       setCheckedOut(false)

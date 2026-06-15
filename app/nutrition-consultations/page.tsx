@@ -2,6 +2,8 @@ import Image from 'next/image'
 import { CheckCircle, Stethoscope, Star, Users, Award, Clock } from 'lucide-react'
 import type { Metadata } from 'next'
 import { BookConsultationButton } from '@/components/book-consultation-button'
+import { WHATSAPP_SUPPORT } from '@/lib/site'
+import { MessageCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Nutrition Consultations',
@@ -51,9 +53,21 @@ export default function NutritionConsultationsPage() {
               Get a science-backed, personalized nutrition plan from certified dietitians.
               Book your session online — right inside your account, in a few clicks.
             </p>
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
               <BookConsultationButton type="consultation" label="Book a Consultation" />
+              <a
+                href={WHATSAPP_SUPPORT}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-6 py-4 text-base font-semibold text-neutral-700 transition hover:border-lime-300 hover:text-neutral-900"
+              >
+                <MessageCircle className="size-5 text-lime-600" />
+                Have a question?
+              </a>
             </div>
+            <p className="mt-2 text-xs text-neutral-400">
+              Booking happens inside your account. WhatsApp is for questions &amp; support only.
+            </p>
             <div className="mt-5 flex items-center gap-2 text-sm text-neutral-500">
               <div className="flex">
                 {[1,2,3,4,5].map((i) => <Star key={i} className="size-4 fill-amber-400 text-amber-400" />)}

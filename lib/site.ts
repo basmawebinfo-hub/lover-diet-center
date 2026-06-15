@@ -4,6 +4,10 @@ export const WHATSAPP_DIRECT =
 
 export const WHATSAPP_NUMBER = '971529033110'
 
+// WhatsApp link for support: complaints & general inquiries (NOT booking)
+export const WHATSAPP_SUPPORT =
+  `https://api.whatsapp.com/send/?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent('Hello, I have an inquiry / complaint for Lover Diet Center support.')}&type=phone_number&app_absent=0`
+
 export function waLink(message: string) {
   return `https://api.whatsapp.com/send/?phone=${WHATSAPP_NUMBER}&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`
 }

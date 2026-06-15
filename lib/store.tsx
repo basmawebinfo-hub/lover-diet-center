@@ -21,6 +21,8 @@ import type {
   User,
   WeightLog,
 } from "./types"
+import { createClient } from "@/lib/supabase/client"
+import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog } from "@/lib/supabase/db"
 import {
   mockDoctorPlan,
   mockMeals,
@@ -56,6 +58,7 @@ type Action =
   | { type: "UPDATE_AVATAR"; payload: User["avatarConfig"] }
   | { type: "UPDATE_PLAN"; payload: DoctorPlan }
   | { type: "ADD_SESSION"; payload: Session }
+  | { type: "SYNC_FROM_DB"; payload: { sessions?: Session[]; weightLogs?: WeightLog[] } }
 
 const STORAGE_KEY = "loversdc:state:v1"
 
@@ -131,6 +134,12 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, doctorPlan: action.payload }
     case "ADD_SESSION":
       return { ...state, sessions: [action.payload, ...state.sessions] }
+    case "SYNC_FROM_DB":
+      return {
+        ...state,
+        sessions: action.payload.sessions ?? state.sessions,
+        weightLogs: action.payload.weightLogs ?? state.weightLogs,
+      }
     default:
       return state
   }
@@ -220,9 +229,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [state])
 
+  // Once hydrated, pull the signed-in user's real data from Supabase
+  useEffect(() => {
+    if (!state.hydrated) return
+    let active = true
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user || !active) return
+      const [sessions, weightLogs] = await Promise.all([
+        fetchSessions(data.user.id),
+        fetchWeightLogs(data.user.id),
+      ])
+      if (!active) return
+      dispatch({
+        type: "SYNC_FROM_DB",
+        payload: {
+          sessions: sessions.length ? sessions : undefined,
+          weightLogs: weightLogs.length ? weightLogs : undefined,
+        },
+      })
+    })
+    return () => { active = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.hydrated])
+
   const setUser = useCallback((u: User | null) => dispatch({ type: "SET_USER", payload: u }), [])
   const logWeight = useCallback(
-    (log: WeightLog) => dispatch({ type: "LOG_WEIGHT", payload: log }),
+    (log: WeightLog) => {
+      dispatch({ type: "LOG_WEIGHT", payload: log })
+      // Sync to Supabase if signed in (non-blocking)
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) insertWeightLog(data.user.id, log).catch(() => {})
+      })
+    },
     []
   )
   const addToCart = useCallback(
@@ -251,7 +291,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     []
   )
   const addSession = useCallback(
-    (s: Session) => dispatch({ type: "ADD_SESSION", payload: s }),
+    (s: Session) => {
+      dispatch({ type: "ADD_SESSION", payload: s })
+      // Sync to Supabase if signed in (non-blocking)
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) insertSession(data.user.id, s).catch(() => {})
+      })
+    },
     []
   )
   const resetOnboarding = useCallback(() => {

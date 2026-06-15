@@ -1,7 +1,10 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { Play, Star } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
+import { useLocale, t } from '@/lib/locale'
 
 // Real Lover Diet Center stats
 const STATS = [
@@ -13,6 +16,7 @@ const STATS = [
 const TRUST_TAGS = ['Nutrition', 'Meals', 'Snacks', 'Sculpting', 'Courses']
 
 export function HeroSection() {
+  const { locale } = useLocale()
   return (
     <section className="relative overflow-hidden pt-16">
       {/* Fresh lime → light gradient background (reference style) */}
@@ -27,19 +31,21 @@ export function HeroSection() {
             {/* Pill */}
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-4 py-1.5 text-sm font-semibold text-neutral-600">
               <span className="size-2 rounded-full bg-lime-500" />
-              Together for a better life
+              {t(locale, 'Together for a better life', 'معًا من أجل حياة أفضل')}
             </div>
 
             {/* Headline */}
             <h1 className="mt-5 text-[clamp(2.5rem,5.2vw,3.6rem)] font-extrabold leading-[1.06] tracking-tight text-neutral-900">
-              Make a <span className="text-lime-500">healthy</span> life
-              <br />with fresh <span className="text-lime-500">Food</span>
+              {locale === 'ar' ? (
+                <>اصنع حياة <span className="text-lime-500">صحية</span><br />مع طعام <span className="text-lime-500">طازج</span></>
+              ) : (
+                <>Make a <span className="text-lime-500">healthy</span> life<br />with fresh <span className="text-lime-500">Food</span></>
+              )}
             </h1>
 
             {/* Sub */}
             <p className="mt-5 max-w-md text-[clamp(0.95rem,1.6vw,1.05rem)] leading-relaxed text-neutral-500">
-              Personalized nutrition plans, chef-prepared balanced meals, and certified experts —
-              delivered to your door. Designed for busy lifestyles to help you eat better and reach real results.
+              {t(locale, 'Personalized nutrition plans, chef-prepared balanced meals, and certified experts — delivered to your door.', 'خطط تغذية مخصصة، ووجبات متوازنة محضّرة على يد الطهاة، وخبراء معتمدون — تصلك حتى باب منزلك.')}
             </p>
 
             {/* CTAs */}
@@ -48,7 +54,7 @@ export function HeroSection() {
                 href="/sign-up"
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-8 py-4 text-base font-bold text-lime-950 shadow-lg shadow-lime-500/40 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-lime-500/50 active:translate-y-0"
               >
-                Get Started Free
+                {t(locale, 'Get Started Free', 'ابدأ مجانًا')}
               </Link>
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%2C+I%27d+like+to+book+a+free+consultation`}
@@ -59,7 +65,7 @@ export function HeroSection() {
                 <span className="flex size-8 items-center justify-center rounded-full bg-neutral-900 text-white">
                   <Play className="size-3.5 fill-white" />
                 </span>
-                Watch Demo
+                {t(locale, 'Watch Demo', 'شاهد العرض')}
               </a>
             </div>
 

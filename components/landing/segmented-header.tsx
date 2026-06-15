@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
 import { createClient } from '@/lib/supabase/client'
+import { useLocale } from '@/lib/locale'
 
 // Pages that hide the header completely
 const HIDE_ON = ['/sign-in', '/sign-up', '/onboarding']
@@ -50,6 +51,7 @@ export function SegmentedHeader() {
   const toggleRef  = useRef<HTMLButtonElement>(null)
   const dropRef    = useRef<HTMLDivElement>(null)
   const [isAuthed, setIsAuthed] = useState(false)
+  const { locale, toggleLocale } = useLocale()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -186,6 +188,14 @@ export function SegmentedHeader() {
 
         {/* ── Desktop right actions ── */}
         <div className="hidden items-center gap-2 md:flex">
+          <button
+            type="button"
+            onClick={toggleLocale}
+            aria-label="Switch language"
+            className="rounded-full border border-neutral-200 px-3 py-2 text-sm font-bold text-neutral-700 transition-colors hover:border-lime-300 hover:text-lime-700"
+          >
+            {locale === 'en' ? 'العربية' : 'EN'}
+          </button>
           {isAuthed ? (
             <Link
               href="/dashboard"
@@ -255,6 +265,15 @@ export function SegmentedHeader() {
               {link.label}
             </Link>
           ))}
+
+          {/* Language toggle (mobile) */}
+          <button
+            type="button"
+            onClick={() => { toggleLocale(); closeMenu() }}
+            className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-neutral-200 py-3 text-base font-bold text-neutral-700"
+          >
+            {locale === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}
+          </button>
 
           {/* Mobile CTA buttons */}
           <div className="mt-3 flex flex-col gap-2 border-t border-neutral-100 pt-4">

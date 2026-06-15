@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Host_Grotesk, Cairo } from 'next/font/google'
 import { ConditionalShell } from '@/components/conditional-shell'
 import { AppProvider } from '@/lib/store'
+import { LocaleProvider } from '@/lib/locale'
 import './globals.css'
 
 const hostGrotesk = Host_Grotesk({
@@ -91,9 +92,11 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <AppProvider>
-          <ConditionalShell>{children}</ConditionalShell>
-        </AppProvider>
+        <LocaleProvider>
+          <AppProvider>
+            <ConditionalShell>{children}</ConditionalShell>
+          </AppProvider>
+        </LocaleProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

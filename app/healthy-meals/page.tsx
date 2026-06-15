@@ -11,30 +11,42 @@ export const metadata: Metadata = {
 
 const meals = [
   {
+    id: 'm1',
     nameEn: 'Oats & Berry Bowl',
     nameAr: 'شوفان مع التوت',
-    calories: 380,
+    descriptionEn: 'Steel-cut oats with mixed berries, chia seeds, and almond milk.',
+    descriptionAr: 'شوفان مع توت مشكل وبذور شيا وحليب لوز.',
+    calories: 380, protein: 14, carbs: 58, fat: 9,
     type: 'Breakfast',
     image: '/meals/breakfast.png',
   },
   {
+    id: 'm2',
     nameEn: 'Grilled Chicken Quinoa',
     nameAr: 'دجاج مشوي مع كينوا',
-    calories: 520,
+    descriptionEn: 'Lean chicken breast, quinoa, roasted veggies, lemon-tahini drizzle.',
+    descriptionAr: 'صدر دجاج مشوي، كينوا، خضار محمصة، صلصة ليمون وطحينة.',
+    calories: 520, protein: 42, carbs: 48, fat: 14,
     type: 'Lunch',
     image: '/meals/lunch.png',
   },
   {
+    id: 'm3',
     nameEn: 'Salmon & Greens',
     nameAr: 'سلمون مع الخضار',
-    calories: 480,
+    descriptionEn: 'Oven-baked salmon fillet over sautéed greens and sweet potato.',
+    descriptionAr: 'سلمون مشوي بالفرن مع خضار سوتيه وبطاطا.',
+    calories: 480, protein: 38, carbs: 30, fat: 22,
     type: 'Dinner',
     image: '/meals/dinner.png',
   },
   {
+    id: 'm4',
     nameEn: 'Protein Snack Box',
     nameAr: 'صندوق سناك بروتين',
-    calories: 210,
+    descriptionEn: 'A balanced mix of nuts, protein bites, and fresh fruit.',
+    descriptionAr: 'مزيج متوازن من المكسرات وكرات البروتين والفاكهة الطازجة.',
+    calories: 210, protein: 16, carbs: 18, fat: 9,
     type: 'Snack',
     image: '/meals/snack.png',
   },
@@ -75,19 +87,42 @@ export default function HealthyMealsPage() {
           <h2 className="text-2xl font-bold text-neutral-900 text-center mb-10">Sample Menu</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {meals.map((meal, i) => (
-              <div key={i} className="bg-white border border-neutral-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <div className="relative h-44 bg-[#f0faf7]">
-                  <Image src={meal.image} alt={meal.nameEn} fill className="object-cover" />
-                </div>
-                <div className="p-4">
-                  <span className="text-xs font-semibold text-[#4d7c0f] bg-[#4d7c0f]/10 px-2 py-1 rounded-full">
+              <Link
+                key={i}
+                href={`/dashboard/meals/${meal.id}`}
+                className="group flex flex-col bg-white border border-neutral-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg hover:border-lime-300 transition-all"
+              >
+                <div className="relative h-44 overflow-hidden bg-[#f3fae6]">
+                  <Image src={meal.image} alt={meal.nameEn} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <span className="absolute left-3 top-3 text-xs font-bold text-lime-700 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full">
                     {meal.type}
                   </span>
-                  <h3 className="font-bold text-neutral-900 mt-2">{meal.nameEn}</h3>
-                  <p className="text-sm text-neutral-500">{meal.nameAr}</p>
-                  <p className="text-sm font-semibold text-neutral-700 mt-2">{meal.calories} kcal</p>
+                  <span className="absolute right-3 top-3 text-xs font-bold text-neutral-700 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full">
+                    {meal.calories} kcal
+                  </span>
                 </div>
-              </div>
+                <div className="flex flex-1 flex-col p-4">
+                  <h3 className="font-bold text-neutral-900 group-hover:text-lime-700 transition-colors">{meal.nameEn}</h3>
+                  <p className="font-arabic text-sm text-neutral-500" dir="rtl">{meal.nameAr}</p>
+                  <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{meal.descriptionEn}</p>
+
+                  {/* Macros */}
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    <span className="rounded-md bg-lime-50 px-2 py-0.5 text-[11px] font-semibold text-lime-700">P {meal.protein}g</span>
+                    <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-600">C {meal.carbs}g</span>
+                    <span className="rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-600">F {meal.fat}g</span>
+                  </div>
+
+                  <div className="mt-auto flex items-center justify-between pt-4">
+                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-lime-700 group-hover:gap-1.5 transition-all">
+                      View details <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                    <span className="rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-3.5 py-1.5 text-xs font-bold text-lime-950 shadow-sm">
+                      Order now
+                    </span>
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         </div>

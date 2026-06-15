@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
+import Image from "next/image"
 import { Search, ShoppingCart, Filter } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
@@ -114,23 +116,29 @@ function ProductCard({
   product: Product
   onAdd: () => void
 }) {
-  const emoji = emojiForCategory(product.category)
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white transition hover:border-lime-300 hover:shadow-md">
-      <div className="flex h-40 items-center justify-center bg-gradient-to-br from-lime-50 to-white text-5xl">
-        {emoji}
-      </div>
+      {/* Clickable image -> details */}
+      <Link href={`/dashboard/products/${product.id}`} className="relative block h-44 overflow-hidden bg-gradient-to-br from-lime-50 to-white">
+        <Image
+          src={product.imageUrl}
+          alt={product.nameEn}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-lime-700 backdrop-blur">
+          {product.category}
+        </span>
+      </Link>
+
       <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-neutral-900">{product.nameEn}</h3>
-          <span className="rounded-full bg-lime-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-lime-700">
-            {product.category}
-          </span>
-        </div>
-        <p className="mt-0.5 text-xs text-neutral-500">{product.nameAr}</p>
-        <p className="mt-2 line-clamp-2 text-sm text-neutral-600">
-          {product.descriptionEn}
-        </p>
+        <Link href={`/dashboard/products/${product.id}`} className="block">
+          <h3 className="font-semibold text-neutral-900 transition-colors group-hover:text-lime-700">{product.nameEn}</h3>
+          <p className="mt-0.5 font-arabic text-sm text-neutral-500" dir="rtl">{product.nameAr}</p>
+          <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{product.descriptionEn}</p>
+        </Link>
+
         <div className="mt-auto flex items-center justify-between pt-4">
           <span className="text-xl font-bold text-neutral-900">
             {product.price}{" "}
@@ -141,30 +149,23 @@ function ProductCard({
             onClick={onAdd}
             disabled={!product.inStock}
             className={cn(
-              "inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-semibold transition",
+              "inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold transition",
               product.inStock
-                ? "bg-lime-700 text-white hover:bg-lime-800"
+                ? "bg-gradient-to-b from-lime-400 to-lime-500 text-lime-950 hover:-translate-y-0.5 shadow-sm"
                 : "cursor-not-allowed bg-neutral-100 text-neutral-400"
             )}
           >
             <ShoppingCart className="size-3.5" />
-            {product.inStock ? "Add" : "Sold out"}
+            {product.inStock ? "Buy Now" : "Sold out"}
           </button>
         </div>
+        <Link
+          href={`/dashboard/products/${product.id}`}
+          className="mt-2 text-center text-xs font-semibold text-lime-700 hover:underline"
+        >
+          View details →
+        </Link>
       </div>
     </div>
   )
-}
-
-function emojiForCategory(c: Product["category"]): string {
-  switch (c) {
-    case "snack":
-      return "🥨"
-    case "drink":
-      return "🍵"
-    case "supplement":
-      return "💊"
-    case "meal":
-      return "🥗"
-  }
 }

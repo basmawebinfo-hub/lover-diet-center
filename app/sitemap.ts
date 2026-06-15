@@ -1,18 +1,17 @@
 import type { MetadataRoute } from 'next'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://loverdiet.com'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://loversdc.com'
 
 const routes = [
   '',
   '/about',
-  '/auth/login',
-  '/auth/sign-up',
-  '/body-sculpting',
   '/contact',
+  '/sign-in',
+  '/sign-up',
+  '/nutrition-consultations',
   '/healthy-meals',
   '/healthy-snacks',
-  '/nutrition-consultations',
-  '/onboarding',
+  '/body-sculpting',
   '/training-courses',
 ] as const
 

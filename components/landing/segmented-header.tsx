@@ -21,6 +21,7 @@ const NAV_LINKS = [
       { label: 'Healthy Meals',           href: '/healthy-meals',           desc: 'Chef-prepared, macro-balanced meals' },
       { label: 'Healthy Snacks',          href: '/healthy-snacks',          desc: 'Protein bars, nuts & supplements' },
       { label: 'Body Sculpting',          href: '/body-sculpting',          desc: 'Non-invasive fat reduction sessions' },
+      { label: 'Training Courses',        href: '/training-courses',        desc: 'Courses with certificates, online & in-person' },
     ],
   },
   { id: 'about',   label: 'About',   href: '/about' },
@@ -32,6 +33,7 @@ const MOBILE_LINKS = [
   { label: 'Healthy Meals',           href: '/healthy-meals' },
   { label: 'Healthy Snacks',          href: '/healthy-snacks' },
   { label: 'Body Sculpting',          href: '/body-sculpting' },
+  { label: 'Training Courses',        href: '/training-courses' },
   { label: 'About',                   href: '/about' },
   { label: 'Contact',                 href: '/contact' },
 ]

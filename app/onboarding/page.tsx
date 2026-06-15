@@ -98,7 +98,7 @@ export default function OnboardingPage() {
   const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100
 
   return (
-    <div className="min-h-screen bg-[#F0FAF8] lg:grid lg:grid-cols-2">
+    <div className="min-h-screen bg-[#f3fae6] lg:grid lg:grid-cols-2">
       <PreviewPanel
         data={data}
         bmi={bmi}
@@ -111,7 +111,7 @@ export default function OnboardingPage() {
           </p>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
             <div
-              className="h-full rounded-full bg-[#0D4F4A] transition-all duration-500"
+              className="h-full rounded-full bg-[#4d7c0f] transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -153,7 +153,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={next}
                 disabled={!canContinue}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#0D4F4A] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0a3d38] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#4d7c0f] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#3f6212] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {step === 7 ? (
                   <>
@@ -259,7 +259,7 @@ function PreviewPanel({
   )
 
   return (
-    <div className="hidden lg:flex sticky top-0 h-screen flex-col items-center justify-center bg-[#0D4F4A] text-white p-8">
+    <div className="hidden lg:flex sticky top-0 h-screen flex-col items-center justify-center bg-[#4d7c0f] text-white p-8">
       <div
         className="absolute -top-20 -start-20 size-64 rounded-full bg-lime-600/30 blur-3xl"
         aria-hidden
@@ -363,12 +363,14 @@ function AgeStep({
       title="How old are you?"
       subtitle="Your metabolism changes with age, so this matters for calorie targets."
     >
-      <NumberStepper
+      <ValueSlider
         value={data.age}
         onChange={(v) => update("age", v)}
         min={12}
         max={100}
+        step={1}
         unit="years"
+        unitAr="سنة"
       />
     </StepFrame>
   )
@@ -386,13 +388,14 @@ function HeightStep({
       title="What's your height?"
       subtitle="Used to compute your BMI and ideal weight range."
     >
-      <NumberStepper
+      <ValueSlider
         value={data.heightCm}
         onChange={(v) => update("heightCm", v)}
         min={120}
         max={230}
         step={1}
         unit="cm"
+        unitAr="سم"
       />
     </StepFrame>
   )
@@ -410,13 +413,14 @@ function WeightStep({
       title="What's your current weight?"
       subtitle="You can log a new weight every day from your dashboard."
     >
-      <NumberStepper
+      <ValueSlider
         value={data.weightKg}
         onChange={(v) => update("weightKg", v)}
         min={30}
         max={250}
-        step={0.1}
+        step={0.5}
         unit="kg"
+        unitAr="كجم"
       />
     </StepFrame>
   )
@@ -586,13 +590,14 @@ function StepFrame({
   )
 }
 
-function NumberStepper({
+function ValueSlider({
   value,
   onChange,
   min,
   max,
   step = 1,
   unit,
+  unitAr,
 }: {
   value: number
   onChange: (v: number) => void
@@ -600,31 +605,84 @@ function NumberStepper({
   max: number
   step?: number
   unit: string
+  unitAr?: string
 }) {
-  const dec = () => onChange(Math.max(min, Math.round((value - step) * 10) / 10))
-  const inc = () => onChange(Math.min(max, Math.round((value + step) * 10) / 10))
+  const clamp = (v: number) => Math.min(max, Math.max(min, Math.round(v / step) * step))
+  const dec = () => onChange(clamp(Math.round((value - step) * 100) / 100))
+  const inc = () => onChange(clamp(Math.round((value + step) * 100) / 100))
+  const pct = ((value - min) / (max - min)) * 100
+
   return (
-    <div className="flex items-center gap-3">
-      <button
-        type="button"
-        onClick={dec}
-        className="flex size-12 items-center justify-center rounded-xl border border-neutral-200 bg-white text-2xl font-semibold text-neutral-700 transition hover:bg-neutral-50"
-        aria-label="Decrease"
-      >
-        −
-      </button>
-      <div className="flex-1 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-center">
-        <p className="text-3xl font-bold text-neutral-900">{value}</p>
-        <p className="text-xs text-neutral-500">{unit}</p>
+    <div className="space-y-6">
+      {/* Big editable value */}
+      <div className="flex items-end justify-center gap-2">
+        <input
+          type="number"
+          value={value}
+          min={min}
+          max={max}
+          step={step}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value)
+            if (!Number.isNaN(v)) onChange(clamp(v))
+          }}
+          className="w-40 bg-transparent text-center text-6xl font-extrabold tracking-tight text-neutral-900 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          aria-label={unit}
+        />
+        <span className="mb-3 text-xl font-semibold text-lime-600">{unit}</span>
       </div>
-      <button
-        type="button"
-        onClick={inc}
-        className="flex size-12 items-center justify-center rounded-xl border border-neutral-200 bg-white text-2xl font-semibold text-neutral-700 transition hover:bg-neutral-50"
-        aria-label="Increase"
-      >
-        +
-      </button>
+
+      {/* Slider with fill + thumb */}
+      <div className="relative px-1">
+        <div className="relative h-3 w-full rounded-full bg-neutral-100">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-lime-400 to-lime-500"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <input
+          type="range"
+          value={value}
+          min={min}
+          max={max}
+          step={step}
+          onChange={(e) => onChange(parseFloat(e.target.value))}
+          className="absolute inset-0 h-3 w-full cursor-pointer appearance-none bg-transparent
+            [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-7
+            [&::-webkit-slider-thumb]:-mt-2 [&::-webkit-slider-thumb]:rounded-full
+            [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-white
+            [&::-webkit-slider-thumb]:bg-lime-500 [&::-webkit-slider-thumb]:shadow-lg
+            [&::-webkit-slider-thumb]:shadow-lime-500/40 [&::-webkit-slider-thumb]:transition
+            [&::-moz-range-thumb]:size-7 [&::-moz-range-thumb]:rounded-full
+            [&::-moz-range-thumb]:border-4 [&::-moz-range-thumb]:border-white
+            [&::-moz-range-thumb]:bg-lime-500 [&::-moz-range-thumb]:shadow-lg"
+          aria-label={unit}
+        />
+      </div>
+
+      {/* Min / Max labels + fine-tune buttons */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-neutral-400">{min} {unit}</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={dec}
+            className="flex size-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-xl font-semibold text-neutral-600 transition hover:border-lime-300 hover:text-lime-700"
+            aria-label="Decrease"
+          >
+            −
+          </button>
+          <button
+            type="button"
+            onClick={inc}
+            className="flex size-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-xl font-semibold text-neutral-600 transition hover:border-lime-300 hover:text-lime-700"
+            aria-label="Increase"
+          >
+            +
+          </button>
+        </div>
+        <span className="text-xs font-medium text-neutral-400">{max} {unit}</span>
+      </div>
     </div>
   )
 }

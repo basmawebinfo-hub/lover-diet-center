@@ -14,6 +14,7 @@ import {
   ShoppingBag,
   User as UserIcon,
   ShoppingCart,
+  Package,
   LogOut,
 } from "lucide-react"
 
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { href: "/dashboard/products", label: "Products", labelAr: "المنتجات", icon: ShoppingBag },
   { href: "/dashboard/sessions", label: "Sessions", labelAr: "الجلسات", icon: Calendar },
   { href: "/dashboard/cart", label: "Cart", labelAr: "السلة", icon: ShoppingCart },
+  { href: "/dashboard/orders", label: "My Orders", labelAr: "طلباتي", icon: Package },
 ] as const
 
 async function signOut(router: ReturnType<typeof useRouter>) {

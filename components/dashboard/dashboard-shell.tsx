@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
+import { useLocale, t } from "@/lib/locale"
 import {
   Home,
   Scale,
@@ -37,6 +38,7 @@ async function signOut(router: ReturnType<typeof useRouter>) {
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
+  const { locale } = useLocale()
   const { state } = useApp()
   const user = state.user
   const cartCount = state.cart.reduce((s, c) => s + c.quantity, 0)
@@ -62,12 +64,12 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
         {user && (
           <div className="mx-4 mb-4 rounded-2xl border border-lime-100 bg-gradient-to-br from-lime-50 to-white p-4">
-            <p className="text-xs font-semibold text-lime-700">Welcome back</p>
+            <p className="text-xs font-semibold text-lime-700">{t(locale, "Welcome back", "مرحباً بعودتك")}</p>
             <p className="mt-0.5 truncate text-base font-bold text-neutral-900">
               {user.nameEn}
             </p>
             <p className="mt-1 text-xs text-neutral-500">
-              {user.currentWeightKg.toFixed(1)} kg · Target {user.targetWeightKg.toFixed(1)} kg
+              {user.currentWeightKg.toFixed(1)} {t(locale,"kg","كجم")} · {t(locale,"Target","الهدف")} {user.targetWeightKg.toFixed(1)} {t(locale,"kg","كجم")}
             </p>
           </div>
         )}
@@ -93,7 +95,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                     active ? "text-lime-600" : "text-neutral-400 group-hover:text-neutral-600"
                   )}
                 />
-                <span className="flex-1">{item.label}</span>
+                <span className="flex-1">{locale === "ar" ? item.labelAr : item.label}</span>
                 {item.href === "/dashboard/cart" && cartCount > 0 && (
                   <span className="rounded-full bg-orange-500 px-2 py-0.5 text-xs font-semibold text-white">
                     {cartCount}
@@ -108,14 +110,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => {
-              if (confirm("Sign out of your account?")) {
+              if (confirm(t(locale, "Sign out of your account?", "تسجيل الخروج من حسابك؟"))) {
                 signOut(router)
               }
             }}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-red-50 hover:text-red-600"
           >
             <LogOut className="size-4.5" />
-            <span>Sign Out</span>
+            <span>{t(locale, "Sign Out", "تسجيل الخروج")}</span>
           </button>
         </div>
       </aside>
@@ -129,7 +131,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => {
-              if (confirm("Sign out?")) signOut(router)
+              if (confirm(t(locale, "Sign out?", "تسجيل الخروج؟"))) signOut(router)
             }}
             className="p-2 rounded-xl text-neutral-500 hover:bg-neutral-100"
           >
@@ -154,6 +156,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 // Mobile bottom nav (small screens)
 export function MobileNav() {
   const pathname = usePathname()
+  const { locale } = useLocale()
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-20 grid grid-cols-4 gap-1 border-t border-neutral-100 bg-white/95 px-2 py-2 backdrop-blur lg:hidden">
       {NAV_ITEMS.slice(0, 4).map((item) => {
@@ -169,7 +172,7 @@ export function MobileNav() {
             )}
           >
             <Icon className="size-4" />
-            <span>{item.label}</span>
+            <span>{locale === "ar" ? item.labelAr : item.label}</span>
           </Link>
         )
       })}

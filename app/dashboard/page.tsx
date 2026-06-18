@@ -20,6 +20,7 @@ import { useApp } from "@/lib/store"
 import { analyzeUser, progressPercent } from "@/lib/analysis"
 import { cn } from "@/lib/utils"
 import type { User } from "@/lib/types"
+import { useLocale, t } from "@/lib/locale"
 
 function getLocalUser(): User | null {
   if (typeof window === "undefined") return null
@@ -30,15 +31,16 @@ function getLocalUser(): User | null {
   return null
 }
 
-function greetingForTime() {
+function greetingForTime(locale: "en" | "ar") {
   const h = new Date().getHours()
-  if (h < 12) return "Good morning"
-  if (h < 18) return "Good afternoon"
-  return "Good evening"
+  if (h < 12) return t(locale, "Good morning", "صباح الخير")
+  if (h < 18) return t(locale, "Good afternoon", "مساء الخير")
+  return t(locale, "Good evening", "مساء الخير")
 }
 
 export default function DashboardOverviewPage() {
   const router = useRouter()
+  const { locale } = useLocale()
   const { state } = useApp()
   const user = useMemo(() => state.user || getLocalUser(), [state.user])
 
@@ -56,7 +58,7 @@ export default function DashboardOverviewPage() {
     currentWeightKg: user.currentWeightKg,
     goal: user.goal,
     activityLevel: user.activityLevel,
-  }, "en")
+  }, locale)
 
   const progress = progressPercent(user)
   const recent = [...state.weightLogs].sort((a, b) => (a.date < b.date ? -1 : 1)).slice(-7)
@@ -70,10 +72,10 @@ export default function DashboardOverviewPage() {
         {/* Greeting */}
         <header className="flex flex-col gap-1">
           <p className="text-sm font-medium text-lime-700">
-            {greetingForTime()} · {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" })}
+            {greetingForTime(locale)} · {new Date().toLocaleDateString(locale === "ar" ? "ar-AE" : "en-GB", { weekday: "long", day: "numeric", month: "short" })}
           </p>
           <h1 className="text-3xl font-bold text-neutral-900 sm:text-4xl">
-            {user.nameEn.split(" ")[0]}, your plan is live.
+            {t(locale, `${user.nameEn.split(" ")[0]}, your plan is live.`, `${user.nameEn.split(" ")[0]}، خطتك جاهزة.`)}
           </h1>
         </header>
 
@@ -82,7 +84,7 @@ export default function DashboardOverviewPage() {
 
           {/* Avatar card */}
           <div className="rounded-3xl border border-neutral-100 bg-white p-6 flex flex-col items-center gap-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">Your Body Now</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">{t(locale, "Your Body Now", "جسمك الآن")}</p>
 
             <BodyAvatar
               weightKg={user.currentWeightKg}
@@ -96,10 +98,10 @@ export default function DashboardOverviewPage() {
 
             <p className="text-center text-sm text-neutral-500 max-w-[220px]">
               {user.goal === "lose_weight"
-                ? "Every kg you lose changes this image. Keep logging daily."
+                ? t(locale, "Every kg you lose changes this image. Keep logging daily.", "كل كيلو تخسره يغيّر هذه الصورة. واظب على التسجيل يومياً.")
                 : user.goal === "gain_muscle"
-                ? "Stack protein-rich meals to build that physique."
-                : "Stay consistent. The body follows the routine."}
+                ? t(locale, "Stack protein-rich meals to build that physique.", "ركّز على وجبات غنية بالبروتين لبناء جسمك.")
+                : t(locale, "Stay consistent. The body follows the routine.", "حافظ على الانتظام. الجسم يتبع الروتين.")}
             </p>
 
             <Link
@@ -107,7 +109,7 @@ export default function DashboardOverviewPage() {
               className="inline-flex items-center gap-1.5 rounded-full bg-lime-600 text-white px-4 py-2 text-sm font-semibold hover:bg-lime-700 transition-colors"
             >
               <Scale className="size-3.5" />
-              Log today's weight
+              {t(locale, "Log today's weight", "سجّل وزن اليوم")}
             </Link>
           </div>
 
@@ -115,30 +117,30 @@ export default function DashboardOverviewPage() {
           <div className="grid grid-cols-2 gap-3 sm:gap-4 content-start">
             <StatCard
               icon={<Scale className="size-5" />}
-              label="Current Weight"
-              value={`${user.currentWeightKg.toFixed(1)} kg`}
+              label={t(locale, "Current Weight", "الوزن الحالي")}
+              value={`${user.currentWeightKg.toFixed(1)} ${t(locale,"kg","كجم")}`}
               delta={user.goal === "gain_muscle"
-                ? `+${(user.currentWeightKg - user.startWeightKg).toFixed(1)} kg gained`
-                : `${Math.max(0, user.startWeightKg - user.currentWeightKg).toFixed(1)} kg lost`}
+                ? t(locale, `+${(user.currentWeightKg - user.startWeightKg).toFixed(1)} kg gained`, `+${(user.currentWeightKg - user.startWeightKg).toFixed(1)} كجم مكتسبة`)
+                : t(locale, `${Math.max(0, user.startWeightKg - user.currentWeightKg).toFixed(1)} kg lost`, `${Math.max(0, user.startWeightKg - user.currentWeightKg).toFixed(1)} كجم مفقودة`)}
               deltaTone="positive"
             />
             <StatCard
               icon={<Target className="size-5" />}
-              label="Target Weight"
-              value={`${user.targetWeightKg.toFixed(1)} kg`}
-              delta={`${progress.toFixed(0)}% there`}
+              label={t(locale, "Target Weight", "الوزن المستهدف")}
+              value={`${user.targetWeightKg.toFixed(1)} ${t(locale,"kg","كجم")}`}
+              delta={t(locale, `${progress.toFixed(0)}% there`, `${progress.toFixed(0)}% أنجزت`)}
             />
             <StatCard
               icon={<Flame className="size-5" />}
-              label="Daily Calories"
+              label={t(locale, "Daily Calories", "السعرات اليومية")}
               value={`${analysis.recommendedDailyCalories}`}
-              delta={`${analysis.recommendedProteinG}g protein`}
+              delta={t(locale, `${analysis.recommendedProteinG}g protein`, `${analysis.recommendedProteinG}غ بروتين`)}
             />
             <StatCard
               icon={<Droplets className="size-5" />}
-              label="Water Target"
-              value={`${state.doctorPlan?.waterLiters ?? 2.5} L`}
-              delta="per day"
+              label={t(locale, "Water Target", "هدف الماء")}
+              value={`${state.doctorPlan?.waterLiters ?? 2.5} ${t(locale,"L","لتر")}`}
+              delta={t(locale, "per day", "يومياً")}
             />
           </div>
         </section>
@@ -146,7 +148,7 @@ export default function DashboardOverviewPage() {
         {/* Before / After comparison (only if weight changed) */}
         {hasProgress && user.startWeightKg !== user.currentWeightKg && (
           <section className="rounded-3xl border border-neutral-100 bg-white p-6">
-            <h2 className="text-lg font-bold text-neutral-900 mb-6 text-center">Your Transformation</h2>
+            <h2 className="text-lg font-bold text-neutral-900 mb-6 text-center">{t(locale, "Your Transformation", "تحوّلك")}</h2>
             <BodyComparison
               startWeightKg={user.startWeightKg}
               currentWeightKg={user.currentWeightKg}
@@ -160,11 +162,11 @@ export default function DashboardOverviewPage() {
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-neutral-100 bg-white p-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900">Weight Progress</h2>
+              <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Weight Progress", "تقدّم الوزن")}</h2>
               <TrendingDown className="size-5 text-lime-600" />
             </div>
             <p className="mt-1 text-sm text-neutral-500">
-              Last 7 days · {Math.max(0, user.startWeightKg - user.currentWeightKg).toFixed(1)} kg total
+              {t(locale, "Last 7 days", "آخر 7 أيام")} · {Math.max(0, user.startWeightKg - user.currentWeightKg).toFixed(1)} {t(locale,"kg total","كجم إجمالاً")}
             </p>
             <div className="mt-6 flex h-32 items-end gap-2">
               {recent.length > 0 ? recent.map((log) => {
@@ -179,34 +181,34 @@ export default function DashboardOverviewPage() {
                       style={{ height: `${heightPct}%` }}
                     />
                     <span className="text-[10px] text-neutral-400">
-                      {new Date(log.date).toLocaleDateString("en-GB", { day: "numeric" })}
+                      {new Date(log.date).toLocaleDateString(locale === "ar" ? "ar-AE" : "en-GB", { day: "numeric" })}
                     </span>
                   </div>
                 )
               }) : (
                 <div className="flex-1 flex items-center justify-center text-sm text-neutral-400">
-                  No weight logs yet. Start logging!
+                  {t(locale, "No weight logs yet. Start logging!", "لا سجلات وزن بعد. ابدأ التسجيل!")}
                 </div>
               )}
             </div>
           </div>
 
           <div className="rounded-3xl border border-neutral-100 bg-gradient-to-br from-lime-700 to-lime-900 p-6 text-white">
-            <p className="text-xs font-semibold uppercase tracking-wider text-lime-200">AI Analysis</p>
-            <h2 className="mt-2 text-xl font-bold leading-snug">{analysis.summaryEn}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/80">{analysis.motivationEn}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-lime-200">{t(locale, "AI Analysis", "تحليل بالذكاء الاصطناعي")}</p>
+            <h2 className="mt-2 text-xl font-bold leading-snug">{locale === "ar" ? analysis.summaryAr : analysis.summaryEn}</h2>
+            <p className="mt-3 text-sm leading-relaxed text-white/80">{locale === "ar" ? analysis.motivationAr : analysis.motivationEn}</p>
             <div className="mt-4 grid grid-cols-3 gap-3 border-t border-white/10 pt-4 text-center text-xs">
               <div>
-                <p className="text-white/60">Ideal</p>
-                <p className="mt-1 font-semibold">{analysis.idealWeightKg} kg</p>
+                <p className="text-white/60">{t(locale, "Ideal", "المثالي")}</p>
+                <p className="mt-1 font-semibold">{analysis.idealWeightKg} {t(locale,"kg","كجم")}</p>
               </div>
               <div>
-                <p className="text-white/60">Timeline</p>
+                <p className="text-white/60">{t(locale, "Timeline", "المدة")}</p>
                 <p className="mt-1 font-semibold">{analysis.estimatedWeeks > 0 ? `${analysis.estimatedWeeks}w` : "—"}</p>
               </div>
               <div>
-                <p className="text-white/60">Daily</p>
-                <p className="mt-1 font-semibold">{analysis.recommendedDailyCalories} kcal</p>
+                <p className="text-white/60">{t(locale, "Daily", "يومياً")}</p>
+                <p className="mt-1 font-semibold">{analysis.recommendedDailyCalories} {t(locale,"kcal","سعرة")}</p>
               </div>
             </div>
           </div>
@@ -214,10 +216,10 @@ export default function DashboardOverviewPage() {
 
         {/* Quick actions */}
         <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          <QuickAction href="/dashboard/weight" icon={<Scale className="size-5" />} label="Log weight" subtitle="Daily check-in" />
-          <QuickAction href="/dashboard/plan" icon={<Apple className="size-5" />} label="View plan" subtitle="Today's meals" />
-          <QuickAction href="/dashboard/sessions" icon={<Calendar className="size-5" />} label="Sessions" subtitle={`${state.sessions.filter((s) => s.status === "scheduled").length} upcoming`} />
-          <QuickAction href="/dashboard/products" icon={<ShoppingBag className="size-5" />} label="Shop" subtitle="Healthy products" />
+          <QuickAction href="/dashboard/weight" icon={<Scale className="size-5" />} label={t(locale,"Log weight","سجّل الوزن")} subtitle={t(locale,"Daily check-in","متابعة يومية")} />
+          <QuickAction href="/dashboard/plan" icon={<Apple className="size-5" />} label={t(locale,"View plan","عرض الخطة")} subtitle={t(locale,"Today's meals","وجبات اليوم")} />
+          <QuickAction href="/dashboard/sessions" icon={<Calendar className="size-5" />} label={t(locale,"Sessions","الجلسات")} subtitle={t(locale, `${state.sessions.filter((s) => s.status === "scheduled").length} upcoming`, `${state.sessions.filter((s) => s.status === "scheduled").length} قادمة`)} />
+          <QuickAction href="/dashboard/products" icon={<ShoppingBag className="size-5" />} label={t(locale,"Shop","تسوّق")} subtitle={t(locale,"Healthy products","منتجات صحية")} />
         </section>
 
       </div>

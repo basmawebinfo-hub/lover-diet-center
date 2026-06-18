@@ -40,7 +40,7 @@ export function ContactContent() {
             {locale === 'ar' ? (
               <>نحن هنا{' '}<span className="text-[#4d7c0f]">لمساعدتك</span></>
             ) : (
-              <>We're Here to{' '}<span className="text-[#4d7c0f]">Help You</span></>
+              <>We&apos;re Here to{' '}<span className="text-[#4d7c0f]">Help You</span></>
             )}
           </h1>
           <p className="text-lg text-neutral-600 mb-8">

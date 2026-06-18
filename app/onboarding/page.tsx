@@ -336,7 +336,7 @@ function NameStep({
   update,
 }: {
   data: { name: string; gender: Gender }
-  update: <K extends "name" | "gender">(k: K, v: (typeof data)[K]) => void
+  update: <K extends "name" | "gender">(k: K, v: { name: string; gender: Gender }[K]) => void
 }) {
   const { locale } = useLocale()
   const genders: { value: Gender; en: string; ar: string; icon: string }[] = [

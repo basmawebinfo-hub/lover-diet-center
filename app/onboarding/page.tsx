@@ -335,10 +335,14 @@ function NameStep({
   data,
   update,
 }: {
-  data: { name: string }
-  update: <K extends "name">(k: K, v: (typeof data)[K]) => void
+  data: { name: string; gender: Gender }
+  update: <K extends "name" | "gender">(k: K, v: (typeof data)[K]) => void
 }) {
   const { locale } = useLocale()
+  const genders: { value: Gender; en: string; ar: string; icon: string }[] = [
+    { value: "male", en: "Male", ar: "رجل", icon: "👨" },
+    { value: "female", en: "Female", ar: "امرأة", icon: "👩" },
+  ]
   return (
     <StepFrame
       title={t(locale, "What should we call you?", "بماذا نناديك؟")}
@@ -352,6 +356,31 @@ function NameStep({
         className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3.5 text-base text-neutral-900 outline-none transition focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
         autoFocus
       />
+
+      <p className="mt-6 mb-2 text-sm font-semibold text-neutral-700">
+        {t(locale, "You are", "أنت")}
+      </p>
+      <div className="grid grid-cols-2 gap-3">
+        {genders.map((g) => {
+          const active = data.gender === g.value
+          return (
+            <button
+              key={g.value}
+              type="button"
+              onClick={() => update("gender", g.value)}
+              className={cn(
+                "flex items-center justify-center gap-2 rounded-2xl border-2 p-4 text-base font-semibold transition-all",
+                active
+                  ? "border-lime-500 bg-lime-50 text-lime-700 shadow-sm"
+                  : "border-neutral-200 bg-white text-neutral-700 hover:border-lime-300"
+              )}
+            >
+              <span className="text-2xl">{g.icon}</span>
+              {locale === "ar" ? g.ar : g.en}
+            </button>
+          )
+        })}
+      </div>
     </StepFrame>
   )
 }

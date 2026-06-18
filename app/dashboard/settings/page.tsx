@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Save, User as UserIcon, Target, ShieldCheck, Camera } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
-import { BodyAvatar } from "@/components/body-avatar"
+import { TransformationSlider } from "@/components/dashboard/transformation-slider"
 import { useApp } from "@/lib/store"
 import { analyzeUser, buildAvatarConfig, idealWeightKg } from "@/lib/analysis"
 import type { ActivityLevel, Gender, GoalType, User } from "@/lib/types"
@@ -191,10 +191,14 @@ export default function SettingsPage() {
             <div className="rounded-3xl border border-neutral-100 bg-white p-6">
               <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Your transformation", "تحوّلك")}</h2>
               <p className="mt-1 text-sm text-neutral-500">{t(locale, "This is you at the start, now, and at your goal weight.", "هذا أنت في البداية، والآن، وعند وزنك المستهدف.")}</p>
-              <div className="mt-6 grid grid-cols-3 gap-3 sm:gap-6">
-                <BodyStage gender={draft.gender} weightKg={draft.startWeightKg} heightCm={draft.heightCm} label={t(locale, "Start", "البداية")} value={`${draft.startWeightKg.toFixed(1)} ${t(locale, "kg", "كجم")}`} />
-                <BodyStage gender={draft.gender} weightKg={draft.currentWeightKg} heightCm={draft.heightCm} label={t(locale, "Now", "الآن")} value={`${draft.currentWeightKg.toFixed(1)} ${t(locale, "kg", "كجم")}`} highlight />
-                <BodyStage gender={draft.gender} weightKg={targetWeight} heightCm={draft.heightCm} label={t(locale, "Goal", "الهدف")} value={`${targetWeight.toFixed(1)} ${t(locale, "kg", "كجم")}`} />
+              <div className="mt-6">
+                <TransformationSlider
+                  gender={draft.gender}
+                  heightCm={draft.heightCm}
+                  startWeightKg={draft.startWeightKg}
+                  currentWeightKg={draft.currentWeightKg}
+                  goalWeightKg={targetWeight}
+                />
               </div>
             </div>
 
@@ -308,19 +312,6 @@ function RowAction({ label, hint, onClick }: { label: string; hint: string; onCl
   )
 }
 
-function BodyStage({ gender, weightKg, heightCm, label, value, highlight }: {
-  gender: "male" | "female"; weightKg: number; heightCm: number; label: string; value: string; highlight?: boolean
-}) {
-  return (
-    <div className={cn("flex flex-col items-center gap-2 rounded-2xl p-2 transition sm:gap-3 sm:p-4", highlight ? "bg-lime-50 ring-2 ring-lime-300" : "bg-neutral-50")}>
-      <BodyAvatar gender={gender} weightKg={weightKg} heightCm={heightCm} fullBody showLabel={false} className="w-full" />
-      <div className="text-center">
-        <p className={cn("text-xs font-semibold uppercase tracking-wider", highlight ? "text-lime-700" : "text-neutral-500")}>{label}</p>
-        <p className="mt-0.5 text-base font-bold text-neutral-900 sm:text-lg">{value}</p>
-      </div>
-    </div>
-  )
-}
 
 function Mini({ label, value }: { label: string; value: string }) {
   return (

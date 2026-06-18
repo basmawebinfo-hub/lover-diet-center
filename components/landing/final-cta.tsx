@@ -1,11 +1,15 @@
+'use client'
+
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
+import { useLocale, t } from '@/lib/locale'
 
 export function FinalCTA() {
+  const { locale } = useLocale()
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-lime-800 via-lime-900 to-lime-950 py-20 sm:py-28">
-      {/* Cross-hatch pattern — plus marks like screenshot */}
+      {/* Cross-hatch pattern */}
       <div
         className="absolute inset-0 opacity-[0.08]"
         style={{
@@ -21,32 +25,35 @@ export function FinalCTA() {
 
       <div className="relative mx-auto max-w-4xl px-4 text-center">
         <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/8 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white/90 backdrop-blur-sm">
-          Start Today
+          {t(locale, 'Start Today', 'ابدأ اليوم')}
         </span>
         <h2 className="mt-6 text-balance text-3xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-          Your transformation
-          <br />
-          starts with{' '}
-          <span className="text-orange-400">one message</span>
+          {locale === 'ar' ? (
+            <>تحوّلك يبدأ<br />برسالة{' '}<span className="text-orange-400">واحدة</span></>
+          ) : (
+            <>Your transformation<br />starts with{' '}<span className="text-orange-400">one message</span></>
+          )}
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-pretty text-base text-lime-100/70 sm:text-lg">
-          Book a free discovery call, get matched with a certified nutritionist
-          in under 24 hours, and walk away with a clear plan — no commitment,
-          no payment up front.
+          {t(
+            locale,
+            'Book a free discovery call, get matched with a certified nutritionist in under 24 hours, and walk away with a clear plan — no commitment, no payment up front.',
+            'احجز مكالمة تعريفية مجانية، ونوصّلك بأخصائي تغذية معتمد خلال أقل من 24 ساعة، لتخرج بخطة واضحة — بلا التزام، وبلا دفع مسبق.'
+          )}
         </p>
 
         <ul className="mx-auto mt-8 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-lime-50">
           <li className="flex items-center gap-2 rounded-full border border-white/8 bg-black/20 px-4 py-1.5 text-white/85 backdrop-blur-sm">
             <CheckCircle2 className="size-4 text-orange-400" />
-            Free 15-min discovery call
+            {t(locale, 'Free 15-min discovery call', 'مكالمة تعريفية مجانية 15 دقيقة')}
           </li>
           <li className="flex items-center gap-2 rounded-full border border-white/8 bg-black/20 px-4 py-1.5 text-white/85 backdrop-blur-sm">
             <CheckCircle2 className="size-4 text-orange-400" />
-            100% money-back guarantee
+            {t(locale, '100% money-back guarantee', 'ضمان استرداد المبلغ 100%')}
           </li>
           <li className="flex items-center gap-2 rounded-full border border-white/8 bg-black/20 px-4 py-1.5 text-white/85 backdrop-blur-sm">
             <CheckCircle2 className="size-4 text-orange-400" />
-            Arabic & English
+            {t(locale, 'Arabic & English', 'بالعربية والإنجليزية')}
           </li>
         </ul>
 
@@ -55,7 +62,7 @@ export function FinalCTA() {
             href="/sign-in?redirect=/onboarding"
             className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange-500 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-orange-900/20 transition-all hover:bg-orange-400 sm:w-auto"
           >
-            Build my plan
+            {t(locale, 'Build my plan', 'ابنِ خطتي')}
             <ArrowRight className="size-4 rtl:rotate-180" />
           </Link>
           <a
@@ -70,7 +77,7 @@ export function FinalCTA() {
               className="size-5"
               aria-hidden="true"
             />
-            Chat on WhatsApp
+            {t(locale, 'Chat on WhatsApp', 'تواصل عبر واتساب')}
           </a>
         </div>
       </div>

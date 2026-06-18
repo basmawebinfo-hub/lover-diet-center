@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation"
 import { Trash2, Minus, Plus, CreditCard, Check, ShoppingBag } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
+import type { Order } from "@/lib/types"
+import { useToast } from "@/components/ui/toast"
 import { createClient } from "@/lib/supabase/client"
 import { placeOrder } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
@@ -13,7 +15,8 @@ import { useLocale, t } from "@/lib/locale"
 export default function CartPage() {
   const router = useRouter()
   const { locale } = useLocale()
-  const { state, updateCartQty, removeFromCart, clearCart } = useApp()
+  const { state, updateCartQty, removeFromCart, clearCart, placeOrderLocal } = useApp()
+  const { notify } = useToast()
   const user = state.user
   const [checkedOut, setCheckedOut] = useState(false)
 
@@ -57,8 +60,25 @@ export default function CartPage() {
     } catch {
       // ignore — order still clears locally
     }
+    // Build a local order so it shows in "My Orders" (frontend-only for now)
+    const order: Order = {
+      id: `o_${Date.now()}`,
+      date: new Date().toISOString(),
+      items: cartItems.map((it) => ({
+        productId: it.product.id,
+        nameEn: it.product.nameEn,
+        nameAr: it.product.nameAr,
+        quantity: it.quantity,
+        price: it.product.price,
+      })),
+      subtotal,
+      shipping,
+      total,
+      status: "processing",
+    }
+    placeOrderLocal(order) // also clears the cart in the reducer
+    notify(t(locale, "Order placed successfully", "تم تأكيد طلبك بنجاح"), "success")
     setTimeout(() => {
-      clearCart()
       setCheckedOut(false)
     }, 2000)
   }

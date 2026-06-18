@@ -1,6 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
-import { Host_Grotesk, Cairo } from 'next/font/google'
+import { Host_Grotesk, Rubik } from 'next/font/google'
 import { ConditionalShell } from '@/components/conditional-shell'
 import { AppProvider } from '@/lib/store'
 import { LocaleProvider } from '@/lib/locale'
@@ -12,10 +12,10 @@ const hostGrotesk = Host_Grotesk({
   display: 'swap',
 })
 
-// Strong, professional Arabic typeface
-const cairo = Cairo({
+// Arabic + Latin typeface (Rubik — supports Arabic)
+const rubik = Rubik({
   subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700', '900'],
   variable: '--font-cairo',
   display: 'swap',
 })
@@ -83,7 +83,7 @@ export default function RootLayout({
       lang="en"
       dir="ltr"
       suppressHydrationWarning
-      className={`light-mode ${hostGrotesk.variable} ${cairo.variable}`}
+      className={`light-mode ${hostGrotesk.variable} ${rubik.variable}`}
     >
       <body className="font-sans antialiased text-neutral-900">
         <a

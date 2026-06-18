@@ -1,34 +1,9 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { WHATSAPP_NUMBER, socialLinks } from '@/lib/site'
-
-const NAV_COLS = [
-  {
-    title: 'Services',
-    links: [
-      { label: 'Nutrition Consultations', href: '/nutrition-consultations' },
-      { label: 'Healthy Meals',           href: '/healthy-meals' },
-      { label: 'Healthy Snacks',          href: '/healthy-snacks' },
-      { label: 'Body Sculpting',          href: '/body-sculpting' },
-    ],
-  },
-  {
-    title: 'Company',
-    links: [
-      { label: 'About Us',  href: '/about' },
-      { label: 'Contact',   href: '/contact' },
-      { label: 'FAQ',       href: '/#faq' },
-    ],
-  },
-  {
-    title: 'Account',
-    links: [
-      { label: 'Sign Up',   href: '/sign-up' },
-      { label: 'Sign In',   href: '/sign-in' },
-      { label: 'Dashboard', href: '/dashboard' },
-    ],
-  },
-]
+import { useLocale, t } from '@/lib/locale'
 
 const SOCIALS = [
   {
@@ -70,6 +45,36 @@ const SOCIALS = [
 ]
 
 export function FooterSimple() {
+  const { locale } = useLocale()
+
+  const NAV_COLS = [
+    {
+      title: t(locale, 'Services', 'الخدمات'),
+      links: [
+        { label: t(locale, 'Nutrition Consultations', 'الاستشارات الغذائية'), href: '/nutrition-consultations' },
+        { label: t(locale, 'Healthy Meals', 'الوجبات الصحية'),               href: '/healthy-meals' },
+        { label: t(locale, 'Healthy Snacks', 'السناكس الصحية'),              href: '/healthy-snacks' },
+        { label: t(locale, 'Body Sculpting', 'نحت الجسم'),                   href: '/body-sculpting' },
+      ],
+    },
+    {
+      title: t(locale, 'Company', 'الشركة'),
+      links: [
+        { label: t(locale, 'About Us', 'من نحن'),       href: '/about' },
+        { label: t(locale, 'Contact', 'تواصل معنا'),     href: '/contact' },
+        { label: t(locale, 'FAQ', 'الأسئلة الشائعة'),    href: '/#faq' },
+      ],
+    },
+    {
+      title: t(locale, 'Account', 'الحساب'),
+      links: [
+        { label: t(locale, 'Sign Up', 'إنشاء حساب'),     href: '/sign-up' },
+        { label: t(locale, 'Sign In', 'تسجيل الدخول'),   href: '/sign-in' },
+        { label: t(locale, 'Dashboard', 'لوحة التحكم'),  href: '/dashboard' },
+      ],
+    },
+  ]
+
   return (
     <footer className="border-t border-neutral-100 bg-neutral-950">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -94,7 +99,11 @@ export function FooterSimple() {
             </Link>
 
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-neutral-400">
-              Science-based nutrition, chef-prepared meals, and certified experts — all working together for your transformation.
+              {t(
+                locale,
+                'Science-based nutrition, chef-prepared meals, and certified experts — all working together for your transformation.',
+                'تغذية قائمة على العلم، ووجبات يحضّرها الطهاة، وخبراء معتمدون — يعملون معاً من أجل تحوّلك.'
+              )}
             </p>
 
             {/* Social icons */}
@@ -122,7 +131,7 @@ export function FooterSimple() {
               </h3>
               <ul className="space-y-3">
                 {col.links.map((link) => (
-                  <li key={link.label}>
+                  <li key={link.href}>
                     <Link
                       href={link.href}
                       className="text-sm text-neutral-400 transition-colors hover:text-white"
@@ -139,18 +148,18 @@ export function FooterSimple() {
         {/* Bottom bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-white/8 py-6 sm:flex-row">
           <p className="text-sm text-neutral-500">
-            © {new Date().getFullYear()} Lover Diet Center. All rights reserved.
+            © {new Date().getFullYear()} Lover Diet Center. {t(locale, 'All rights reserved.', 'جميع الحقوق محفوظة.')}
           </p>
           <div className="flex items-center gap-4 text-sm text-neutral-500">
             <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-lime-400">
-              WhatsApp
+              {t(locale, 'WhatsApp', 'واتساب')}
             </a>
             <span className="text-neutral-700">·</span>
             <a href="mailto:support@loverdiet.com" className="transition-colors hover:text-lime-400">
-              Email
+              {t(locale, 'Email', 'البريد الإلكتروني')}
             </a>
             <span className="text-neutral-700">·</span>
-            <span className="text-neutral-600">UAE</span>
+            <span className="text-neutral-600">{t(locale, 'UAE', 'الإمارات')}</span>
           </div>
         </div>
       </div>

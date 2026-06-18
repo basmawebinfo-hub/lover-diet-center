@@ -82,6 +82,29 @@ export type DoctorPlan = {
   waterLiters: number
 }
 
+export type OrderItem = {
+  productId: string
+  nameEn: string
+  nameAr: string
+  quantity: number
+  price: number
+}
+
+export type Order = {
+  id: string
+  date: string // ISO
+  items: OrderItem[]
+  subtotal: number
+  shipping: number
+  total: number
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
+}
+
+export type WaterLog = {
+  date: string // YYYY-MM-DD
+  liters: number
+}
+
 export type AnalysisResult = {
   bmi: number
   bmiCategory: "underweight" | "normal" | "overweight" | "obese"

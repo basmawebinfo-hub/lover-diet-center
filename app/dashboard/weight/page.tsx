@@ -9,9 +9,11 @@ import { useApp } from "@/lib/store"
 import { analyzeUser } from "@/lib/analysis"
 import type { WeightLog } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useLocale, t } from "@/lib/locale"
 
 export default function WeightPage() {
   const router = useRouter()
+  const { locale } = useLocale()
   const { state, logWeight } = useApp()
   const user = state.user
   const today = new Date().toISOString().slice(0, 10)
@@ -42,7 +44,7 @@ export default function WeightPage() {
     currentWeightKg: inputWeight,
     goal: user.goal,
     activityLevel: user.activityLevel,
-  }, "en")
+  }, locale)
 
   function save() {
     const w = Number(input)
@@ -63,8 +65,8 @@ export default function WeightPage() {
       <div className="mx-auto max-w-4xl space-y-6 pb-24 lg:pb-0">
 
         <header>
-          <h1 className="text-2xl font-bold text-neutral-900">Daily Weight</h1>
-          <p className="text-sm text-neutral-500 mt-1">Log your weight and watch your body transform</p>
+          <h1 className="text-2xl font-bold text-neutral-900">{t(locale, "Daily Weight", "الوزن اليومي")}</h1>
+          <p className="text-sm text-neutral-500 mt-1">{t(locale, "Log your weight and watch your body transform", "سجّل وزنك وشاهد جسمك يتحوّل")}</p>
         </header>
 
         {/* Main: Avatar + Input side by side */}
@@ -73,7 +75,7 @@ export default function WeightPage() {
           {/* Live avatar - updates as you type */}
           <div className="rounded-3xl border border-neutral-100 bg-white p-6 flex flex-col items-center gap-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-              Live Preview
+              {t(locale, "Live Preview", "معاينة مباشرة")}
             </p>
 
             <BodyAvatar
@@ -87,7 +89,7 @@ export default function WeightPage() {
             />
 
             <p className="text-center text-xs text-neutral-400">
-              BMI {analysis.bmi.toFixed(1)} · {analysis.bmiCategoryEn}
+              {t(locale,"BMI","مؤشر")} {analysis.bmi.toFixed(1)} · {locale === "ar" ? analysis.bmiCategoryAr : analysis.bmiCategoryEn}
             </p>
           </div>
 
@@ -95,7 +97,7 @@ export default function WeightPage() {
           <div className="rounded-3xl border border-neutral-100 bg-white p-6 flex flex-col gap-6">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-3">
-                Today — {new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+                {t(locale,"Today","اليوم")} — {new Date().toLocaleDateString(locale === "ar" ? "ar-AE" : "en-GB", { weekday: "long", day: "numeric", month: "long" })}
               </p>
 
               {/* Big number input */}
@@ -109,7 +111,7 @@ export default function WeightPage() {
                   max="300"
                   className="w-full text-5xl font-black text-neutral-900 border-b-2 border-lime-400 bg-transparent focus:outline-none focus:border-lime-600 pb-2"
                 />
-                <span className="text-2xl font-bold text-neutral-400 pb-2">kg</span>
+                <span className="text-2xl font-bold text-neutral-400 pb-2">{t(locale,"kg","كجم")}</span>
               </div>
 
               {/* Change indicator */}
@@ -119,7 +121,7 @@ export default function WeightPage() {
                   diff < 0 ? "bg-lime-50 text-lime-700" : "bg-orange-50 text-orange-600"
                 )}>
                   {diff < 0 ? <TrendingDown className="size-4" /> : <TrendingUp className="size-4" />}
-                  {diff < 0 ? `${Math.abs(diff).toFixed(1)} kg less than last log` : `${diff.toFixed(1)} kg more than last log`}
+                  {diff < 0 ? t(locale, `${Math.abs(diff).toFixed(1)} kg less than last log`, `${Math.abs(diff).toFixed(1)} كجم أقل من آخر تسجيل`) : t(locale, `${diff.toFixed(1)} kg more than last log`, `${diff.toFixed(1)} كجم أكثر من آخر تسجيل`)}
                 </div>
               )}
             </div>
@@ -149,28 +151,28 @@ export default function WeightPage() {
               )}
             >
               {savedFor === today ? (
-                <><Check className="size-5" /> Saved for today</>
+                <><Check className="size-5" /> {t(locale, "Saved for today", "تم الحفظ لليوم")}</>
               ) : (
-                <><Save className="size-5" /> Save Weight</>
+                <><Save className="size-5" /> {t(locale, "Save Weight", "حفظ الوزن")}</>
               )}
             </button>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-3 pt-2 border-t border-neutral-100">
               <div className="text-center">
-                <p className="text-xs text-neutral-400">Start</p>
-                <p className="text-lg font-bold text-neutral-700">{user.startWeightKg} kg</p>
+                <p className="text-xs text-neutral-400">{t(locale,"Start","البداية")}</p>
+                <p className="text-lg font-bold text-neutral-700">{user.startWeightKg} {t(locale,"kg","كجم")}</p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-neutral-400">Lost</p>
+                <p className="text-xs text-neutral-400">{t(locale,"Lost","المفقود")}</p>
                 <p className="text-lg font-bold text-lime-600">
-                  {Math.max(0, user.startWeightKg - inputWeight).toFixed(1)} kg
+                  {Math.max(0, user.startWeightKg - inputWeight).toFixed(1)} {t(locale,"kg","كجم")}
                 </p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-neutral-400">To go</p>
+                <p className="text-xs text-neutral-400">{t(locale,"To go","المتبقي")}</p>
                 <p className="text-lg font-bold text-neutral-700">
-                  {Math.max(0, inputWeight - user.targetWeightKg).toFixed(1)} kg
+                  {Math.max(0, inputWeight - user.targetWeightKg).toFixed(1)} {t(locale,"kg","كجم")}
                 </p>
               </div>
             </div>
@@ -180,7 +182,7 @@ export default function WeightPage() {
         {/* History */}
         {state.weightLogs.length > 0 && (
           <section className="rounded-3xl border border-neutral-100 bg-white p-6">
-            <h2 className="text-lg font-bold text-neutral-900 mb-4">Weight History</h2>
+            <h2 className="text-lg font-bold text-neutral-900 mb-4">{t(locale, "Weight History", "سجل الوزن")}</h2>
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {[...state.weightLogs]
                 .sort((a, b) => (a.date > b.date ? -1 : 1))
@@ -190,15 +192,15 @@ export default function WeightPage() {
                   return (
                     <div key={log.id} className="flex items-center justify-between py-2 border-b border-neutral-50 last:border-0">
                       <span className="text-sm text-neutral-500">
-                        {new Date(log.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+                        {new Date(log.date).toLocaleDateString(locale === "ar" ? "ar-AE" : "en-GB", { weekday: "short", day: "numeric", month: "short" })}
                       </span>
                       <div className="flex items-center gap-3">
                         {change !== 0 && (
                           <span className={cn("text-xs font-medium", change < 0 ? "text-lime-600" : "text-orange-500")}>
-                            {change < 0 ? "" : "+"}{change.toFixed(1)} kg
+                            {change < 0 ? "" : "+"}{change.toFixed(1)} {t(locale,"kg","كجم")}
                           </span>
                         )}
-                        <span className="text-base font-bold text-neutral-900">{log.weightKg} kg</span>
+                        <span className="text-base font-bold text-neutral-900">{log.weightKg} {t(locale,"kg","كجم")}</span>
                       </div>
                     </div>
                   )

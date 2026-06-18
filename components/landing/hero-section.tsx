@@ -96,7 +96,7 @@ export function HeroSection() {
                 ))}
               </div>
               <div>
-                <p className="text-xs font-bold text-neutral-900">Our Happy Customer</p>
+                <p className="text-xs font-bold text-neutral-900">{t(locale, 'Our Happy Customer', 'عملاؤنا السعداء')}</p>
                 <p className="flex items-center gap-1 text-[11px] text-neutral-500">
                   <Star className="size-3 fill-amber-400 text-amber-400" />
                   <span className="font-bold text-amber-500">4.9</span> (2,000+ Reviews)

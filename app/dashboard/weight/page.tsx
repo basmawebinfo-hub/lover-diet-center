@@ -86,10 +86,11 @@ export default function WeightPage() {
               weightKg={inputWeight}
               heightCm={user.heightCm}
               gender={user.gender === "female" ? "female" : "male"}
-              size="lg"
+              fullBody
               showLabel
               showBMI
               previousWeightKg={user.startWeightKg}
+              className="w-full max-w-[240px]"
             />
 
             <p className="text-center text-xs text-neutral-400">

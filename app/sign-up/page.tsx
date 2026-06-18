@@ -124,7 +124,7 @@ export default function SignUpPage() {
 
           {/* Subtext */}
           <p className="mt-4 text-lg text-white/70">
-            Sign in to access your personalized nutrition plan.
+            {t(locale, 'Create your account to start your personalized nutrition plan.', 'أنشئ حسابك لتبدأ خطتك الغذائية المخصصة.')}
           </p>
 
           {/* Trust badges */}

@@ -16,9 +16,11 @@ import type {
   DoctorPlan,
   Locale,
   Meal,
+  Order,
   Product,
   Session,
   User,
+  WaterLog,
   WeightLog,
 } from "./types"
 import { createClient } from "@/lib/supabase/client"
@@ -27,9 +29,6 @@ import {
   mockDoctorPlan,
   mockMeals,
   mockProducts,
-  mockSessions,
-  mockUser,
-  mockWeightLogs,
 } from "./mock-data"
 
 type AppState = {
@@ -41,6 +40,8 @@ type AppState = {
   sessions: Session[]
   doctorPlan: DoctorPlan | null
   cart: CartItem[]
+  orders: Order[]
+  waterLogs: WaterLog[]
   locale: Locale
   hasSeenIntro: boolean
 }
@@ -58,6 +59,9 @@ type Action =
   | { type: "UPDATE_AVATAR"; payload: User["avatarConfig"] }
   | { type: "UPDATE_PLAN"; payload: DoctorPlan }
   | { type: "ADD_SESSION"; payload: Session }
+  | { type: "UPDATE_SESSION"; payload: { id: string; changes: Partial<Session> } }
+  | { type: "PLACE_ORDER"; payload: Order }
+  | { type: "LOG_WATER"; payload: WaterLog }
   | { type: "SYNC_FROM_DB"; payload: { sessions?: Session[]; weightLogs?: WeightLog[] } }
 
 const STORAGE_KEY = "loversdc:state:v1"
@@ -71,6 +75,8 @@ const initialState: AppState = {
   sessions: [],
   doctorPlan: null,
   cart: [],
+  orders: [],
+  waterLogs: [],
   locale: "en",
   hasSeenIntro: false,
 }
@@ -134,6 +140,19 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, doctorPlan: action.payload }
     case "ADD_SESSION":
       return { ...state, sessions: [action.payload, ...state.sessions] }
+    case "UPDATE_SESSION":
+      return {
+        ...state,
+        sessions: state.sessions.map((sn) =>
+          sn.id === action.payload.id ? { ...sn, ...action.payload.changes } : sn
+        ),
+      }
+    case "PLACE_ORDER":
+      return { ...state, orders: [action.payload, ...state.orders], cart: [] }
+    case "LOG_WATER": {
+      const filtered = state.waterLogs.filter((w) => w.date !== action.payload.date)
+      return { ...state, waterLogs: [action.payload, ...filtered] }
+    }
     case "SYNC_FROM_DB":
       return {
         ...state,
@@ -158,6 +177,9 @@ type AppContextValue = {
   updateAvatar: (cfg: User["avatarConfig"]) => void
   updatePlan: (plan: DoctorPlan) => void
   addSession: (s: Session) => void
+  updateSession: (id: string, changes: Partial<Session>) => void
+  placeOrderLocal: (order: Order) => void
+  logWater: (date: string, liters: number) => void
   resetOnboarding: () => void
 }
 
@@ -189,10 +211,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           payload: {
             ...initialState,
             user: parsed,
-            weightLogs: mockWeightLogs,
+            // Real user starts with a clean slate — no fake logs/sessions.
+            // meals/products are a shared catalog; doctorPlan is assigned by the clinic.
             meals: mockMeals,
             products: mockProducts,
-            sessions: mockSessions,
             doctorPlan: mockDoctorPlan,
           },
         })
@@ -201,19 +223,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore
     }
-    // First-time load — seed with mock data so the dashboard has something to show
+    // First-time visitor — NO fake user. They go through onboarding.
+    // Only the shared catalog (meals/products) is preloaded so browsing works.
     dispatch({
       type: "HYDRATE",
       payload: {
-        user: mockUser,
-        weightLogs: mockWeightLogs,
+        ...initialState,
+        user: null,
         meals: mockMeals,
         products: mockProducts,
-        sessions: mockSessions,
         doctorPlan: mockDoctorPlan,
-        cart: [],
-        locale: "en",
-        hasSeenIntro: false,
       },
     })
   }, [])
@@ -301,6 +320,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     []
   )
+  const updateSession = useCallback(
+    (id: string, changes: Partial<Session>) =>
+      dispatch({ type: "UPDATE_SESSION", payload: { id, changes } }),
+    []
+  )
+  const placeOrderLocal = useCallback(
+    (order: Order) => dispatch({ type: "PLACE_ORDER", payload: order }),
+    []
+  )
+  const logWater = useCallback(
+    (date: string, liters: number) => dispatch({ type: "LOG_WATER", payload: { date, liters } }),
+    []
+  )
   const resetOnboarding = useCallback(() => {
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(STORAGE_KEY)
@@ -308,15 +340,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     dispatch({
       type: "HYDRATE",
       payload: {
+        ...initialState,
         user: null,
-        weightLogs: [],
         meals: mockMeals,
         products: mockProducts,
-        sessions: mockSessions,
         doctorPlan: mockDoctorPlan,
-        cart: [],
-        locale: "en",
-        hasSeenIntro: false,
       },
     })
   }, [])
@@ -335,6 +363,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateAvatar,
       updatePlan,
       addSession,
+      updateSession,
+      placeOrderLocal,
+      logWater,
       resetOnboarding,
     }),
     [
@@ -350,6 +381,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateAvatar,
       updatePlan,
       addSession,
+      updateSession,
+      placeOrderLocal,
+      logWater,
       resetOnboarding,
     ]
   )

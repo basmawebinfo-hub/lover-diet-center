@@ -126,7 +126,7 @@ export default function OnboardingPage() {
 
         <div className="flex-1 px-6 py-8">
           <div className="mx-auto max-w-md">
-            {step === 1 && <NameStep data={data} update={update} />}
+            {step === 1 && <NameStep data={data} update={(k, v) => update(k, v as never)} />}
             {step === 2 && <AgeStep data={data} update={update} />}
             {step === 3 && <HeightStep data={data} update={update} />}
             {step === 4 && <WeightStep data={data} update={update} />}
@@ -336,7 +336,7 @@ function NameStep({
   update,
 }: {
   data: { name: string; gender: Gender }
-  update: <K extends "name" | "gender">(k: K, v: { name: string; gender: Gender }[K]) => void
+  update: (k: "name" | "gender", v: string) => void
 }) {
   const { locale } = useLocale()
   const genders: { value: Gender; en: string; ar: string; icon: string }[] = [

@@ -44,6 +44,8 @@ type BodyAvatarProps = {
   showBMI?: boolean
   className?: string
   previousWeightKg?: number
+  /** When true, render the full standing body (3:4, no crop) instead of a square. */
+  fullBody?: boolean
 }
 
 const SIZE_MAP = {
@@ -62,6 +64,7 @@ export function BodyAvatar({
   showBMI = false,
   className,
   previousWeightKg,
+  fullBody = false,
 }: BodyAvatarProps) {
   const { locale } = useLocale()
   const current = useMemo(
@@ -84,19 +87,23 @@ export function BodyAvatar({
       {/* Avatar image with smooth transition */}
       <div
         className={cn(
-          "relative rounded-3xl overflow-hidden bg-gradient-to-b from-neutral-50 to-neutral-100 shadow-sm",
-          cls,
+          "relative overflow-hidden bg-gradient-to-b from-neutral-50 to-white",
+          fullBody ? "w-full rounded-2xl" : cn("rounded-3xl shadow-sm", cls),
           improved && "ring-2 ring-lime-400 ring-offset-2"
         )}
+        style={fullBody ? { aspectRatio: "3 / 4" } : undefined}
       >
         <Image
           key={current.stage}
           src={`/body-stages/${current.gender}/${current.stage}.png`}
           alt={`Body stage: ${current.label}`}
           fill
-          className="object-cover object-top transition-all duration-700 ease-in-out"
+          className={cn(
+            "transition-all duration-700 ease-in-out",
+            fullBody ? "object-contain object-bottom" : "object-cover object-top"
+          )}
           priority
-          sizes={`${px}px`}
+          sizes={fullBody ? "(max-width:640px) 33vw, 220px" : `${px}px`}
         />
 
         {/* Improvement badge */}

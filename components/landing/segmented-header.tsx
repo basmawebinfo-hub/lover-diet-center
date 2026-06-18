@@ -15,6 +15,7 @@ const HIDE_ON = ['/sign-in', '/sign-up', '/onboarding']
 
 // Main nav — direct links to real pages
 const NAV_LINKS = [
+  { id: 'about',   label: 'About',   href: '/about' },
   {
     id: 'services',
     label: 'Services',
@@ -26,17 +27,16 @@ const NAV_LINKS = [
       { label: 'Training Courses',        href: '/training-courses',        desc: 'Courses with certificates, online & in-person' },
     ],
   },
-  { id: 'about',   label: 'About',   href: '/about' },
   { id: 'contact', label: 'Contact', href: '/contact' },
 ]
 
 const MOBILE_LINKS = [
+  { label: 'About',                   href: '/about' },
   { label: 'Nutrition Consultations', href: '/nutrition-consultations' },
   { label: 'Healthy Meals',           href: '/healthy-meals' },
   { label: 'Healthy Snacks',          href: '/healthy-snacks' },
   { label: 'Body Sculpting',          href: '/body-sculpting' },
   { label: 'Training Courses',        href: '/training-courses' },
-  { label: 'About',                   href: '/about' },
   { label: 'Contact',                 href: '/contact' },
 ]
 

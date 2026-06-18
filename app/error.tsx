@@ -1,9 +1,8 @@
-'use client'
-
-'use client'
+"use client"
 
 import { useEffect } from 'react'
 import { Leaf, RefreshCcw } from 'lucide-react'
+import { useLocale, t } from '@/lib/locale'
 
 export default function Error({
   error,
@@ -12,6 +11,7 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const { locale } = useLocale()
   useEffect(() => {
     console.error(error)
   }, [error])
@@ -21,16 +21,16 @@ export default function Error({
       <span className="flex size-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
         <Leaf className="size-8" />
       </span>
-      <h1 className="mt-6 text-3xl font-bold tracking-tight text-neutral-900">Something went wrong</h1>
+      <h1 className="mt-6 text-3xl font-bold tracking-tight text-neutral-900">{t(locale, 'Something went wrong', 'حدث خطأ ما')}</h1>
       <p className="mt-3 max-w-md text-pretty text-neutral-500">
-        An unexpected error occurred. Please try again or contact support if the problem persists.
+        {t(locale, 'An unexpected error occurred. Please try again or contact support if the problem persists.', 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى أو التواصل مع الدعم إذا استمرت المشكلة.')}
       </p>
       <button
         onClick={reset}
         className="mt-8 flex items-center gap-2 rounded-full bg-orange-500 px-6 py-3 font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-lg"
       >
         <RefreshCcw className="size-4" />
-        Try again
+        {t(locale, 'Try again', 'حاول مرة أخرى')}
       </button>
     </div>
   )

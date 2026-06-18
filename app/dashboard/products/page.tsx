@@ -9,17 +9,19 @@ import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shel
 import { useApp } from "@/lib/store"
 import type { Product } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useLocale, t } from "@/lib/locale"
 
 const CATEGORIES = [
-  { id: "all", label: "All" },
-  { id: "snack", label: "Snacks" },
-  { id: "drink", label: "Drinks" },
-  { id: "supplement", label: "Supplements" },
-  { id: "meal", label: "Meals" },
+  { id: "all", label: "All", labelAr: "الكل" },
+  { id: "snack", label: "Snacks", labelAr: "سناكس" },
+  { id: "drink", label: "Drinks", labelAr: "مشروبات" },
+  { id: "supplement", label: "Supplements", labelAr: "مكمّلات" },
+  { id: "meal", label: "Meals", labelAr: "وجبات" },
 ] as const
 
 export default function ProductsPage() {
   const router = useRouter()
+  const { locale } = useLocale()
   const { state, addToCart } = useApp()
   const user = state.user
   const [search, setSearch] = useState("")
@@ -51,9 +53,9 @@ export default function ProductsPage() {
       <MobileNav />
       <div className="mx-auto max-w-5xl space-y-6 pb-24 lg:pb-0">
         <header>
-          <h1 className="text-3xl font-bold text-neutral-900">Healthy Products</h1>
+          <h1 className="text-3xl font-bold text-neutral-900">{t(locale, "Healthy Products", "المنتجات الصحية")}</h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Curated by our nutritionists. Add to cart and we'll deliver to your door.
+            {t(locale, "Curated by our nutritionists. Add to cart and we'll deliver to your door.", "مختارة من أخصائيي التغذية لدينا. أضف إلى السلة وسنوصلها إلى بابك.")}
           </p>
         </header>
 
@@ -65,7 +67,7 @@ export default function ProductsPage() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search products…"
+              placeholder={t(locale, "Search products…", "ابحث عن المنتجات…")}
               className="w-full rounded-xl border border-neutral-200 bg-white py-2.5 ps-10 pe-4 text-sm text-neutral-900 outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
             />
           </div>
@@ -83,7 +85,7 @@ export default function ProductsPage() {
                     : "border border-neutral-200 bg-white text-neutral-600 hover:border-lime-300"
                 )}
               >
-                {c.label}
+                {locale === "ar" ? c.labelAr : c.label}
               </button>
             ))}
           </div>
@@ -100,7 +102,7 @@ export default function ProductsPage() {
           ))}
           {filtered.length === 0 && (
             <p className="col-span-full rounded-2xl border border-dashed border-neutral-200 bg-white p-10 text-center text-sm text-neutral-500">
-              No products match your search.
+              {t(locale, "No products match your search.", "لا توجد منتجات تطابق بحثك.")}
             </p>
           )}
         </div>
@@ -116,6 +118,7 @@ function ProductCard({
   product: Product
   onAdd: () => void
 }) {
+  const { locale } = useLocale()
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white transition hover:border-lime-300 hover:shadow-md">
       {/* Clickable image -> details */}
@@ -134,15 +137,14 @@ function ProductCard({
 
       <div className="flex flex-1 flex-col p-4">
         <Link href={`/dashboard/products/${product.id}`} className="block">
-          <h3 className="font-semibold text-neutral-900 transition-colors group-hover:text-lime-700">{product.nameEn}</h3>
-          <p className="mt-0.5 font-arabic text-sm text-neutral-500" dir="rtl">{product.nameAr}</p>
-          <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{product.descriptionEn}</p>
+          <h3 className="font-semibold text-neutral-900 transition-colors group-hover:text-lime-700">{locale === "ar" ? product.nameAr : product.nameEn}</h3>
+          <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{locale === "ar" ? product.descriptionAr : product.descriptionEn}</p>
         </Link>
 
         <div className="mt-auto flex items-center justify-between pt-4">
           <span className="text-xl font-bold text-neutral-900">
             {product.price}{" "}
-            <span className="text-xs font-normal text-neutral-500">AED</span>
+            <span className="text-xs font-normal text-neutral-500">{t(locale,"AED","درهم")}</span>
           </span>
           <button
             type="button"
@@ -156,14 +158,14 @@ function ProductCard({
             )}
           >
             <ShoppingCart className="size-3.5" />
-            {product.inStock ? "Buy Now" : "Sold out"}
+            {product.inStock ? t(locale,"Buy Now","اشترِ الآن") : t(locale,"Sold out","نفد المخزون")}
           </button>
         </div>
         <Link
           href={`/dashboard/products/${product.id}`}
           className="mt-2 text-center text-xs font-semibold text-lime-700 hover:underline"
         >
-          View details →
+          {t(locale,"View details","عرض التفاصيل")} →
         </Link>
       </div>
     </div>

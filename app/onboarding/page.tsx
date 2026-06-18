@@ -7,6 +7,7 @@ import { analyzeUser, buildAvatarConfig, calculateBMI } from "@/lib/analysis"
 import type { ActivityLevel, Gender, GoalType, User } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
+import { useLocale, t } from "@/lib/locale"
 
 const TOTAL_STEPS = 8
 
@@ -27,6 +28,7 @@ const activityCopy: Record<ActivityLevel, { en: string; ar: string; emoji: strin
 
 export default function OnboardingPage() {
   const { setUser, markIntroSeen } = useApp()
+  const { locale } = useLocale()
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [data, setData] = useState({
@@ -107,7 +109,7 @@ export default function OnboardingPage() {
       <div className="flex min-h-screen flex-col bg-white">
         <div className="border-b border-neutral-100 px-6 pt-8 pb-6">
           <p className="mb-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
-            Step {step} of {TOTAL_STEPS}
+            {t(locale, `Step ${step} of ${TOTAL_STEPS}`, `الخطوة ${step} من ${TOTAL_STEPS}`)}
           </p>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
             <div
@@ -146,8 +148,8 @@ export default function OnboardingPage() {
                   step === 1 && "invisible"
                 )}
               >
-                <ArrowLeft className="size-4" />
-                Back
+                <ArrowLeft className="size-4 rtl:rotate-180" />
+                {t(locale, "Back", "رجوع")}
               </button>
               <button
                 type="button"
@@ -157,13 +159,13 @@ export default function OnboardingPage() {
               >
                 {step === 7 ? (
                   <>
-                    See My Plan →
+                    {t(locale, "See My Plan", "اعرض خطتي")}
                     <Sparkles className="size-4" />
                   </>
                 ) : (
                   <>
-                    Continue
-                    <ArrowRight className="size-4" />
+                    {t(locale, "Continue", "متابعة")}
+                    <ArrowRight className="size-4 rtl:rotate-180" />
                   </>
                 )}
               </button>
@@ -177,6 +179,7 @@ export default function OnboardingPage() {
 
 function AIAnalysisStep({ data }: { data: any }) {
   const router = useRouter()
+  const { locale } = useLocale()
   const { setUser, markIntroSeen } = useApp()
 
   useEffect(() => {
@@ -221,9 +224,9 @@ function AIAnalysisStep({ data }: { data: any }) {
         <div className="absolute -inset-4 rounded-full bg-lime-400/20 blur-xl animate-pulse" />
         <Sparkles className="relative mx-auto h-16 w-16 text-lime-600 animate-bounce" />
       </div>
-      <h2 className="text-2xl font-bold text-neutral-900">AI Analysis</h2>
+      <h2 className="text-2xl font-bold text-neutral-900">{t(locale, "AI Analysis", "تحليل بالذكاء الاصطناعي")}</h2>
       <p className="mt-2 text-sm text-neutral-500">
-        Computing your personalized diet plan...
+        {t(locale, "Computing your personalized diet plan...", "نحسب خطتك الغذائية المخصصة...")}
       </p>
       <div className="mt-6 w-full max-w-xs h-2 rounded-full bg-lime-100 overflow-hidden">
         <div className="h-full bg-lime-500 animate-pulse rounded-full" style={{ width: '60%' }} />
@@ -241,6 +244,7 @@ function PreviewPanel({
   bmi: number
   step: number
 }) {
+  const { locale } = useLocale()
   const analysis = useMemo(
     () =>
       analyzeUser(
@@ -253,9 +257,9 @@ function PreviewPanel({
           goal: data.goal,
           activityLevel: data.activity,
         },
-        "en"
+        locale
       ),
-    [data]
+    [data, locale]
   )
 
   return (
@@ -271,30 +275,30 @@ function PreviewPanel({
       <div className="relative z-10 flex w-full max-w-sm flex-col">
         <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white/80 backdrop-blur-sm">
           <Sparkles className="size-3.5" />
-          LIVE PREVIEW
+          {t(locale, "LIVE PREVIEW", "معاينة مباشرة")}
         </div>
         <h2 className="text-2xl font-bold leading-tight">
-          {data.name ? `Hello, ${data.name}` : "Your profile"}
+          {data.name ? t(locale, `Hello, ${data.name}`, `مرحباً، ${data.name}`) : t(locale, "Your profile", "ملفك الشخصي")}
         </h2>
         <p className="mt-2 text-sm text-white/70">
-          As you fill in your details, we calculate your BMI and tailor the plan.
+          {t(locale, "As you fill in your details, we calculate your BMI and tailor the plan.", "بينما تُدخل بياناتك، نحسب مؤشر كتلة جسمك ونصمّم الخطة لك.")}
         </p>
 
         <div className="mt-8 grid grid-cols-2 gap-3 text-sm">
-          <Stat label="Height" value={`${data.heightCm} cm`} />
-          <Stat label="Weight" value={`${data.weightKg} kg`} />
-          <Stat label="BMI" value={bmi > 0 ? bmi.toFixed(1) : "—"} />
-          <Stat label="Goal" value={goalCopy[data.goal].en} />
+          <Stat label={t(locale, "Height", "الطول")} value={`${data.heightCm} ${t(locale, "cm", "سم")}`} />
+          <Stat label={t(locale, "Weight", "الوزن")} value={`${data.weightKg} ${t(locale, "kg", "كجم")}`} />
+          <Stat label={t(locale, "BMI", "مؤشر الكتلة")} value={bmi > 0 ? bmi.toFixed(1) : "—"} />
+          <Stat label={t(locale, "Goal", "الهدف")} value={locale === "ar" ? goalCopy[data.goal].ar : goalCopy[data.goal].en} />
         </div>
 
         {step >= 5 && (
           <div className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-4 text-sm">
-            <p className="font-semibold text-lime-200">AI Analysis</p>
-            <p className="mt-1 text-white/80 leading-relaxed">{analysis.summaryEn}</p>
+            <p className="font-semibold text-lime-200">{t(locale, "AI Analysis", "تحليل بالذكاء الاصطناعي")}</p>
+            <p className="mt-1 text-white/80 leading-relaxed">{locale === "ar" ? analysis.summaryAr : analysis.summaryEn}</p>
             <div className="mt-3 flex items-center justify-between text-xs text-white/60">
-              <span>Daily target</span>
+              <span>{t(locale, "Daily target", "الهدف اليومي")}</span>
               <span className="font-semibold text-white">
-                {analysis.recommendedDailyCalories} kcal
+                {analysis.recommendedDailyCalories} {t(locale, "kcal", "سعرة")}
               </span>
             </div>
           </div>
@@ -334,16 +338,17 @@ function NameStep({
   data: { name: string }
   update: <K extends "name">(k: K, v: (typeof data)[K]) => void
 }) {
+  const { locale } = useLocale()
   return (
     <StepFrame
-      title="What should we call you?"
-      subtitle="We'll use this across your dashboard and reminders."
+      title={t(locale, "What should we call you?", "بماذا نناديك؟")}
+      subtitle={t(locale, "We'll use this across your dashboard and reminders.", "سنستخدمه في لوحة التحكم والتذكيرات.")}
     >
       <input
         type="text"
         value={data.name}
         onChange={(e) => update("name", e.target.value)}
-        placeholder="e.g. Ahmed Ahmed"
+        placeholder={t(locale, "e.g. Ahmed Ahmed", "مثال: أحمد أحمد")}
         className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3.5 text-base text-neutral-900 outline-none transition focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
         autoFocus
       />
@@ -358,10 +363,11 @@ function AgeStep({
   data: { age: number }
   update: <K extends "age">(k: K, v: (typeof data)[K]) => void
 }) {
+  const { locale } = useLocale()
   return (
     <StepFrame
-      title="How old are you?"
-      subtitle="Your metabolism changes with age, so this matters for calorie targets."
+      title={t(locale, "How old are you?", "كم عمرك؟")}
+      subtitle={t(locale, "Your metabolism changes with age, so this matters for calorie targets.", "يتغيّر الأيض مع العمر، لذا يهمّنا هذا لتحديد السعرات.")}
     >
       <ValueSlider
         value={data.age}
@@ -369,8 +375,7 @@ function AgeStep({
         min={12}
         max={100}
         step={1}
-        unit="years"
-        unitAr="سنة"
+        unit={t(locale, "years", "سنة")}
       />
     </StepFrame>
   )
@@ -383,10 +388,11 @@ function HeightStep({
   data: { heightCm: number }
   update: <K extends "heightCm">(k: K, v: (typeof data)[K]) => void
 }) {
+  const { locale } = useLocale()
   return (
     <StepFrame
-      title="What's your height?"
-      subtitle="Used to compute your BMI and ideal weight range."
+      title={t(locale, "What's your height?", "كم طولك؟")}
+      subtitle={t(locale, "Used to compute your BMI and ideal weight range.", "يُستخدم لحساب مؤشر كتلة جسمك ونطاق وزنك المثالي.")}
     >
       <ValueSlider
         value={data.heightCm}
@@ -394,8 +400,7 @@ function HeightStep({
         min={120}
         max={230}
         step={1}
-        unit="cm"
-        unitAr="سم"
+        unit={t(locale, "cm", "سم")}
       />
     </StepFrame>
   )
@@ -408,10 +413,11 @@ function WeightStep({
   data: { weightKg: number }
   update: <K extends "weightKg">(k: K, v: (typeof data)[K]) => void
 }) {
+  const { locale } = useLocale()
   return (
     <StepFrame
-      title="What's your current weight?"
-      subtitle="You can log a new weight every day from your dashboard."
+      title={t(locale, "What's your current weight?", "كم وزنك الحالي؟")}
+      subtitle={t(locale, "You can log a new weight every day from your dashboard.", "يمكنك تسجيل وزن جديد كل يوم من لوحة التحكم.")}
     >
       <ValueSlider
         value={data.weightKg}
@@ -419,8 +425,7 @@ function WeightStep({
         min={30}
         max={250}
         step={0.5}
-        unit="kg"
-        unitAr="كجم"
+        unit={t(locale, "kg", "كجم")}
       />
     </StepFrame>
   )
@@ -433,10 +438,11 @@ function GoalStep({
   data: { goal: GoalType }
   update: <K extends "goal">(k: K, v: (typeof data)[K]) => void
 }) {
+  const { locale } = useLocale()
   return (
     <StepFrame
-      title="What's your main goal?"
-      subtitle="Your plan, meals, and timeline will be built around this."
+      title={t(locale, "What's your main goal?", "ما هدفك الأساسي؟")}
+      subtitle={t(locale, "Your plan, meals, and timeline will be built around this.", "ستُبنى خطتك ووجباتك وجدولك الزمني حول هذا الهدف.")}
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {(Object.keys(goalCopy) as GoalType[]).map((g) => {
@@ -455,8 +461,7 @@ function GoalStep({
             >
               <span className="text-2xl">{goalCopy[g].icon}</span>
               <div className="flex-1">
-                <p className="font-semibold text-neutral-900">{goalCopy[g].en}</p>
-                <p className="text-xs text-neutral-500">{goalCopy[g].ar}</p>
+                <p className="font-semibold text-neutral-900">{locale === "ar" ? goalCopy[g].ar : goalCopy[g].en}</p>
               </div>
               {active && (
                 <Check className="size-5 text-lime-600" />
@@ -476,10 +481,11 @@ function ActivityStep({
   data: { activity: ActivityLevel }
   update: <K extends "activity">(k: K, v: (typeof data)[K]) => void
 }) {
+  const { locale } = useLocale()
   return (
     <StepFrame
-      title="How active are you normally?"
-      subtitle="Honest answer = better calorie and protein target."
+      title={t(locale, "How active are you normally?", "ما مستوى نشاطك عادةً؟")}
+      subtitle={t(locale, "Honest answer = better calorie and protein target.", "إجابة صادقة = هدف أدق للسعرات والبروتين.")}
     >
       <div className="space-y-2">
         {(Object.keys(activityCopy) as ActivityLevel[]).map((a) => {
@@ -498,8 +504,7 @@ function ActivityStep({
             >
               <span className="text-xl">{activityCopy[a].emoji}</span>
               <div className="flex-1">
-                <p className="font-semibold text-neutral-900">{activityCopy[a].en}</p>
-                <p className="text-xs text-neutral-500">{activityCopy[a].ar}</p>
+                <p className="font-semibold text-neutral-900">{locale === "ar" ? activityCopy[a].ar : activityCopy[a].en}</p>
               </div>
               {active && <Check className="size-5 text-lime-600" />}
             </button>
@@ -517,6 +522,7 @@ function ReviewStep({
   data: { name: string; age: number; gender: Gender; heightCm: number; weightKg: number; goal: GoalType; activity: ActivityLevel }
   bmi: number
 }) {
+  const { locale } = useLocale()
   const analysis = useMemo(
     () =>
       analyzeUser(
@@ -529,34 +535,34 @@ function ReviewStep({
           goal: data.goal,
           activityLevel: data.activity,
         },
-        "en"
+        locale
       ),
-    [data]
+    [data, locale]
   )
   return (
     <StepFrame
-      title="Ready to meet your future self?"
-      subtitle="Here's a quick summary of what we computed."
+      title={t(locale, "Ready to meet your future self?", "جاهز لتقابل نسختك المستقبلية؟")}
+      subtitle={t(locale, "Here's a quick summary of what we computed.", "إليك ملخصاً سريعاً لما حسبناه.")}
     >
       <div className="rounded-2xl border border-lime-100 bg-lime-50/50 p-4">
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <Row label="Name" value={data.name} />
-          <Row label="BMI" value={bmi.toFixed(1)} />
-          <Row label="Category" value={analysis.bmiCategoryEn} />
-          <Row label="Daily target" value={`${analysis.recommendedDailyCalories} kcal`} />
+          <Row label={t(locale, "Name", "الاسم")} value={data.name} />
+          <Row label={t(locale, "BMI", "مؤشر الكتلة")} value={bmi.toFixed(1)} />
+          <Row label={t(locale, "Category", "التصنيف")} value={locale === "ar" ? analysis.bmiCategoryAr : analysis.bmiCategoryEn} />
+          <Row label={t(locale, "Daily target", "الهدف اليومي")} value={`${analysis.recommendedDailyCalories} ${t(locale, "kcal", "سعرة")}`} />
           <Row
-            label="Goal"
-            value={goalCopy[data.goal].en}
+            label={t(locale, "Goal", "الهدف")}
+            value={locale === "ar" ? goalCopy[data.goal].ar : goalCopy[data.goal].en}
           />
           {analysis.estimatedWeeks > 0 && (
             <Row
-              label="Timeline"
-              value={`${analysis.estimatedWeeks} weeks`}
+              label={t(locale, "Timeline", "المدة")}
+              value={`${analysis.estimatedWeeks} ${t(locale, "weeks", "أسبوع")}`}
             />
           )}
         </div>
         <p className="mt-4 text-sm leading-relaxed text-neutral-700">
-          {analysis.summaryEn}
+          {locale === "ar" ? analysis.summaryAr : analysis.summaryEn}
         </p>
       </div>
     </StepFrame>
@@ -597,7 +603,6 @@ function ValueSlider({
   max,
   step = 1,
   unit,
-  unitAr,
 }: {
   value: number
   onChange: (v: number) => void
@@ -605,8 +610,8 @@ function ValueSlider({
   max: number
   step?: number
   unit: string
-  unitAr?: string
 }) {
+  const { locale } = useLocale()
   const clamp = (v: number) => Math.min(max, Math.max(min, Math.round(v / step) * step))
   const dec = () => onChange(clamp(Math.round((value - step) * 100) / 100))
   const inc = () => onChange(clamp(Math.round((value + step) * 100) / 100))
@@ -668,7 +673,7 @@ function ValueSlider({
             type="button"
             onClick={dec}
             className="flex size-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-xl font-semibold text-neutral-600 transition hover:border-lime-300 hover:text-lime-700"
-            aria-label="Decrease"
+            aria-label={t(locale, "Decrease", "إنقاص")}
           >
             −
           </button>
@@ -676,7 +681,7 @@ function ValueSlider({
             type="button"
             onClick={inc}
             className="flex size-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-xl font-semibold text-neutral-600 transition hover:border-lime-300 hover:text-lime-700"
-            aria-label="Increase"
+            aria-label={t(locale, "Increase", "زيادة")}
           >
             +
           </button>

@@ -7,6 +7,7 @@ import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shel
 import { useApp } from "@/lib/store"
 import type { Session } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useLocale, t } from "@/lib/locale"
 
 const TYPE_EMOJI: Record<Session["type"], string> = {
   consultation: "🩺",
@@ -18,6 +19,7 @@ const TYPE_EMOJI: Record<Session["type"], string> = {
 function SessionsInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { locale } = useLocale()
   const { state, addSession } = useApp()
   const user = state.user
   const initialType = (searchParams.get("type") as Session["type"]) || "consultation"
@@ -73,9 +75,9 @@ function SessionsInner() {
       <div className="mx-auto max-w-4xl space-y-6 pb-24 lg:pb-0">
         <header className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900">My Sessions</h1>
+            <h1 className="text-3xl font-bold text-neutral-900">{t(locale,"My Sessions","جلساتي")}</h1>
             <p className="mt-1 text-sm text-neutral-500">
-              Book and manage your appointments with Dr. Wael Mostafa.
+              {t(locale,"Book and manage your appointments with Dr. Wael Mostafa.","احجز وأدر مواعيدك مع الدكتور وائل مصطفى.")}
             </p>
           </div>
           <button
@@ -84,15 +86,15 @@ function SessionsInner() {
             className="inline-flex items-center gap-1.5 rounded-xl bg-lime-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-lime-800"
           >
             <Plus className="size-4" />
-            Book new
+            {t(locale,"Book new","حجز جديد")}
           </button>
         </header>
 
         {showForm && (
           <section className="rounded-3xl border border-lime-200 bg-lime-50/50 p-6">
-            <h2 className="font-bold text-neutral-900">Book a new session</h2>
+            <h2 className="font-bold text-neutral-900">{t(locale,"Book a new session","حجز جلسة جديدة")}</h2>
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field label="Type">
+              <Field label={t(locale,"Type","النوع")}>
                 <select
                   value={draft.type}
                   onChange={(e) =>
@@ -100,13 +102,13 @@ function SessionsInner() {
                   }
                   className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm"
                 >
-                  <option value="consultation">Consultation</option>
-                  <option value="body_sculpting">Body Sculpting</option>
-                  <option value="follow_up">Follow-up</option>
-                  <option value="training">Training</option>
+                  <option value="consultation">{t(locale,"Consultation","استشارة")}</option>
+                  <option value="body_sculpting">{t(locale,"Body Sculpting","نحت الجسم")}</option>
+                  <option value="follow_up">{t(locale,"Follow-up","متابعة")}</option>
+                  <option value="training">{t(locale,"Training","تدريب")}</option>
                 </select>
               </Field>
-              <Field label="Location">
+              <Field label={t(locale,"Location","المكان")}>
                 <select
                   value={draft.location}
                   onChange={(e) =>
@@ -114,11 +116,11 @@ function SessionsInner() {
                   }
                   className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm"
                 >
-                  <option value="clinic">In-clinic</option>
-                  <option value="online">Online</option>
+                  <option value="clinic">{t(locale,"In-clinic","في العيادة")}</option>
+                  <option value="online">{t(locale,"Online","عبر الإنترنت")}</option>
                 </select>
               </Field>
-              <Field label="Date">
+              <Field label={t(locale,"Date","التاريخ")}>
                 <input
                   type="date"
                   value={draft.date}
@@ -127,7 +129,7 @@ function SessionsInner() {
                   className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm"
                 />
               </Field>
-              <Field label="Time">
+              <Field label={t(locale,"Time","الوقت")}>
                 <input
                   type="time"
                   value={draft.time}
@@ -143,14 +145,14 @@ function SessionsInner() {
                 disabled={!draft.date}
                 className="rounded-xl bg-lime-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-lime-800 disabled:opacity-50"
               >
-                Confirm booking
+                {t(locale,"Confirm booking","تأكيد الحجز")}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
                 className="rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-600"
               >
-                Cancel
+                {t(locale,"Cancel","إلغاء")}
               </button>
             </div>
           </section>
@@ -159,12 +161,12 @@ function SessionsInner() {
         {/* Upcoming */}
         <section>
           <h2 className="text-lg font-bold text-neutral-900">
-            Upcoming ({upcoming.length})
+            {t(locale,"Upcoming","القادمة")} ({upcoming.length})
           </h2>
           <div className="mt-3 space-y-3">
             {upcoming.length === 0 && (
               <p className="rounded-2xl border border-dashed border-neutral-200 bg-white p-6 text-center text-sm text-neutral-500">
-                No upcoming sessions.
+                {t(locale,"No upcoming sessions.","لا جلسات قادمة.")}
               </p>
             )}
             {upcoming.map((session) => (
@@ -176,7 +178,7 @@ function SessionsInner() {
         {/* Past */}
         {past.length > 0 && (
           <section>
-            <h2 className="text-lg font-bold text-neutral-900">Past</h2>
+            <h2 className="text-lg font-bold text-neutral-900">{t(locale,"Past","السابقة")}</h2>
             <div className="mt-3 space-y-3">
               {past.map((session) => (
                 <SessionCard key={session.id} session={session} past />
@@ -190,6 +192,7 @@ function SessionsInner() {
 }
 
 function SessionCard({ session, past }: { session: Session; past?: boolean }) {
+  const { locale } = useLocale()
   return (
     <div
       className={cn(
@@ -199,7 +202,7 @@ function SessionCard({ session, past }: { session: Session; past?: boolean }) {
     >
       <div className="flex size-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-lime-50 text-lime-700">
         <span className="text-[10px] font-semibold uppercase tracking-wider">
-          {new Date(session.date).toLocaleDateString("en-GB", { month: "short" })}
+          {new Date(session.date).toLocaleDateString(locale === "ar" ? "ar-AE" : "en-GB", { month: "short" })}
         </span>
         <span className="text-lg font-bold leading-none">
           {new Date(session.date).getDate()}
@@ -208,29 +211,28 @@ function SessionCard({ session, past }: { session: Session; past?: boolean }) {
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <span className="text-xl">{TYPE_EMOJI[session.type]}</span>
-          <p className="font-semibold text-neutral-900">{session.typeEn}</p>
+          <p className="font-semibold text-neutral-900">{locale === "ar" ? session.typeAr : session.typeEn}</p>
           {session.status === "completed" && (
             <span className="rounded-full bg-lime-100 px-2 py-0.5 text-[10px] font-semibold text-lime-700">
-              Done
+              {t(locale,"Done","تمت")}
             </span>
           )}
         </div>
-        <p className="text-xs text-neutral-500">{session.typeAr}</p>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-neutral-600">
           <span className="inline-flex items-center gap-1">
             <Clock className="size-3.5" />
-            {session.time} · {session.durationMinutes}m
+            {session.time} · {session.durationMinutes}{t(locale,"m","د")}
           </span>
           <span className="inline-flex items-center gap-1">
             {session.location === "online" ? (
               <>
                 <Video className="size-3.5" />
-                Online
+                {t(locale,"Online","عبر الإنترنت")}
               </>
             ) : (
               <>
                 <MapPin className="size-3.5" />
-                Clinic
+                {t(locale,"Clinic","العيادة")}
               </>
             )}
           </span>
@@ -241,7 +243,7 @@ function SessionCard({ session, past }: { session: Session; past?: boolean }) {
         </div>
         {session.notes && (
           <p className="mt-2 rounded-lg bg-yellow-50 px-3 py-2 text-xs text-yellow-800">
-            Note: {session.notes}
+            {t(locale,"Note","ملاحظة")}: {session.notes}
           </p>
         )}
       </div>
@@ -251,13 +253,13 @@ function SessionCard({ session, past }: { session: Session; past?: boolean }) {
             type="button"
             className="rounded-lg bg-lime-50 px-2.5 py-1.5 text-xs font-semibold text-lime-700 hover:bg-lime-100"
           >
-            Reschedule
+            {t(locale,"Reschedule","إعادة جدولة")}
           </button>
           <button
             type="button"
             className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-neutral-500 hover:bg-red-50 hover:text-red-500"
           >
-            Cancel
+            {t(locale,"Cancel","إلغاء")}
           </button>
         </div>
       )}

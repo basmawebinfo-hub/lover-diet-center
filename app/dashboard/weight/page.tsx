@@ -10,6 +10,7 @@ import { analyzeUser } from "@/lib/analysis"
 import type { WeightLog } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { WeightChart } from "@/components/dashboard/weight-chart"
 
 export default function WeightPage() {
   const router = useRouter()
@@ -68,6 +69,9 @@ export default function WeightPage() {
           <h1 className="text-2xl font-bold text-neutral-900">{t(locale, "Daily Weight", "الوزن اليومي")}</h1>
           <p className="text-sm text-neutral-500 mt-1">{t(locale, "Log your weight and watch your body transform", "سجّل وزنك وشاهد جسمك يتحوّل")}</p>
         </header>
+
+        {/* Trend chart */}
+        <WeightChart logs={state.weightLogs} goalKg={Math.round(user.targetWeightKg * 10) / 10} />
 
         {/* Main: Avatar + Input side by side */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">

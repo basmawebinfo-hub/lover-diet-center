@@ -11,24 +11,26 @@ import { useApp } from "@/lib/store"
 import { analyzeUser, buildAvatarConfig, idealWeightKg } from "@/lib/analysis"
 import type { ActivityLevel, GoalType, User } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useLocale, t } from "@/lib/locale"
 
-const goalCopy: Record<GoalType, string> = {
-  lose_weight: "Lose Weight",
-  tone: "Tone & Sculpt",
-  gain_muscle: "Build Muscle",
-  maintain: "Stay Healthy",
+const goalCopy: Record<GoalType, { en: string; ar: string }> = {
+  lose_weight: { en: "Lose Weight", ar: "إنقاص الوزن" },
+  tone: { en: "Tone & Sculpt", ar: "شد ونحت" },
+  gain_muscle: { en: "Build Muscle", ar: "بناء العضلات" },
+  maintain: { en: "Stay Healthy", ar: "الحفاظ على الصحة" },
 }
 
-const activityCopy: Record<ActivityLevel, string> = {
-  sedentary: "Sedentary",
-  light: "Light",
-  moderate: "Moderate",
-  active: "Active",
-  very_active: "Very Active",
+const activityCopy: Record<ActivityLevel, { en: string; ar: string }> = {
+  sedentary: { en: "Sedentary", ar: "خامل" },
+  light: { en: "Light", ar: "خفيف" },
+  moderate: { en: "Moderate", ar: "متوسط" },
+  active: { en: "Active", ar: "نشط" },
+  very_active: { en: "Very Active", ar: "نشط جداً" },
 }
 
 export default function SettingsPage() {
   const router = useRouter()
+  const { locale } = useLocale()
   const { state, setUser } = useApp()
   const user = state.user
 
@@ -55,7 +57,7 @@ export default function SettingsPage() {
       goal: draft.goal,
       activityLevel: draft.activityLevel,
     },
-    "en"
+    locale
   )
 
   const startingConfig = buildAvatarConfig(
@@ -123,9 +125,9 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-5xl space-y-6 pb-24 lg:pb-0">
         <header className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900">Profile & Goal</h1>
+            <h1 className="text-3xl font-bold text-neutral-900">{t(locale,"Profile & Goal","الملف والهدف")}</h1>
             <p className="mt-1 text-sm text-neutral-500">
-              Your measurements, your goal, and the avatar that reflects your progress.
+              {t(locale,"Your measurements, your goal, and the avatar that reflects your progress.","قياساتك وهدفك والمجسّم الذي يعكس تقدّمك.")}
             </p>
           </div>
           {!editing ? (
@@ -134,7 +136,7 @@ export default function SettingsPage() {
               onClick={() => setEditing(true)}
               className="rounded-xl border border-lime-200 bg-white px-4 py-2.5 text-sm font-semibold text-lime-700 transition hover:bg-lime-50"
             >
-              Edit
+              {t(locale,"Edit","تعديل")}
             </button>
           ) : (
             <div className="flex gap-2">
@@ -146,7 +148,7 @@ export default function SettingsPage() {
                 }}
                 className="rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-600 hover:bg-neutral-50"
               >
-                Cancel
+                {t(locale,"Cancel","إلغاء")}
               </button>
               <button
                 type="button"
@@ -154,7 +156,7 @@ export default function SettingsPage() {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-lime-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-lime-800"
               >
                 <Save className="size-4" />
-                Save
+                {t(locale,"Save","حفظ")}
               </button>
             </div>
           )}
@@ -162,30 +164,30 @@ export default function SettingsPage() {
 
         {/* Avatar comparison */}
         <section className="rounded-3xl border border-neutral-100 bg-white p-6">
-          <h2 className="text-lg font-bold text-neutral-900">Your transformation</h2>
+          <h2 className="text-lg font-bold text-neutral-900">{t(locale,"Your transformation","تحوّلك")}</h2>
           <p className="mt-1 text-sm text-neutral-500">
-            This is you at the start, now, and at your goal weight.
+            {t(locale,"This is you at the start, now, and at your goal weight.","هذا أنت في البداية، والآن، وعند وزنك المستهدف.")}
           </p>
           <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
             <AvatarStage
               avatar={startingConfig}
               gender={draft.gender}
-              label="Start"
-              value={`${draft.startWeightKg.toFixed(1)} kg`}
+              label={t(locale,"Start","البداية")}
+              value={`${draft.startWeightKg.toFixed(1)} ${t(locale,"kg","كجم")}`}
             />
             <AvatarStage
               avatar={currentConfig}
               gender={draft.gender}
-              label="Now"
-              value={`${draft.currentWeightKg.toFixed(1)} kg`}
+              label={t(locale,"Now","الآن")}
+              value={`${draft.currentWeightKg.toFixed(1)} ${t(locale,"kg","كجم")}`}
               highlight
               progress={progress}
             />
             <AvatarStage
               avatar={targetConfig}
               gender={draft.gender}
-              label="Goal"
-              value={`${targetWeight.toFixed(1)} kg`}
+              label={t(locale,"Goal","الهدف")}
+              value={`${targetWeight.toFixed(1)} ${t(locale,"kg","كجم")}`}
             />
           </div>
         </section>
@@ -193,30 +195,30 @@ export default function SettingsPage() {
         {/* Profile details */}
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-neutral-100 bg-white p-6">
-            <h2 className="text-lg font-bold text-neutral-900">Personal info</h2>
+            <h2 className="text-lg font-bold text-neutral-900">{t(locale,"Personal info","المعلومات الشخصية")}</h2>
             <div className="mt-4 space-y-3">
               <Row
-                label="Full name"
+                label={t(locale,"Full name","الاسم الكامل")}
                 value={draft.nameEn}
                 editing={editing}
                 onChange={(v) => setDraft({ ...draft, nameEn: v })}
               />
               <Row
-                label="Age"
-                value={`${draft.age} years`}
+                label={t(locale,"Age","العمر")}
+                value={`${draft.age} ${t(locale,"years","سنة")}`}
                 editing={editing}
                 onChange={(v) => setDraft({ ...draft, age: Number(v) || draft.age })}
                 inputType="number"
               />
               <Row
-                label="Height"
-                value={`${draft.heightCm} cm`}
+                label={t(locale,"Height","الطول")}
+                value={`${draft.heightCm} ${t(locale,"cm","سم")}`}
                 editing={editing}
                 onChange={(v) => setDraft({ ...draft, heightCm: Number(v) || draft.heightCm })}
                 inputType="number"
               />
               <Row
-                label="Email"
+                label={t(locale,"Email","البريد الإلكتروني")}
                 value={draft.email}
                 editing={editing}
                 onChange={(v) => setDraft({ ...draft, email: v })}
@@ -225,11 +227,11 @@ export default function SettingsPage() {
           </div>
 
           <div className="rounded-3xl border border-neutral-100 bg-white p-6">
-            <h2 className="text-lg font-bold text-neutral-900">Goal & targets</h2>
+            <h2 className="text-lg font-bold text-neutral-900">{t(locale,"Goal & targets","الهدف والمستهدفات")}</h2>
             <div className="mt-4 space-y-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
-                  Primary goal
+                  {t(locale,"Primary goal","الهدف الأساسي")}
                 </p>
                 {editing ? (
                   <select
@@ -239,20 +241,20 @@ export default function SettingsPage() {
                   >
                     {(Object.keys(goalCopy) as GoalType[]).map((g) => (
                       <option key={g} value={g}>
-                        {goalCopy[g]}
+                        {locale === "ar" ? goalCopy[g].ar : goalCopy[g].en}
                       </option>
                     ))}
                   </select>
                 ) : (
                   <p className="mt-1 font-semibold text-neutral-900">
-                    {goalCopy[draft.goal]}
+                    {locale === "ar" ? goalCopy[draft.goal].ar : goalCopy[draft.goal].en}
                   </p>
                 )}
               </div>
 
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
-                  Activity level
+                  {t(locale,"Activity level","مستوى النشاط")}
                 </p>
                 {editing ? (
                   <select
@@ -264,20 +266,20 @@ export default function SettingsPage() {
                   >
                     {(Object.keys(activityCopy) as ActivityLevel[]).map((a) => (
                       <option key={a} value={a}>
-                        {activityCopy[a]}
+                        {locale === "ar" ? activityCopy[a].ar : activityCopy[a].en}
                       </option>
                     ))}
                   </select>
                 ) : (
                   <p className="mt-1 font-semibold text-neutral-900">
-                    {activityCopy[draft.activityLevel]}
+                    {locale === "ar" ? activityCopy[draft.activityLevel].ar : activityCopy[draft.activityLevel].en}
                   </p>
                 )}
               </div>
 
               <Row
-                label="Target weight"
-                value={`${draft.targetWeightKg.toFixed(1)} kg`}
+                label={t(locale,"Target weight","الوزن المستهدف")}
+                value={`${draft.targetWeightKg.toFixed(1)} ${t(locale,"kg","كجم")}`}
                 editing={editing}
                 onChange={(v) =>
                   setDraft({ ...draft, targetWeightKg: Number(v) || draft.targetWeightKg })
@@ -291,14 +293,14 @@ export default function SettingsPage() {
         {/* AI summary */}
         <section className="rounded-3xl border border-neutral-100 bg-gradient-to-br from-lime-50 to-white p-6">
           <p className="text-xs font-semibold uppercase tracking-wider text-lime-700">
-            AI Summary
+            {t(locale,"AI Summary","ملخص الذكاء الاصطناعي")}
           </p>
-          <h2 className="mt-2 text-xl font-bold text-neutral-900">{analysis.summaryEn}</h2>
+          <h2 className="mt-2 text-xl font-bold text-neutral-900">{locale === "ar" ? analysis.summaryAr : analysis.summaryEn}</h2>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <Mini label="Daily kcal" value={`${analysis.recommendedDailyCalories}`} />
-            <Mini label="Protein" value={`${analysis.recommendedProteinG}g`} />
-            <Mini label="Carbs" value={`${analysis.recommendedCarbsG}g`} />
-            <Mini label="Fat" value={`${analysis.recommendedFatG}g`} />
+            <Mini label={t(locale,"Daily kcal","سعرات يومية")} value={`${analysis.recommendedDailyCalories}`} />
+            <Mini label={t(locale,"Protein","بروتين")} value={`${analysis.recommendedProteinG}${t(locale,"g","غ")}`} />
+            <Mini label={t(locale,"Carbs","كربوهيدرات")} value={`${analysis.recommendedCarbsG}${t(locale,"g","غ")}`} />
+            <Mini label={t(locale,"Fat","دهون")} value={`${analysis.recommendedFatG}${t(locale,"g","غ")}`} />
           </div>
         </section>
       </div>

@@ -4,6 +4,7 @@ import { Host_Grotesk, Rubik } from 'next/font/google'
 import { ConditionalShell } from '@/components/conditional-shell'
 import { AppProvider } from '@/lib/store'
 import { LocaleProvider } from '@/lib/locale'
+import { ToastProvider } from '@/components/ui/toast'
 import './globals.css'
 
 const hostGrotesk = Host_Grotesk({
@@ -94,7 +95,9 @@ export default function RootLayout({
         </a>
         <LocaleProvider>
           <AppProvider>
-            <ConditionalShell>{children}</ConditionalShell>
+            <ToastProvider>
+              <ConditionalShell>{children}</ConditionalShell>
+            </ToastProvider>
           </AppProvider>
         </LocaleProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}

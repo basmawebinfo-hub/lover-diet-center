@@ -13,6 +13,9 @@ import {
   Target,
   Flame,
   Droplets,
+  Bell,
+  Plus,
+  Minus,
 } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { BodyAvatar, BodyComparison } from "@/components/body-avatar"
@@ -21,6 +24,7 @@ import { analyzeUser, progressPercent } from "@/lib/analysis"
 import { cn } from "@/lib/utils"
 import type { User } from "@/lib/types"
 import { useLocale, t } from "@/lib/locale"
+import { useToast } from "@/components/ui/toast"
 
 function getLocalUser(): User | null {
   if (typeof window === "undefined") return null
@@ -41,7 +45,8 @@ function greetingForTime(locale: "en" | "ar") {
 export default function DashboardOverviewPage() {
   const router = useRouter()
   const { locale } = useLocale()
-  const { state } = useApp()
+  const { notify } = useToast()
+  const { state, logWater } = useApp()
   const user = useMemo(() => state.user || getLocalUser(), [state.user])
 
   useEffect(() => {
@@ -64,6 +69,15 @@ export default function DashboardOverviewPage() {
   const recent = [...state.weightLogs].sort((a, b) => (a.date < b.date ? -1 : 1)).slice(-7)
   const hasProgress = user.startWeightKg !== user.currentWeightKg
 
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const waterToday = state.waterLogs.find((w) => w.date === todayStr)?.liters ?? 0
+  const waterGoal = state.doctorPlan?.waterLiters ?? 2.5
+  const loggedWeightToday = state.weightLogs.some((l) => l.date === todayStr)
+  const addWater = (delta: number) => {
+    const next = Math.max(0, Math.round((waterToday + delta) * 10) / 10)
+    logWater(todayStr, next)
+  }
+
   return (
     <DashboardShell>
       <MobileNav />
@@ -78,6 +92,23 @@ export default function DashboardOverviewPage() {
             {t(locale, `${user.nameEn.split(" ")[0]}, your plan is live.`, `${user.nameEn.split(" ")[0]}، خطتك جاهزة.`)}
           </h1>
         </header>
+
+        {/* Smart reminder */}
+        {!loggedWeightToday && (
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                <Bell className="size-4" />
+              </span>
+              <p className="text-sm font-medium text-amber-800">
+                {t(locale, "You haven't logged your weight today.", "لم تسجّل وزنك اليوم.")}
+              </p>
+            </div>
+            <Link href="/dashboard/weight" className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-600">
+              {t(locale, "Log now", "سجّل الآن")}
+            </Link>
+          </div>
+        )}
 
         {/* Avatar + Stats */}
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
@@ -138,9 +169,10 @@ export default function DashboardOverviewPage() {
             />
             <StatCard
               icon={<Droplets className="size-5" />}
-              label={t(locale, "Water Target", "هدف الماء")}
-              value={`${state.doctorPlan?.waterLiters ?? 2.5} ${t(locale,"L","لتر")}`}
-              delta={t(locale, "per day", "يومياً")}
+              label={t(locale, "Water Today", "ماء اليوم")}
+              value={`${waterToday} / ${waterGoal} ${t(locale,"L","لتر")}`}
+              delta={`${Math.min(100, Math.round((waterToday / waterGoal) * 100))}% ${t(locale,"of goal","من الهدف")}`}
+              deltaTone="positive"
             />
           </div>
         </section>
@@ -212,6 +244,30 @@ export default function DashboardOverviewPage() {
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Water tracker */}
+        <section className="rounded-3xl border border-neutral-100 bg-white p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Droplets className="size-5 text-sky-500" />
+              <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Water intake", "شرب الماء")}</h2>
+            </div>
+            <span className="text-sm font-semibold text-neutral-500">{waterToday} / {waterGoal} {t(locale,"L","لتر")}</span>
+          </div>
+          <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-neutral-100">
+            <div className="h-full rounded-full bg-gradient-to-r from-sky-400 to-sky-500 transition-all" style={{ width: `${Math.min(100, (waterToday / waterGoal) * 100)}%` }} />
+          </div>
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <button type="button" onClick={() => addWater(-0.25)} className="flex size-11 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 hover:border-sky-300 hover:text-sky-600">
+              <Minus className="size-4" />
+            </button>
+            <span className="min-w-[80px] text-center text-2xl font-black text-neutral-900">{waterToday}{t(locale,"L","ل")}</span>
+            <button type="button" onClick={() => { addWater(0.25); if (waterToday + 0.25 >= waterGoal) notify(t(locale,"Water goal reached! 💧","وصلت لهدف الماء! 💧"),"success") }} className="flex size-11 items-center justify-center rounded-full bg-sky-500 text-white hover:bg-sky-600">
+              <Plus className="size-4" />
+            </button>
+          </div>
+          <p className="mt-3 text-center text-xs text-neutral-400">{t(locale, "Tap + for each glass (250 ml)", "اضغط + لكل كوب (250 مل)")}</p>
         </section>
 
         {/* Quick actions */}

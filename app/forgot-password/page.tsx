@@ -4,8 +4,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Mail, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useLocale, t } from '@/lib/locale'
 
 export default function ForgotPasswordPage() {
+  const { locale } = useLocale()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -23,7 +25,7 @@ export default function ForgotPasswordPage() {
       if (err) { setError(err.message); return }
       setSent(true)
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t(locale, 'Something went wrong. Please try again.', 'حدث خطأ ما. حاول مرة أخرى.'))
     } finally {
       setLoading(false)
     }
@@ -33,29 +35,28 @@ export default function ForgotPasswordPage() {
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#f3fae6] to-white px-4">
       <div className="w-full max-w-md rounded-3xl border border-neutral-100 bg-white p-8 shadow-sm">
         <Link href="/sign-in" className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-lime-700">
-          <ArrowLeft className="size-4" /> Back to sign in
+          <ArrowLeft className="size-4 rtl:rotate-180" /> {t(locale, 'Back to sign in', 'العودة لتسجيل الدخول')}
         </Link>
 
         <div className="mt-6 flex size-12 items-center justify-center rounded-2xl bg-lime-100 text-lime-700">
           <Mail className="size-6" />
         </div>
-        <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-neutral-900">Reset your password</h1>
-        <p className="font-arabic text-sm text-neutral-500 mt-1" dir="rtl">إعادة تعيين كلمة المرور</p>
+        <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-neutral-900">{t(locale, 'Reset your password', 'إعادة تعيين كلمة المرور')}</h1>
 
         {sent ? (
           <div className="mt-6 flex items-start gap-3 rounded-2xl bg-lime-50 p-4 text-sm text-lime-800">
             <Check className="mt-0.5 size-5 shrink-0 text-lime-600" />
-            <p>If an account exists for <strong>{email}</strong>, a reset link is on its way. Check your inbox.</p>
+            <p>{t(locale, 'If an account exists for', 'إذا كان هناك حساب مرتبط بـ')} <strong>{email}</strong>{t(locale, ', a reset link is on its way. Check your inbox.', '، فإن رابط إعادة التعيين في طريقه إليك. تحقّق من بريدك.')}</p>
           </div>
         ) : (
           <>
             <p className="mt-3 text-sm text-neutral-500">
-              Enter the email linked to your account and we&apos;ll send you a reset link.
+              {t(locale, "Enter the email linked to your account and we'll send you a reset link.", 'أدخل البريد المرتبط بحسابك وسنرسل لك رابط إعادة التعيين.')}
             </p>
             {error && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-neutral-700">Email</label>
+                <label className="block text-sm font-semibold text-neutral-700">{t(locale, 'Email', 'البريد الإلكتروني')}</label>
                 <input
                   type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
@@ -66,15 +67,15 @@ export default function ForgotPasswordPage() {
                 type="submit" disabled={loading}
                 className="w-full rounded-xl bg-gradient-to-b from-lime-400 to-lime-500 py-3.5 text-base font-bold text-lime-950 shadow-sm transition hover:-translate-y-0.5 disabled:opacity-60"
               >
-                {loading ? 'Sending…' : 'Send reset link'}
+                {loading ? t(locale, 'Sending…', 'جارٍ الإرسال…') : t(locale, 'Send reset link', 'إرسال رابط إعادة التعيين')}
               </button>
             </form>
           </>
         )}
 
         <p className="mt-5 text-center text-xs text-neutral-400">
-          Remembered it?{' '}
-          <Link href="/sign-in" className="font-semibold text-lime-700 hover:underline">Sign in</Link>
+          {t(locale, 'Remembered it?', 'تذكّرتها؟')}{' '}
+          <Link href="/sign-in" className="font-semibold text-lime-700 hover:underline">{t(locale, 'Sign in', 'تسجيل الدخول')}</Link>
         </p>
       </div>
     </main>

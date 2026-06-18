@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import Image from 'next/image'
 import { SignUpForm } from '@/components/ui/sign-up-form'
 import { Check } from 'lucide-react'
+import { useLocale, t } from '@/lib/locale'
 
 function SignUpLoadingFallback() {
   return (
@@ -14,10 +15,11 @@ function SignUpLoadingFallback() {
 }
 
 export default function SignUpPage() {
+  const { locale } = useLocale()
   const trustBadges = [
-    'Certified Nutritionists',
-    'Science-backed meal plans',
-    '500+ success stories',
+    t(locale, 'Certified Nutritionists', 'أخصائيو تغذية معتمدون'),
+    t(locale, 'Science-backed meal plans', 'خطط وجبات مبنية على العلم'),
+    t(locale, '500+ success stories', 'أكثر من 500 قصة نجاح'),
   ]
 
   return (
@@ -119,7 +121,7 @@ export default function SignUpPage() {
 
           {/* Headline */}
           <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight">
-            Your health journey starts here.
+            {t(locale, 'Your health journey starts here.', 'رحلتك الصحية تبدأ من هنا.')}
           </h1>
 
           {/* Subtext */}
@@ -142,7 +144,7 @@ export default function SignUpPage() {
           {/* Bottom badge */}
           <div className="mt-12">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur-sm">
-              Trusted by 3,000+ clients
+              {t(locale, 'Trusted by 3,000+ clients', 'موثوق من أكثر من 3,000 عميل')}
             </span>
           </div>
         </div>

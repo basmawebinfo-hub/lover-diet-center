@@ -85,53 +85,41 @@ export default function SettingsPage() {
       <MobileNav />
       <div className="mx-auto max-w-5xl space-y-6 pb-28 lg:pb-0">
 
-        {/* Header card with avatar */}
-        <section className="overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm">
-          {/* Banner */}
-          <div className="relative h-32 bg-gradient-to-br from-[#0D4F4A] via-[#15604f] to-[#4d7c0f] sm:h-36">
-            <div
-              className="absolute inset-0 opacity-[0.12]"
-              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='44' height='44' viewBox='0 0 44 44' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M22 7l-2.2 5.6H14l4.6 3.4-1.7 5.6L22 23l4.1 3.2-1.7-5.6L29 17h-5.8z' fill='none' stroke='%23ffffff' stroke-width='0.7'/%3E%3C/svg%3E")`, backgroundSize: "44px 44px" }}
-              aria-hidden="true"
-            />
-          </div>
-
-          {/* Profile row */}
-          <div className="flex flex-col gap-4 px-5 pb-5 sm:flex-row sm:items-end sm:justify-between sm:px-7 sm:pb-6">
-            <div className="-mt-12 flex flex-col items-center gap-3 sm:-mt-14 sm:flex-row sm:items-end">
-              <div className="relative shrink-0">
-                <div className="flex size-24 items-center justify-center rounded-3xl border-4 border-white bg-gradient-to-br from-lime-100 to-lime-50 text-4xl font-black text-lime-700 shadow-md">
-                  {initials}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => notify(t(locale, "Photo upload coming soon", "رفع الصورة قريباً"), "success")}
-                  className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-lime-600 text-white shadow ring-2 ring-white transition hover:bg-lime-700 rtl:left-0 rtl:right-auto"
-                  aria-label={t(locale, "Change photo", "تغيير الصورة")}
-                >
-                  <Camera className="size-4" />
-                </button>
+        {/* Profile header (no banner) */}
+        <section className="flex flex-col gap-4 rounded-3xl border border-neutral-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div className="flex items-center gap-4">
+            <div className="relative shrink-0">
+              <div className="flex size-20 items-center justify-center rounded-3xl bg-gradient-to-br from-lime-100 to-lime-50 text-3xl font-black text-lime-700 shadow-sm ring-1 ring-lime-100">
+                {initials}
               </div>
-              <div className="text-center sm:pb-1 sm:text-start">
-                <h1 className="text-2xl font-extrabold text-neutral-900">{draft.nameEn}</h1>
-                <p className="text-sm text-neutral-500">{draft.email}</p>
-              </div>
+              <button
+                type="button"
+                onClick={() => notify(t(locale, "Photo upload coming soon", "رفع الصورة قريباً"), "success")}
+                className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-lime-600 text-white shadow ring-2 ring-white transition hover:bg-lime-700 rtl:left-0 rtl:right-auto"
+                aria-label={t(locale, "Change photo", "تغيير الصورة")}
+              >
+                <Camera className="size-3.5" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={save}
-              disabled={!dirty}
-              className={cn(
-                "inline-flex items-center justify-center gap-1.5 rounded-xl px-5 py-3 text-sm font-bold transition",
-                dirty
-                  ? "bg-lime-700 text-white shadow-sm hover:bg-lime-800"
-                  : "cursor-not-allowed bg-neutral-100 text-neutral-400"
-              )}
-            >
-              <Save className="size-4" />
-              {dirty ? t(locale, "Save changes", "حفظ التغييرات") : t(locale, "Saved", "محفوظ")}
-            </button>
+            <div>
+              <h1 className="text-xl font-extrabold text-neutral-900 sm:text-2xl">{draft.nameEn}</h1>
+              <p className="text-sm text-neutral-500">{draft.email}</p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={save}
+            disabled={!dirty}
+            className={cn(
+              "inline-flex items-center justify-center gap-1.5 rounded-xl px-5 py-3 text-sm font-bold transition",
+              dirty
+                ? "bg-lime-700 text-white shadow-sm hover:bg-lime-800"
+                : "cursor-not-allowed bg-neutral-100 text-neutral-400"
+            )}
+          >
+            <Save className="size-4" />
+            {dirty ? t(locale, "Save changes", "حفظ التغييرات") : t(locale, "Saved", "محفوظ")}
+          </button>
         </section>
 
         {/* Tabs */}

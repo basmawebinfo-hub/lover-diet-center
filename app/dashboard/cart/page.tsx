@@ -8,9 +8,11 @@ import { useApp } from "@/lib/store"
 import { createClient } from "@/lib/supabase/client"
 import { placeOrder } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
+import { useLocale, t } from "@/lib/locale"
 
 export default function CartPage() {
   const router = useRouter()
+  const { locale } = useLocale()
   const { state, updateCartQty, removeFromCart, clearCart } = useApp()
   const user = state.user
   const [checkedOut, setCheckedOut] = useState(false)
@@ -69,9 +71,9 @@ export default function CartPage() {
           <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-lime-100">
             <Check className="size-10 text-lime-700" />
           </div>
-          <h1 className="text-3xl font-bold text-neutral-900">Order placed</h1>
+          <h1 className="text-3xl font-bold text-neutral-900">{t(locale,"Order placed","تم تأكيد الطلب")}</h1>
           <p className="mt-2 text-neutral-500">
-            We'll deliver to your door within 2-3 days. Thanks for choosing us.
+            {t(locale,"We'll deliver to your door within 2-3 days. Thanks for choosing us.","سنوصل طلبك إلى بابك خلال 2-3 أيام. شكراً لاختيارك لنا.")}
           </p>
         </div>
       </DashboardShell>
@@ -84,20 +86,20 @@ export default function CartPage() {
       <div className="mx-auto max-w-4xl space-y-6 pb-24 lg:pb-0">
         <header className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900">Your Cart</h1>
+            <h1 className="text-3xl font-bold text-neutral-900">{t(locale,"Your Cart","سلتك")}</h1>
             <p className="mt-1 text-sm text-neutral-500">
-              {cartItems.length} {cartItems.length === 1 ? "item" : "items"} ready to ship
+              {cartItems.length} {locale === "ar" ? "منتج جاهز للشحن" : (cartItems.length === 1 ? "item" : "items") + " ready to ship"}
             </p>
           </div>
           {cartItems.length > 0 && (
             <button
               type="button"
               onClick={() => {
-                if (confirm("Clear your cart?")) clearCart()
+                if (confirm(t(locale,"Clear your cart?","تفريغ سلتك؟"))) clearCart()
               }}
               className="text-sm font-semibold text-neutral-500 hover:text-red-500"
             >
-              Clear all
+              {t(locale,"Clear all","تفريغ الكل")}
             </button>
           )}
         </header>
@@ -107,15 +109,15 @@ export default function CartPage() {
             <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-neutral-100">
               <ShoppingBag className="size-7 text-neutral-400" />
             </div>
-            <h2 className="text-lg font-bold text-neutral-900">Your cart is empty</h2>
+            <h2 className="text-lg font-bold text-neutral-900">{t(locale,"Your cart is empty","سلتك فارغة")}</h2>
             <p className="mt-1 text-sm text-neutral-500">
-              Browse healthy products and add them to your cart.
+              {t(locale,"Browse healthy products and add them to your cart.","تصفّح المنتجات الصحية وأضفها إلى سلتك.")}
             </p>
             <a
               href="/dashboard/products"
               className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-lime-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-lime-800"
             >
-              Browse products
+              {t(locale,"Browse products","تصفّح المنتجات")}
             </a>
           </div>
         ) : (
@@ -136,10 +138,9 @@ export default function CartPage() {
                           : "🥗"}
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-neutral-900">{item.product.nameEn}</p>
-                    <p className="text-xs text-neutral-500">{item.product.nameAr}</p>
+                    <p className="font-semibold text-neutral-900">{locale === "ar" ? item.product.nameAr : item.product.nameEn}</p>
                     <p className="mt-1 text-sm font-bold text-lime-700">
-                      {item.product.price} AED
+                      {item.product.price} {t(locale,"AED","درهم")}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -165,7 +166,7 @@ export default function CartPage() {
                     type="button"
                     onClick={() => removeFromCart(item.productId)}
                     className="flex size-9 items-center justify-center rounded-lg text-neutral-400 hover:bg-red-50 hover:text-red-500"
-                    aria-label="Remove"
+                    aria-label={t(locale,"Remove","إزالة")}
                   >
                     <Trash2 className="size-4" />
                   </button>
@@ -174,14 +175,14 @@ export default function CartPage() {
             </div>
 
             <div className="rounded-2xl border border-neutral-100 bg-white p-6">
-              <h2 className="font-bold text-neutral-900">Order summary</h2>
+              <h2 className="font-bold text-neutral-900">{t(locale,"Order summary","ملخص الطلب")}</h2>
               <dl className="mt-4 space-y-2 text-sm">
-                <Row label="Subtotal" value={`${subtotal} AED`} />
-                <Row label="Shipping" value={`${shipping} AED`} />
+                <Row label={t(locale,"Subtotal","المجموع الفرعي")} value={`${subtotal} ${t(locale,"AED","درهم")}`} />
+                <Row label={t(locale,"Shipping","الشحن")} value={`${shipping} ${t(locale,"AED","درهم")}`} />
                 <div className="border-t border-neutral-100 pt-2">
                   <Row
-                    label="Total"
-                    value={`${total} AED`}
+                    label={t(locale,"Total","الإجمالي")}
+                    value={`${total} ${t(locale,"AED","درهم")}`}
                     className="text-base font-bold"
                   />
                 </div>
@@ -192,10 +193,10 @@ export default function CartPage() {
                 className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
               >
                 <CreditCard className="size-4" />
-                Checkout
+                {t(locale,"Checkout","إتمام الشراء")}
               </button>
               <p className="mt-3 text-center text-xs text-neutral-400">
-                Secure checkout · Cash on delivery available
+                {t(locale,"Secure checkout · Cash on delivery available","دفع آمن · الدفع عند الاستلام متاح")}
               </p>
             </div>
           </div>

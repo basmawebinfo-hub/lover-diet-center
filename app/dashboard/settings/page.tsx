@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Save, User as UserIcon, Target, ShieldCheck, Camera } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
-import { Avatar } from "@/components/avatar"
+import { BodyAvatar } from "@/components/body-avatar"
 import { useApp } from "@/lib/store"
 import { analyzeUser, buildAvatarConfig, idealWeightKg } from "@/lib/analysis"
 import type { ActivityLevel, Gender, GoalType, User } from "@/lib/types"
@@ -86,25 +86,34 @@ export default function SettingsPage() {
       <div className="mx-auto max-w-5xl space-y-6 pb-28 lg:pb-0">
 
         {/* Header card with avatar */}
-        <section className="overflow-hidden rounded-3xl border border-neutral-100 bg-white">
-          <div className="h-24 bg-gradient-to-r from-[#0D4F4A] to-[#4d7c0f]" />
-          <div className="flex flex-col items-center gap-3 px-6 pb-6 -mt-10 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-end">
-              <div className="relative">
-                <div className="flex size-20 items-center justify-center rounded-2xl border-4 border-white bg-lime-100 text-3xl font-black text-lime-700 shadow-sm">
+        <section className="overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm">
+          {/* Banner */}
+          <div className="relative h-32 bg-gradient-to-br from-[#0D4F4A] via-[#15604f] to-[#4d7c0f] sm:h-36">
+            <div
+              className="absolute inset-0 opacity-[0.12]"
+              style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='44' height='44' viewBox='0 0 44 44' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M22 7l-2.2 5.6H14l4.6 3.4-1.7 5.6L22 23l4.1 3.2-1.7-5.6L29 17h-5.8z' fill='none' stroke='%23ffffff' stroke-width='0.7'/%3E%3C/svg%3E")`, backgroundSize: "44px 44px" }}
+              aria-hidden="true"
+            />
+          </div>
+
+          {/* Profile row */}
+          <div className="flex flex-col gap-4 px-5 pb-5 sm:flex-row sm:items-end sm:justify-between sm:px-7 sm:pb-6">
+            <div className="-mt-12 flex flex-col items-center gap-3 sm:-mt-14 sm:flex-row sm:items-end">
+              <div className="relative shrink-0">
+                <div className="flex size-24 items-center justify-center rounded-3xl border-4 border-white bg-gradient-to-br from-lime-100 to-lime-50 text-4xl font-black text-lime-700 shadow-md">
                   {initials}
                 </div>
                 <button
                   type="button"
                   onClick={() => notify(t(locale, "Photo upload coming soon", "رفع الصورة قريباً"), "success")}
-                  className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full bg-white text-neutral-500 shadow ring-1 ring-neutral-200 hover:text-lime-700 rtl:-left-1 rtl:right-auto"
+                  className="absolute bottom-0 right-0 flex size-8 items-center justify-center rounded-full bg-lime-600 text-white shadow ring-2 ring-white transition hover:bg-lime-700 rtl:left-0 rtl:right-auto"
                   aria-label={t(locale, "Change photo", "تغيير الصورة")}
                 >
-                  <Camera className="size-3.5" />
+                  <Camera className="size-4" />
                 </button>
               </div>
-              <div className="text-center sm:text-start sm:pb-1">
-                <h1 className="text-xl font-bold text-neutral-900">{draft.nameEn}</h1>
+              <div className="text-center sm:pb-1 sm:text-start">
+                <h1 className="text-2xl font-extrabold text-neutral-900">{draft.nameEn}</h1>
                 <p className="text-sm text-neutral-500">{draft.email}</p>
               </div>
             </div>
@@ -113,9 +122,9 @@ export default function SettingsPage() {
               onClick={save}
               disabled={!dirty}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-semibold transition",
+                "inline-flex items-center justify-center gap-1.5 rounded-xl px-5 py-3 text-sm font-bold transition",
                 dirty
-                  ? "bg-lime-700 text-white hover:bg-lime-800"
+                  ? "bg-lime-700 text-white shadow-sm hover:bg-lime-800"
                   : "cursor-not-allowed bg-neutral-100 text-neutral-400"
               )}
             >
@@ -194,10 +203,10 @@ export default function SettingsPage() {
             <div className="rounded-3xl border border-neutral-100 bg-white p-6">
               <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Your transformation", "تحوّلك")}</h2>
               <p className="mt-1 text-sm text-neutral-500">{t(locale, "This is you at the start, now, and at your goal weight.", "هذا أنت في البداية، والآن، وعند وزنك المستهدف.")}</p>
-              <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
-                <AvatarStage avatar={buildAvatarConfig({ gender: draft.gender, heightCm: draft.heightCm, currentWeightKg: draft.startWeightKg, startWeightKg: draft.startWeightKg, goal: draft.goal }, [])} gender={draft.gender} label={t(locale, "Start", "البداية")} value={`${draft.startWeightKg.toFixed(1)} ${t(locale, "kg", "كجم")}`} />
-                <AvatarStage avatar={buildAvatarConfig({ gender: draft.gender, heightCm: draft.heightCm, currentWeightKg: draft.currentWeightKg, startWeightKg: draft.startWeightKg, goal: draft.goal }, state.weightLogs)} gender={draft.gender} label={t(locale, "Now", "الآن")} value={`${draft.currentWeightKg.toFixed(1)} ${t(locale, "kg", "كجم")}`} highlight />
-                <AvatarStage avatar={buildAvatarConfig({ gender: draft.gender, heightCm: draft.heightCm, currentWeightKg: targetWeight, startWeightKg: draft.startWeightKg, goal: draft.goal }, [])} gender={draft.gender} label={t(locale, "Goal", "الهدف")} value={`${targetWeight.toFixed(1)} ${t(locale, "kg", "كجم")}`} />
+              <div className="mt-6 grid grid-cols-3 gap-3 sm:gap-6">
+                <BodyStage gender={draft.gender} weightKg={draft.startWeightKg} heightCm={draft.heightCm} label={t(locale, "Start", "البداية")} value={`${draft.startWeightKg.toFixed(1)} ${t(locale, "kg", "كجم")}`} />
+                <BodyStage gender={draft.gender} weightKg={draft.currentWeightKg} heightCm={draft.heightCm} label={t(locale, "Now", "الآن")} value={`${draft.currentWeightKg.toFixed(1)} ${t(locale, "kg", "كجم")}`} highlight />
+                <BodyStage gender={draft.gender} weightKg={targetWeight} heightCm={draft.heightCm} label={t(locale, "Goal", "الهدف")} value={`${targetWeight.toFixed(1)} ${t(locale, "kg", "كجم")}`} />
               </div>
             </div>
 
@@ -311,15 +320,15 @@ function RowAction({ label, hint, onClick }: { label: string; hint: string; onCl
   )
 }
 
-function AvatarStage({ avatar, gender, label, value, highlight }: {
-  avatar: ReturnType<typeof buildAvatarConfig>; gender: "male" | "female"; label: string; value: string; highlight?: boolean
+function BodyStage({ gender, weightKg, heightCm, label, value, highlight }: {
+  gender: "male" | "female"; weightKg: number; heightCm: number; label: string; value: string; highlight?: boolean
 }) {
   return (
-    <div className={cn("flex flex-col items-center gap-3 rounded-2xl p-4 transition", highlight ? "bg-lime-50 ring-2 ring-lime-300" : "bg-neutral-50")}>
-      <Avatar config={avatar} gender={gender} size={150} />
+    <div className={cn("flex flex-col items-center gap-2 rounded-2xl p-2 transition sm:gap-3 sm:p-4", highlight ? "bg-lime-50 ring-2 ring-lime-300" : "bg-neutral-50")}>
+      <BodyAvatar gender={gender} weightKg={weightKg} heightCm={heightCm} fullBody showLabel={false} className="w-full" />
       <div className="text-center">
         <p className={cn("text-xs font-semibold uppercase tracking-wider", highlight ? "text-lime-700" : "text-neutral-500")}>{label}</p>
-        <p className="mt-0.5 text-lg font-bold text-neutral-900">{value}</p>
+        <p className="mt-0.5 text-base font-bold text-neutral-900 sm:text-lg">{value}</p>
       </div>
     </div>
   )

@@ -5,9 +5,9 @@ import { useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 
-// BMI -> body stage mapping (male)
-// Stages based on real photos uploaded to /public/body-stages/male/
-const MALE_STAGES = [
+// BMI -> body stage mapping (shared by male & female; images live in
+// /public/body-stages/male/ and /public/body-stages/female/)
+const STAGES = [
   { stage: "stage_1",  bmiMin: 40,   label: "Morbidly Obese",      labelAr: "سمنة مفرطة جداً" },
   { stage: "stage_2",  bmiMin: 35,   label: "Severely Obese",       labelAr: "سمنة شديدة" },
   { stage: "stage_4",  bmiMin: 32,   label: "Obese",                labelAr: "سمنة" },
@@ -21,8 +21,8 @@ const MALE_STAGES = [
 
 export function getBodyStage(bmi: number, gender: "male" | "female" = "male") {
   // Find the matching stage (first one where bmi >= bmiMin)
-  const match = MALE_STAGES.find((s) => bmi >= s.bmiMin)
-  return match ?? MALE_STAGES[MALE_STAGES.length - 1]
+  const match = STAGES.find((s) => bmi >= s.bmiMin)
+  return match ?? STAGES[STAGES.length - 1]
 }
 
 export function getBodyStageFromWeight(
@@ -32,7 +32,7 @@ export function getBodyStageFromWeight(
 ) {
   const heightM = heightCm / 100
   const bmi = weightKg / (heightM * heightM)
-  return { ...getBodyStage(bmi, gender), bmi: Math.round(bmi * 10) / 10 }
+  return { ...getBodyStage(bmi, gender), bmi: Math.round(bmi * 10) / 10, gender }
 }
 
 type BodyAvatarProps = {
@@ -91,7 +91,7 @@ export function BodyAvatar({
       >
         <Image
           key={current.stage}
-          src={`/body-stages/male/${current.stage}.png`}
+          src={`/body-stages/${current.gender}/${current.stage}.png`}
           alt={`Body stage: ${current.label}`}
           fill
           className="object-cover object-top transition-all duration-700 ease-in-out"
@@ -153,7 +153,7 @@ export function BodyComparison({
         <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">{t(locale, "Before", "قبل")}</p>
         <div className="relative w-[140px] h-[140px] rounded-2xl overflow-hidden bg-neutral-100">
           <Image
-            src={`/body-stages/male/${start.stage}.png`}
+            src={`/body-stages/${start.gender}/${start.stage}.png`}
             alt="Starting body"
             fill
             className="object-cover object-top grayscale"
@@ -184,7 +184,7 @@ export function BodyComparison({
           !sameStage && "ring-2 ring-lime-400 ring-offset-2"
         )}>
           <Image
-            src={`/body-stages/male/${current.stage}.png`}
+            src={`/body-stages/${current.gender}/${current.stage}.png`}
             alt="Current body"
             fill
             className="object-cover object-top"

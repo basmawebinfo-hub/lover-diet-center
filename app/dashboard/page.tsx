@@ -121,10 +121,11 @@ export default function DashboardOverviewPage() {
               weightKg={user.currentWeightKg}
               heightCm={user.heightCm}
               gender={user.gender === "female" ? "female" : "male"}
-              size="lg"
+              fullBody
               showLabel
               showBMI
               previousWeightKg={hasProgress ? user.startWeightKg : undefined}
+              className="w-full max-w-[240px]"
             />
 
             <p className="text-center text-sm text-neutral-500 max-w-[220px]">

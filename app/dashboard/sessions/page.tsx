@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { Calendar, Clock, Video, MapPin, Check, X, Plus } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
+import { useToast } from "@/components/ui/toast"
 import type { Session } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -20,7 +21,8 @@ function SessionsInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { locale } = useLocale()
-  const { state, addSession } = useApp()
+  const { notify } = useToast()
+  const { state, addSession, updateSession } = useApp()
   const user = state.user
   const initialType = (searchParams.get("type") as Session["type"]) || "consultation"
   const autoBook = searchParams.get("book") === "1"
@@ -170,7 +172,16 @@ function SessionsInner() {
               </p>
             )}
             {upcoming.map((session) => (
-              <SessionCard key={session.id} session={session} />
+              <SessionCard
+                key={session.id}
+                session={session}
+                onCancel={(id) => {
+                  if (confirm(t(locale, "Cancel this session?", "إلغاء هذه الجلسة؟"))) {
+                    updateSession(id, { status: "cancelled" })
+                    notify(t(locale, "Session cancelled", "تم إلغاء الجلسة"), "success")
+                  }
+                }}
+              />
             ))}
           </div>
         </section>
@@ -191,7 +202,7 @@ function SessionsInner() {
   )
 }
 
-function SessionCard({ session, past }: { session: Session; past?: boolean }) {
+function SessionCard({ session, past, onCancel }: { session: Session; past?: boolean; onCancel?: (id: string) => void }) {
   const { locale } = useLocale()
   return (
     <div
@@ -251,12 +262,7 @@ function SessionCard({ session, past }: { session: Session; past?: boolean }) {
         <div className="flex flex-col gap-1">
           <button
             type="button"
-            className="rounded-lg bg-lime-50 px-2.5 py-1.5 text-xs font-semibold text-lime-700 hover:bg-lime-100"
-          >
-            {t(locale,"Reschedule","إعادة جدولة")}
-          </button>
-          <button
-            type="button"
+            onClick={() => onCancel?.(session.id)}
             className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-neutral-500 hover:bg-red-50 hover:text-red-500"
           >
             {t(locale,"Cancel","إلغاء")}

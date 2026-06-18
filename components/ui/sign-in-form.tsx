@@ -4,8 +4,10 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, LogIn } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useLocale, t } from '@/lib/locale'
 
 export function SignIn2() {
+  const { locale } = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/dashboard'
@@ -23,11 +25,11 @@ export function SignIn2() {
     try {
       // Basic validation
       if (!email || !password) {
-        setError('Please enter your email and password.')
+        setError(t(locale, 'Please enter your email and password.', 'يرجى إدخال البريد الإلكتروني وكلمة المرور.'))
         return
       }
       if (password.length < 6) {
-        setError('Password must be at least 6 characters.')
+        setError(t(locale, 'Password must be at least 6 characters.', 'يجب أن تكون كلمة المرور 6 أحرف على الأقل.'))
         return
       }
 
@@ -38,14 +40,14 @@ export function SignIn2() {
       })
 
       if (signInError) {
-        setError('Invalid email or password. Please try again.')
+        setError(t(locale, 'Invalid email or password. Please try again.', 'البريد الإلكتروني أو كلمة المرور غير صحيحة. حاول مرة أخرى.'))
         return
       }
 
       router.push(redirect)
       router.refresh()
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(t(locale, 'Something went wrong. Please try again.', 'حدث خطأ ما. حاول مرة أخرى.'))
     } finally {
       setIsLoading(false)
     }
@@ -58,8 +60,8 @@ export function SignIn2() {
         <div className="inline-flex items-center justify-center w-12 h-12 bg-[#4d7c0f]/10 rounded-2xl mb-4">
           <LogIn className="w-6 h-6 text-[#4d7c0f]" />
         </div>
-        <h1 className="text-2xl font-bold text-neutral-900">Welcome back</h1>
-        <p className="text-neutral-500 mt-1">Sign in to access your personalized health plan.</p>
+        <h1 className="text-2xl font-bold text-neutral-900">{t(locale, 'Welcome back', 'مرحباً بعودتك')}</h1>
+        <p className="text-neutral-500 mt-1">{t(locale, 'Sign in to access your personalized health plan.', 'سجّل الدخول للوصول إلى خطتك الصحية المخصصة.')}</p>
       </div>
 
       {/* Form */}
@@ -71,7 +73,7 @@ export function SignIn2() {
         )}
 
         <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-1.5">Email</label>
+          <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t(locale, 'Email', 'البريد الإلكتروني')}</label>
           <input
             type="email"
             value={email}
@@ -84,9 +86,9 @@ export function SignIn2() {
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-sm font-semibold text-neutral-700">Password</label>
+            <label className="block text-sm font-semibold text-neutral-700">{t(locale, 'Password', 'كلمة المرور')}</label>
             <a href="/forgot-password" className="text-xs text-[#4d7c0f] hover:underline">
-              Forgot password?
+              {t(locale, 'Forgot password?', 'نسيت كلمة المرور؟')}
             </a>
           </div>
           <input
@@ -107,11 +109,11 @@ export function SignIn2() {
           {isLoading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Signing in...
+              {t(locale, 'Signing in...', 'جارٍ تسجيل الدخول...')}
             </>
           ) : (
             <>
-              Get Started
+              {t(locale, 'Get Started', 'ابدأ الآن')}
               <LogIn className="w-4 h-4" />
             </>
           )}
@@ -120,9 +122,9 @@ export function SignIn2() {
 
       {/* Sign up link */}
       <p className="text-center text-sm text-neutral-500 mt-6">
-        Don&apos;t have an account?{' '}
+        {t(locale, "Don't have an account?", 'ليس لديك حساب؟')}{' '}
         <a href="/sign-up" className="text-[#4d7c0f] font-semibold hover:underline">
-          Create one
+          {t(locale, 'Create one', 'أنشئ حساباً')}
         </a>
       </p>
     </div>

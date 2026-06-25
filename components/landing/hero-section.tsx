@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Play, Star } from 'lucide-react'
+import { Play, Star, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
 import { useLocale, t } from '@/lib/locale'
 
@@ -14,6 +14,14 @@ const STATS = [
 ]
 
 const TRUST_TAGS = ['Nutrition', 'Meals', 'Snacks', 'Sculpting', 'Courses']
+
+const SERVICES = [
+  { icon: Stethoscope,     en: 'Consultations', ar: 'استشارات',    href: '/nutrition-consultations' },
+  { icon: UtensilsCrossed, en: 'Healthy Meals', ar: 'وجبات صحية',  href: '/healthy-meals' },
+  { icon: Cookie,          en: 'Snacks',        ar: 'سناكس',       href: '/healthy-snacks' },
+  { icon: Activity,        en: 'Sculpting',     ar: 'نحت الجسم',   href: '/body-sculpting' },
+  { icon: GraduationCap,   en: 'Courses',       ar: 'دورات',       href: '/training-courses' },
+]
 
 export function HeroSection() {
   const { locale } = useLocale()
@@ -104,16 +112,55 @@ export function HeroSection() {
               </div>
             </div>
 
-            <div className="relative w-full max-w-[540px]">
-              <Image
-                src="/hero-meal.png"
-                alt="Fresh healthy meal from Lover Diet Center"
-                width={1024}
-                height={980}
-                priority
-                sizes="(min-width: 1024px) 540px, 100vw"
-                className="h-auto w-full drop-shadow-[0_24px_40px_rgba(60,80,20,0.22)]"
-              />
+            <div className="group relative aspect-square w-full max-w-[540px]">
+              {/* Professional backdrop circle */}
+              <div className="absolute inset-0 -z-10 flex items-center justify-center" aria-hidden="true">
+                <div className="size-[88%] rounded-full bg-gradient-to-br from-lime-100 via-lime-50 to-white" />
+                <div className="absolute size-[88%] rounded-full ring-1 ring-lime-200/70" />
+                <div className="absolute size-[100%] rounded-full border border-dashed border-lime-300/50" />
+              </div>
+
+              {/* Meal image */}
+              <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-[0.92]">
+                <Image
+                  src="/hero-meal.png"
+                  alt="Fresh healthy meal from Lover Diet Center"
+                  width={1024}
+                  height={980}
+                  priority
+                  sizes="(min-width: 1024px) 540px, 100vw"
+                  className="h-auto w-[86%] drop-shadow-[0_24px_40px_rgba(60,80,20,0.22)]"
+                />
+              </div>
+
+              {/* Services that pop out on hover, arranged in a ring */}
+              {SERVICES.map((s, i) => {
+                const Icon = s.icon
+                const angle = (i / SERVICES.length) * 2 * Math.PI - Math.PI / 2
+                const radius = 46 // % from center
+                const left = 50 + radius * Math.cos(angle)
+                const top = 50 + radius * Math.sin(angle)
+                return (
+                  <Link
+                    key={s.href}
+                    href={s.href}
+                    style={{ left: `${left}%`, top: `${top}%`, transitionDelay: `${i * 60}ms` }}
+                    className="absolute z-20 flex -translate-x-1/2 -translate-y-1/2 scale-50 flex-col items-center gap-1 opacity-0 transition-all duration-500 group-hover:scale-100 group-hover:opacity-100"
+                  >
+                    <span className="flex size-14 items-center justify-center rounded-2xl border border-lime-100 bg-white text-lime-600 shadow-lg shadow-lime-900/10 transition-colors hover:bg-lime-600 hover:text-white sm:size-16">
+                      <Icon className="size-6 sm:size-7" />
+                    </span>
+                    <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-neutral-700 shadow-sm backdrop-blur">
+                      {locale === 'ar' ? s.ar : s.en}
+                    </span>
+                  </Link>
+                )
+              })}
+
+              {/* Hint shown before hover */}
+              <span className="pointer-events-none absolute bottom-1 left-1/2 z-20 -translate-x-1/2 rounded-full bg-lime-600/90 px-3 py-1 text-[11px] font-bold text-white shadow-md backdrop-blur transition-opacity duration-300 group-hover:opacity-0">
+                {t(locale, 'Hover to see our services', 'مرّر لرؤية خدماتنا')}
+              </span>
             </div>
           </div>
         </div>

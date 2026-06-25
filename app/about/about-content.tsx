@@ -50,13 +50,18 @@ export function AboutContent() {
               <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </a>
           </div>
-          <div className="relative h-[30rem]">
+          <div className="relative mx-auto flex aspect-[4/5] w-full max-w-md items-end justify-center overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-lime-100 via-lime-50 to-white">
+            {/* soft decorative ring */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
+              <div className="size-[78%] -translate-y-6 rounded-full bg-white/40 ring-1 ring-lime-200/60" />
+            </div>
             <Image
               src="/dr-wael.png"
               alt={t(locale, 'Dr. Wael Mostafa - Founder', 'د. وائل مصطفى - المؤسس')}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain object-bottom drop-shadow-xl"
+              width={796}
+              height={1173}
+              sizes="(max-width: 768px) 90vw, 440px"
+              className="relative z-10 h-[96%] w-auto object-contain object-bottom drop-shadow-2xl"
               priority
             />
           </div>

@@ -28,7 +28,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             className={cn(
               "flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur animate-in fade-in slide-in-from-bottom-2",
               t.tone === "success"
-                ? "bg-lime-600 text-white"
+                ? "bg-emerald-600 text-white"
                 : "bg-red-500 text-white"
             )}
           >

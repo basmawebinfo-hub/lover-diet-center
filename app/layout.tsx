@@ -52,12 +52,14 @@ export const metadata: Metadata = {
     siteName: 'Lover Diet Center',
     locale: 'en_AE',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Lover Diet Center' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Lover Diet Center — Science-Based Nutrition',
     description:
       'Personalized nutrition, chef-prepared meals, and certified experts. Book your free discovery call.',
+    images: ['/og-image.png'],
   },
   alternates: {
     canonical: siteUrl,

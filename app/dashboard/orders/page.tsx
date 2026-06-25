@@ -13,7 +13,7 @@ const STATUS: Record<string, { en: string; ar: string; cls: string }> = {
   pending:    { en: "Pending",    ar: "قيد الانتظار", cls: "bg-amber-50 text-amber-600" },
   processing: { en: "Processing", ar: "قيد التجهيز",  cls: "bg-blue-50 text-blue-600" },
   shipped:    { en: "Shipped",    ar: "تم الشحن",     cls: "bg-indigo-50 text-indigo-600" },
-  delivered:  { en: "Delivered",  ar: "تم التوصيل",   cls: "bg-lime-50 text-lime-700" },
+  delivered:  { en: "Delivered",  ar: "تم التوصيل",   cls: "bg-emerald-50 text-emerald-700" },
   cancelled:  { en: "Cancelled",  ar: "ملغي",         cls: "bg-red-50 text-red-500" },
 }
 
@@ -48,7 +48,7 @@ export default function OrdersPage() {
             </div>
             <h2 className="text-lg font-bold text-neutral-900">{t(locale, "No orders yet", "لا توجد طلبات بعد")}</h2>
             <p className="mt-1 text-sm text-neutral-500">{t(locale, "When you place an order, it will show up here.", "عند إتمام طلب، سيظهر هنا.")}</p>
-            <Link href="/dashboard/products" className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-lime-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-lime-800">
+            <Link href="/dashboard/products" className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">
               <ShoppingBag className="size-4" /> {t(locale, "Browse products", "تصفّح المنتجات")}
             </Link>
           </div>
@@ -81,7 +81,7 @@ export default function OrdersPage() {
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t border-neutral-50 pt-4">
                     <span className="text-sm text-neutral-500">{t(locale, "Total", "الإجمالي")}</span>
-                    <span className="text-lg font-bold text-lime-700">{order.total} {aed}</span>
+                    <span className="text-lg font-bold text-emerald-700">{order.total} {aed}</span>
                   </div>
                 </div>
               )

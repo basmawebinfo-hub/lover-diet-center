@@ -85,7 +85,7 @@ function SessionsInner() {
           <button
             type="button"
             onClick={() => setShowForm(!showForm)}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-lime-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-lime-800"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800"
           >
             <Plus className="size-4" />
             {t(locale,"Book new","حجز جديد")}
@@ -93,7 +93,7 @@ function SessionsInner() {
         </header>
 
         {showForm && (
-          <section className="rounded-3xl border border-lime-200 bg-lime-50/50 p-6">
+          <section className="rounded-3xl border border-emerald-200 bg-emerald-50/50 p-6">
             <h2 className="font-bold text-neutral-900">{t(locale,"Book a new session","حجز جلسة جديدة")}</h2>
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label={t(locale,"Type","النوع")}>
@@ -145,7 +145,7 @@ function SessionsInner() {
                 type="button"
                 onClick={book}
                 disabled={!draft.date}
-                className="rounded-xl bg-lime-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-lime-800 disabled:opacity-50"
+                className="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
               >
                 {t(locale,"Confirm booking","تأكيد الحجز")}
               </button>
@@ -208,10 +208,10 @@ function SessionCard({ session, past, onCancel }: { session: Session; past?: boo
     <div
       className={cn(
         "flex items-start gap-4 rounded-2xl border bg-white p-4",
-        past ? "border-neutral-100 opacity-80" : "border-lime-100"
+        past ? "border-neutral-100 opacity-80" : "border-emerald-100"
       )}
     >
-      <div className="flex size-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-lime-50 text-lime-700">
+      <div className="flex size-14 shrink-0 flex-col items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
         <span className="text-[10px] font-semibold uppercase tracking-wider">
           {new Date(session.date).toLocaleDateString(locale === "ar" ? "ar-AE" : "en-GB", { month: "short" })}
         </span>
@@ -224,7 +224,7 @@ function SessionCard({ session, past, onCancel }: { session: Session; past?: boo
           <span className="text-xl">{TYPE_EMOJI[session.type]}</span>
           <p className="font-semibold text-neutral-900">{locale === "ar" ? session.typeAr : session.typeEn}</p>
           {session.status === "completed" && (
-            <span className="rounded-full bg-lime-100 px-2 py-0.5 text-[10px] font-semibold text-lime-700">
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
               {t(locale,"Done","تمت")}
             </span>
           )}

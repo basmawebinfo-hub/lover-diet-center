@@ -46,7 +46,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const cartCount = state.cart.reduce((s, c) => s + c.quantity, 0)
 
   return (
-    <div className="min-h-screen bg-[#F0FAF8] lg:grid lg:grid-cols-[280px_1fr]">
+    <div className="min-h-screen bg-[#f6faf8] lg:grid lg:grid-cols-[280px_1fr]">
       {/* Sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:border-r lg:border-neutral-100 lg:bg-white">
         <div className="flex items-center gap-2.5 px-6 py-6">
@@ -58,15 +58,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               height={36}
               className="size-9 rounded-full object-cover"
             />
-            <span className="text-xl font-bold text-lime-700 tracking-tight">
-              lovers<span className="text-lime-500">dc</span>
+            <span className="text-xl font-bold text-emerald-700 tracking-tight">
+              lovers<span className="text-emerald-500">dc</span>
             </span>
           </Link>
         </div>
 
         {user && (
-          <div className="mx-4 mb-4 rounded-2xl border border-lime-100 bg-gradient-to-br from-lime-50 to-white p-4">
-            <p className="text-xs font-semibold text-lime-700">{t(locale, "Welcome back", "مرحباً بعودتك")}</p>
+          <div className="mx-4 mb-4 rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-4">
+            <p className="text-xs font-semibold text-emerald-700">{t(locale, "Welcome back", "مرحباً بعودتك")}</p>
             <p className="mt-0.5 truncate text-base font-bold text-neutral-900">
               {user.nameEn}
             </p>
@@ -87,14 +87,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                   active
-                    ? "bg-lime-50 text-lime-700"
+                    ? "bg-emerald-50 text-emerald-700"
                     : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
                 )}
               >
                 <Icon
                   className={cn(
                     "size-4.5",
-                    active ? "text-lime-600" : "text-neutral-400 group-hover:text-neutral-600"
+                    active ? "text-emerald-600" : "text-neutral-400 group-hover:text-neutral-600"
                   )}
                 />
                 <span className="flex-1">{locale === "ar" ? item.labelAr : item.label}</span>
@@ -126,8 +126,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* Mobile top bar */}
       <div className="sticky top-0 z-20 flex items-center justify-between border-b border-neutral-100 bg-white/90 px-4 py-3 backdrop-blur lg:hidden">
-        <Link href="/" className="text-lg font-bold text-lime-700 tracking-tight">
-          lovers<span className="text-lime-500">dc</span>
+        <Link href="/" className="text-lg font-bold text-emerald-700 tracking-tight">
+          lovers<span className="text-emerald-500">dc</span>
         </Link>
         <div className="flex items-center gap-2">
           <button
@@ -170,7 +170,7 @@ export function MobileNav() {
             href={item.href}
             className={cn(
               "flex flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 text-[10px] font-semibold",
-              active ? "text-lime-700" : "text-neutral-500"
+              active ? "text-emerald-700" : "text-neutral-500"
             )}
           >
             <Icon className="size-4" />

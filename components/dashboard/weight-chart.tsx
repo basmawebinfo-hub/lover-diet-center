@@ -51,7 +51,7 @@ export function WeightChart({ logs, goalKg }: { logs: WeightLog[]; goalKg?: numb
               onClick={() => setRange(r.v)}
               className={cn(
                 "rounded-full px-3 py-1 text-xs font-bold transition",
-                range === r.v ? "bg-white text-lime-700 shadow-sm" : "text-neutral-500"
+                range === r.v ? "bg-white text-emerald-700 shadow-sm" : "text-neutral-500"
               )}
             >
               {r.label}
@@ -69,8 +69,8 @@ export function WeightChart({ logs, goalKg }: { logs: WeightLog[]; goalKg?: numb
           <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: "auto" }}>
             <defs>
               <linearGradient id="wfill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#84cc16" stopOpacity="0.25" />
-                <stop offset="100%" stopColor="#84cc16" stopOpacity="0" />
+                <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
               </linearGradient>
             </defs>
             {/* goal line */}
@@ -78,9 +78,9 @@ export function WeightChart({ logs, goalKg }: { logs: WeightLog[]; goalKg?: numb
               <line x1={PAD} y1={y(goalKg)} x2={W - PAD} y2={y(goalKg)} stroke="#f97316" strokeWidth="1.5" strokeDasharray="5 4" />
             )}
             <path d={areaPath} fill="url(#wfill)" />
-            <path d={linePath} fill="none" stroke="#4d7c0f" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+            <path d={linePath} fill="none" stroke="#059669" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
             {data.map((d, i) => (
-              <circle key={d.id} cx={x(i)} cy={y(d.weightKg)} r="3.5" fill="#fff" stroke="#4d7c0f" strokeWidth="2" />
+              <circle key={d.id} cx={x(i)} cy={y(d.weightKg)} r="3.5" fill="#fff" stroke="#059669" strokeWidth="2" />
             ))}
           </svg>
           <div className="mt-2 flex items-center justify-between text-xs text-neutral-400">

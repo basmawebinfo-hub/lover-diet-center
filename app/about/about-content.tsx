@@ -50,8 +50,8 @@ export function AboutContent() {
               <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </a>
           </div>
-          {/* Founder photo with brand-colored circle backdrop — swaps on hover */}
-          <div className="group relative mx-auto aspect-square w-full max-w-md">
+          {/* Founder photo with brand-colored circle backdrop */}
+          <div className="relative mx-auto aspect-square w-full max-w-md">
             {/* Circle shape in brand colors */}
             <div className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
               <div className="size-[86%] rounded-full bg-gradient-to-br from-[#4d7c0f] to-[#3f6212]" />
@@ -59,8 +59,8 @@ export function AboutContent() {
               <div className="absolute size-[97%] rounded-full border border-dashed border-[#4d7c0f]/25" />
             </div>
 
-            {/* Image 1 — Dr. Wael (default) */}
-            <div className="absolute inset-0 flex items-end justify-center transition-opacity duration-500 group-hover:opacity-0">
+            {/* Dr. Wael */}
+            <div className="absolute inset-0 flex items-end justify-center">
               <Image
                 src="/dr-wael.png"
                 alt={t(locale, 'Dr. Wael Mostafa - Founder', 'د. وائل مصطفى - المؤسس')}
@@ -71,23 +71,6 @@ export function AboutContent() {
                 priority
               />
             </div>
-
-            {/* Image 2 — team (on hover) */}
-            <div className="absolute inset-0 flex items-end justify-center opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-              <Image
-                src="/dr-wael-team.png"
-                alt={t(locale, 'Lover Diet Center leadership', 'قيادة Lover Diet Center')}
-                width={443}
-                height={507}
-                sizes="(max-width: 768px) 90vw, 440px"
-                className="h-[96%] w-auto object-contain object-bottom drop-shadow-2xl"
-              />
-            </div>
-
-            {/* hint */}
-            <span className="pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-bold text-[#4d7c0f] shadow-md backdrop-blur transition-opacity duration-300 group-hover:opacity-0">
-              {t(locale, 'Hover to meet the team', 'مرّر لرؤية الفريق')}
-            </span>
           </div>
         </div>
       </section>

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { WHATSAPP_DIRECT } from '@/lib/site'
@@ -9,18 +8,6 @@ import { useLocale, t } from '@/lib/locale'
 
 export function AboutContent() {
   const { locale } = useLocale()
-
-  // Two founder photos that auto-rotate (and can be tapped to switch).
-  const photos = [
-    { src: '/dr-wael.png', alt: t(locale, 'Dr. Wael Mostafa - Founder', 'د. وائل مصطفى - المؤسس') },
-    { src: '/dr-wael-team.png', alt: t(locale, 'Dr. Wael Mostafa with the team', 'د. وائل مصطفى مع الفريق') },
-  ]
-  const [photoIdx, setPhotoIdx] = useState(0)
-  useEffect(() => {
-    const id = setInterval(() => setPhotoIdx((i) => (i + 1) % photos.length), 4000)
-    return () => clearInterval(id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const stats = [
     { value: '3,000+', label: t(locale, 'Happy Clients', 'عميل سعيد') },
@@ -63,30 +50,15 @@ export function AboutContent() {
               <ArrowRight className="w-4 h-4 rtl:rotate-180" />
             </a>
           </div>
-          <div className="relative h-[30rem] rounded-3xl bg-gradient-to-b from-[#e7f6ef] via-[#f0faf7] to-white overflow-hidden">
-            {photos.map((p, i) => (
-              <Image
-                key={p.src}
-                src={p.src}
-                alt={p.alt}
-                fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className={`object-contain object-bottom transition-opacity duration-700 ${i === photoIdx ? 'opacity-100' : 'opacity-0'}`}
-                priority={i === 0}
-              />
-            ))}
-            {/* switch dots */}
-            <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-              {photos.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setPhotoIdx(i)}
-                  aria-label={`${t(locale, 'Photo', 'صورة')} ${i + 1}`}
-                  className={`h-2 rounded-full transition-all ${i === photoIdx ? 'w-6 bg-[#4d7c0f]' : 'w-2 bg-[#4d7c0f]/30'}`}
-                />
-              ))}
-            </div>
+          <div className="relative h-[30rem]">
+            <Image
+              src="/dr-wael.png"
+              alt={t(locale, 'Dr. Wael Mostafa - Founder', 'د. وائل مصطفى - المؤسس')}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-contain object-bottom drop-shadow-xl"
+              priority
+            />
           </div>
         </div>
       </section>

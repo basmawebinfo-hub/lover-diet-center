@@ -80,9 +80,9 @@ export function NutritionConsultationsContent() {
           </div>
 
           {/* Visual */}
-          <div className="relative">
-            <div className="relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2rem] bg-lime-50 shadow-2xl shadow-lime-900/15 mx-auto">
-              <Image src="/dr-wael.png" alt={t(locale, 'Lead nutritionist at Lover Diet Center', 'كبير أخصائيي التغذية في Lover Diet Center')} fill priority sizes="(min-width:1024px) 420px, 100vw" className="object-cover object-top" />
+          <div className="relative flex justify-center">
+            <div className="relative aspect-[4/5] w-full max-w-xs overflow-hidden rounded-[2rem] bg-gradient-to-b from-lime-100 via-lime-50 to-white mx-auto">
+              <Image src="/dr-wael.png" alt={t(locale, 'Lead nutritionist at Lover Diet Center', 'كبير أخصائيي التغذية في Lover Diet Center')} fill priority sizes="(min-width:1024px) 320px, 80vw" className="object-contain object-bottom" />
             </div>
           </div>
         </div>

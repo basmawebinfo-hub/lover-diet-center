@@ -46,7 +46,7 @@ export function ContactContent() {
     {
       icon: MapPin,
       title: t(locale, 'Location', 'الموقع'),
-      value: t(locale, 'UAE — Dubai & Abu Dhabi', 'الإمارات — دبي وأبوظبي'),
+      value: t(locale, 'UAE', 'الإمارات'),
       sub: t(locale, 'In-clinic & online sessions', 'جلسات في العيادة وعبر الإنترنت'),
       link: null,
       linkLabel: null,
@@ -55,7 +55,7 @@ export function ContactContent() {
     {
       icon: Clock,
       title: t(locale, 'Working Hours', 'ساعات العمل'),
-      value: t(locale, 'Sat–Thu: 9am – 9pm', 'السبت–الخميس: 9 صباحاً – 9 مساءً'),
+      value: t(locale, 'Sat–Thu: 9am – 6pm', 'السبت–الخميس: 9 صباحاً – 6 مساءً'),
       sub: t(locale, 'Friday: by appointment', 'الجمعة: بموعد مسبق'),
       link: null,
       linkLabel: null,
@@ -144,6 +144,33 @@ export function ContactContent() {
         </div>
       </section>
 
+      {/* Connect on social — shown near the top */}
+      <section className="px-4 mt-12">
+        <div className="mx-auto max-w-5xl rounded-3xl border border-neutral-100 bg-[#f0faf7] p-6 sm:p-8 text-center">
+          <h2 className="text-xl font-bold text-neutral-900">{t(locale, 'Connect with us on social media', 'تواصل معنا على صفحات التواصل الاجتماعي')}</h2>
+          <p className="mt-1 text-sm text-neutral-500">{t(locale, 'Tips, recipes, and success stories.', 'نصائح ووصفات وقصص نجاح.')}</p>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            {[
+              { label: 'Instagram', href: socialLinks.instagram },
+              { label: 'Facebook', href: socialLinks.facebook },
+              { label: 'TikTok', href: socialLinks.tiktok },
+              { label: 'YouTube', href: socialLinks.youtube },
+              { label: 'Pinterest', href: socialLinks.pinterest },
+            ].map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-xl border border-neutral-200 bg-white px-6 py-3 text-sm font-semibold text-neutral-700 transition-colors hover:border-[#4d7c0f] hover:text-[#4d7c0f]"
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Form + benefits */}
       <section className="py-20 px-4">
         <div className="max-w-5xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
@@ -207,28 +234,6 @@ export function ContactContent() {
               ))}
             </ul>
 
-            <div className="rounded-3xl bg-[#f0faf7] p-6">
-              <h3 className="font-bold text-neutral-900 mb-1">{t(locale, 'Follow Us', 'تابعنا')}</h3>
-              <p className="text-neutral-500 text-sm mb-4">{t(locale, 'Tips, recipes, and success stories.', 'نصائح ووصفات وقصص نجاح.')}</p>
-              <div className="flex flex-wrap gap-3">
-                {[
-                  { label: 'Facebook', href: socialLinks.facebook },
-                  { label: 'TikTok', href: socialLinks.tiktok },
-                  { label: 'YouTube', href: socialLinks.youtube },
-                  { label: 'Pinterest', href: socialLinks.pinterest },
-                ].map((s) => (
-                  <a
-                    key={s.label}
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-5 py-2.5 bg-white border border-neutral-200 rounded-xl font-semibold text-sm text-neutral-700 hover:border-[#4d7c0f] hover:text-[#4d7c0f] transition-colors"
-                  >
-                    {s.label}
-                  </a>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </section>

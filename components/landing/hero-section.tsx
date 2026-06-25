@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { Play, Star, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } from 'lucide-react'
+import { Play, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
 import { useLocale, t } from '@/lib/locale'
 
@@ -90,28 +90,6 @@ export function HeroSection() {
 
           {/* ── RIGHT: Hero meal with green accents ── */}
           <div className="relative flex items-center justify-center lg:justify-end">
-            {/* Floating review card */}
-            <div className="absolute -top-2 right-2 z-20 flex items-center gap-3 rounded-2xl bg-white px-3.5 py-2.5 shadow-xl shadow-neutral-900/15 sm:right-6">
-              <div className="flex -space-x-2.5">
-                {[['S','#65a30d'],['A','#c97a1f'],['N','#9bcf24']].map(([l,c],i) => (
-                  <span
-                    key={i}
-                    className="flex size-8 items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white"
-                    style={{ backgroundColor: c as string, color: l === 'N' ? '#243b00' : '#fff' }}
-                  >
-                    {l}
-                  </span>
-                ))}
-              </div>
-              <div>
-                <p className="text-xs font-bold text-neutral-900">{t(locale, 'Our Happy Customer', 'عملاؤنا السعداء')}</p>
-                <p className="flex items-center gap-1 text-[11px] text-neutral-500">
-                  <Star className="size-3 fill-amber-400 text-amber-400" />
-                  <span className="font-bold text-amber-500">4.9</span> (2,000+ Reviews)
-                </p>
-              </div>
-            </div>
-
             <div className="group relative aspect-square w-full max-w-[540px]">
               {/* Professional backdrop circle */}
               <div className="absolute inset-0 -z-10 flex items-center justify-center" aria-hidden="true">

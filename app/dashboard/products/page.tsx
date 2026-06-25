@@ -68,7 +68,7 @@ export default function ProductsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t(locale, "Search products…", "ابحث عن المنتجات…")}
-              className="w-full rounded-xl border border-neutral-200 bg-white py-2.5 ps-10 pe-4 text-sm text-neutral-900 outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
+              className="w-full rounded-xl border border-neutral-200 bg-white py-2.5 ps-10 pe-4 text-sm text-neutral-900 outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
             />
           </div>
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -81,8 +81,8 @@ export default function ProductsPage() {
                 className={cn(
                   "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition",
                   category === c.id
-                    ? "bg-lime-700 text-white"
-                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-lime-300"
+                    ? "bg-emerald-700 text-white"
+                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-emerald-300"
                 )}
               >
                 {locale === "ar" ? c.labelAr : c.label}
@@ -120,9 +120,9 @@ function ProductCard({
 }) {
   const { locale } = useLocale()
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white transition hover:border-lime-300 hover:shadow-md">
+    <div className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white transition hover:border-emerald-300 hover:shadow-md">
       {/* Clickable image -> details */}
-      <Link href={`/dashboard/products/${product.id}`} className="relative block h-44 overflow-hidden bg-gradient-to-br from-lime-50 to-white">
+      <Link href={`/dashboard/products/${product.id}`} className="relative block h-44 overflow-hidden bg-gradient-to-br from-emerald-50 to-white">
         <Image
           src={product.imageUrl}
           alt={product.nameEn}
@@ -130,14 +130,14 @@ function ProductCard({
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-lime-700 backdrop-blur">
+        <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 backdrop-blur">
           {product.category}
         </span>
       </Link>
 
       <div className="flex flex-1 flex-col p-4">
         <Link href={`/dashboard/products/${product.id}`} className="block">
-          <h3 className="font-semibold text-neutral-900 transition-colors group-hover:text-lime-700">{locale === "ar" ? product.nameAr : product.nameEn}</h3>
+          <h3 className="font-semibold text-neutral-900 transition-colors group-hover:text-emerald-700">{locale === "ar" ? product.nameAr : product.nameEn}</h3>
           <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{locale === "ar" ? product.descriptionAr : product.descriptionEn}</p>
         </Link>
 
@@ -153,7 +153,7 @@ function ProductCard({
             className={cn(
               "inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold transition",
               product.inStock
-                ? "bg-gradient-to-b from-lime-400 to-lime-500 text-lime-950 hover:-translate-y-0.5 shadow-sm"
+                ? "bg-gradient-to-b from-emerald-400 to-emerald-500 text-emerald-950 hover:-translate-y-0.5 shadow-sm"
                 : "cursor-not-allowed bg-neutral-100 text-neutral-400"
             )}
           >
@@ -163,7 +163,7 @@ function ProductCard({
         </div>
         <Link
           href={`/dashboard/products/${product.id}`}
-          className="mt-2 text-center text-xs font-semibold text-lime-700 hover:underline"
+          className="mt-2 text-center text-xs font-semibold text-emerald-700 hover:underline"
         >
           {t(locale,"View details","عرض التفاصيل")} →
         </Link>

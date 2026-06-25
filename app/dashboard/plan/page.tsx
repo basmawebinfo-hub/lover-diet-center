@@ -43,13 +43,13 @@ export default function PlanPage() {
         </header>
 
         {/* Doctor notes */}
-        <section className="rounded-3xl border border-lime-100 bg-gradient-to-br from-lime-50 to-white p-6">
+        <section className="rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-6">
           <div className="flex items-start gap-3">
-            <div className="flex size-10 items-center justify-center rounded-2xl bg-lime-600 text-white">
+            <div className="flex size-10 items-center justify-center rounded-2xl bg-emerald-600 text-white">
               <ChefHat className="size-5" />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-lime-700">
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
                 {t(locale, "Doctor's Notes", "ملاحظات الطبيب")}
               </p>
               <p className="mt-1 text-base font-semibold text-neutral-900">
@@ -117,7 +117,7 @@ export default function PlanPage() {
                       className="rounded-xl border border-neutral-100 bg-neutral-50 p-3"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-lime-700">
+                        <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
                           {item.meal.mealType}
                         </span>
                         <span className="text-xs font-bold text-neutral-700">
@@ -131,7 +131,7 @@ export default function PlanPage() {
                         {locale === "ar" ? item.meal.descriptionAr : item.meal.descriptionEn}
                       </p>
                       <div className="mt-2 flex items-center gap-2 text-[10px] font-semibold">
-                        <span className="rounded bg-lime-100 px-1.5 py-0.5 text-lime-700">
+                        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-emerald-700">
                           P {item.meal.protein}g
                         </span>
                         <span className="rounded bg-yellow-100 px-1.5 py-0.5 text-yellow-700">
@@ -157,7 +157,7 @@ export default function PlanPage() {
             </h2>
             <a
               href="/dashboard/products"
-              className="text-sm font-semibold text-lime-700 hover:underline"
+              className="text-sm font-semibold text-emerald-700 hover:underline"
             >
               {t(locale, "View all", "عرض الكل")} →
             </a>
@@ -172,16 +172,16 @@ export default function PlanPage() {
                 key={product.id}
                 className="rounded-2xl border border-neutral-100 bg-neutral-50 p-4"
               >
-                <div className="flex h-24 items-center justify-center rounded-xl bg-gradient-to-br from-lime-100 to-lime-50 text-3xl">
+                <div className="flex h-24 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 text-3xl">
                   🥗
                 </div>
                 <p className="mt-3 font-semibold text-neutral-900">{locale === "ar" ? product.nameAr : product.nameEn}</p>
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="font-bold text-lime-700">{product.price} {t(locale,"AED","درهم")}</span>
+                  <span className="font-bold text-emerald-700">{product.price} {t(locale,"AED","درهم")}</span>
                   <button
                     type="button"
                     onClick={() => addToCart(product.id)}
-                    className="inline-flex items-center gap-1 rounded-lg bg-lime-700 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-lime-800"
+                    className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800"
                   >
                     <ShoppingCart className="size-3" />
                     {t(locale, "Add", "أضف")}
@@ -211,7 +211,7 @@ function MacroCard({
 }) {
   const colorMap = {
     orange: "bg-orange-50 text-orange-700",
-    teal: "bg-lime-50 text-lime-700",
+    teal: "bg-emerald-50 text-emerald-700",
     yellow: "bg-yellow-100 text-yellow-700",
     blue: "bg-blue-50 text-blue-700",
   } as const

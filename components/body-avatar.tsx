@@ -89,7 +89,7 @@ export function BodyAvatar({
         className={cn(
           "relative overflow-hidden bg-gradient-to-b from-neutral-50 to-white",
           fullBody ? "w-full rounded-2xl" : cn("rounded-3xl shadow-sm", cls),
-          improved && "ring-2 ring-lime-400 ring-offset-2"
+          improved && "ring-2 ring-emerald-400 ring-offset-2"
         )}
         style={fullBody ? { aspectRatio: "3 / 4" } : undefined}
       >
@@ -108,7 +108,7 @@ export function BodyAvatar({
 
         {/* Improvement badge */}
         {improved && (
-          <div className="absolute top-2 right-2 bg-lime-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow">
+          <div className="absolute top-2 right-2 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow">
             {t(locale, "Progress!", "تقدّم!")}
           </div>
         )}
@@ -123,9 +123,9 @@ export function BodyAvatar({
 
       {/* BMI badge */}
       {showBMI && (
-        <div className="flex items-center gap-1.5 bg-lime-50 border border-lime-100 rounded-full px-3 py-1">
-          <span className="text-xs text-lime-600 font-medium">BMI</span>
-          <span className="text-sm font-bold text-lime-700">{current.bmi}</span>
+        <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 rounded-full px-3 py-1">
+          <span className="text-xs text-emerald-600 font-medium">BMI</span>
+          <span className="text-sm font-bold text-emerald-700">{current.bmi}</span>
         </div>
       )}
     </div>
@@ -174,9 +174,9 @@ export function BodyComparison({
       <div className="flex flex-col items-center gap-1 pb-8">
         {lostKg > 0 ? (
           <>
-            <div className="text-2xl font-black text-lime-600">-{lostKg.toFixed(1)}</div>
-            <div className="text-xs text-lime-500 font-semibold">{t(locale, "kg lost", "كجم مفقودة")}</div>
-            <div className="text-xl text-lime-400 mt-1">→</div>
+            <div className="text-2xl font-black text-emerald-600">-{lostKg.toFixed(1)}</div>
+            <div className="text-xs text-emerald-500 font-semibold">{t(locale, "kg lost", "كجم مفقودة")}</div>
+            <div className="text-xl text-emerald-400 mt-1">→</div>
           </>
         ) : (
           <div className="text-xl text-neutral-300">→</div>
@@ -185,10 +185,10 @@ export function BodyComparison({
 
       {/* After */}
       <div className="flex flex-col items-center gap-2">
-        <p className="text-xs font-semibold text-lime-600 uppercase tracking-wider">{t(locale, "Now", "الآن")}</p>
+        <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">{t(locale, "Now", "الآن")}</p>
         <div className={cn(
           "relative w-[140px] h-[140px] rounded-2xl overflow-hidden bg-neutral-100",
-          !sameStage && "ring-2 ring-lime-400 ring-offset-2"
+          !sameStage && "ring-2 ring-emerald-400 ring-offset-2"
         )}>
           <Image
             src={`/body-stages/${current.gender}/${current.stage}.png`}
@@ -198,7 +198,7 @@ export function BodyComparison({
             sizes="140px"
           />
         </div>
-        <p className="text-sm font-bold text-lime-700">{currentWeightKg} {kg}</p>
+        <p className="text-sm font-bold text-emerald-700">{currentWeightKg} {kg}</p>
       </div>
     </div>
   )

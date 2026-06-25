@@ -13,13 +13,14 @@ const routes = [
   '/training-courses',
   '/sign-in',
   '/sign-up',
-] as const
+]
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const now = new Date()
   return routes.map((route) => ({
     url: `${siteUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: (route === '' ? 'weekly' : 'monthly') as const,
+    lastModified: now,
+    changeFrequency: route === '' ? 'weekly' : 'monthly',
     priority: route === '' ? 1 : 0.8,
   }))
 }

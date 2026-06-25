@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    // Allow images from any domain (update with specific domains when backend is added)
+    // Serve modern, smaller formats automatically (Next optimizes local images on Vercel)
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [],
   },
   experimental: {

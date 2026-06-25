@@ -14,6 +14,7 @@ export function waLink(message: string) {
 
 export const socialLinks = {
   facebook: 'https://www.facebook.com/wael.mousa.167/',
+  instagram: 'https://www.instagram.com/lovers_diet_center',
   tiktok: 'https://www.tiktok.com/@loversdiet',
   youtube: 'https://www.youtube.com/channel/UCb0n5fTajQsT8oUC3_2sG6Q',
   pinterest:

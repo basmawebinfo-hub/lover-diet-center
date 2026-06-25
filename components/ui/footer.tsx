@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { WHATSAPP_NUMBER, socialLinks } from '@/lib/site'
+import { socialLinks } from '@/lib/site'
 import { useLocale, t } from '@/lib/locale'
 
 const SOCIALS = [
@@ -155,21 +155,10 @@ export function FooterSimple() {
         </div>
 
         {/* Bottom bar */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/8 py-6 sm:flex-row">
+        <div className="border-t border-white/8 py-6 text-center">
           <p className="text-sm text-neutral-500">
             © {new Date().getFullYear()} Lover Diet Center. {t(locale, 'All rights reserved.', 'جميع الحقوق محفوظة.')}
           </p>
-          <div className="flex items-center gap-4 text-sm text-neutral-500">
-            <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-lime-400">
-              {t(locale, 'WhatsApp', 'واتساب')}
-            </a>
-            <span className="text-neutral-700">·</span>
-            <a href="mailto:support@loverdiet.com" className="transition-colors hover:text-lime-400">
-              {t(locale, 'Email', 'البريد الإلكتروني')}
-            </a>
-            <span className="text-neutral-700">·</span>
-            <span className="text-neutral-600">{t(locale, 'UAE', 'الإمارات')}</span>
-          </div>
         </div>
       </div>
     </footer>

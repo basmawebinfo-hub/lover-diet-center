@@ -15,8 +15,9 @@ export function ConditionalShell({ children }: { children: React.ReactNode }) {
   )
   // The dashboard has its own sidebar/header — hide the public chrome on every /dashboard route.
   const inDashboard = pathname === '/dashboard' || pathname.startsWith('/dashboard/')
+  const inAdmin = pathname === '/admin' || pathname.startsWith('/admin/')
 
-  if (hideExact || inDashboard) {
+  if (hideExact || inDashboard || inAdmin) {
     return <>{children}</>
   }
 

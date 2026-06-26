@@ -80,3 +80,5 @@ export const adminRevenue = [
   { month: "May", value: 34800 },
   { month: "Jun", value: 38900 },
 ]
+
+// admin data v1

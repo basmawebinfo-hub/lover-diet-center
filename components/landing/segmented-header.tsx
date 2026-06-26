@@ -24,6 +24,7 @@ type NavItem = {
 
 const NAV_LINKS: NavItem[] = [
   { id: 'about', en: 'About', ar: 'من نحن', href: '/about' },
+  { id: 'shop', en: 'Shop', ar: 'المتجر', href: '/shop' },
   {
     id: 'services',
     en: 'Services',

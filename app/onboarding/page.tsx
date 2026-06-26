@@ -111,9 +111,9 @@ export default function OnboardingPage() {
           <p className="mb-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
             {t(locale, `Step ${step} of ${TOTAL_STEPS}`, `الخطوة ${step} من ${TOTAL_STEPS}`)}
           </p>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+          <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
             <div
-              className="h-full rounded-full bg-[#34857b] transition-all duration-500"
+              className="absolute inset-y-0 start-0 rounded-full bg-[#34857b] transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -657,7 +657,7 @@ function ValueSlider({
       <div className="relative px-1">
         <div className="relative h-3 w-full rounded-full bg-neutral-100">
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500"
+            className="absolute inset-y-0 start-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500"
             style={{ width: `${pct}%` }}
           />
         </div>

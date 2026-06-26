@@ -100,7 +100,7 @@ export default function OnboardingPage() {
   const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100
 
   return (
-    <div className="min-h-screen bg-[#f3fae6] lg:grid lg:grid-cols-2">
+    <div className="min-h-screen bg-[#e7f5ee] lg:grid lg:grid-cols-2">
       <PreviewPanel
         data={data}
         bmi={bmi}
@@ -113,13 +113,13 @@ export default function OnboardingPage() {
           </p>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
             <div
-              className="h-full rounded-full bg-[#4d7c0f] transition-all duration-500"
+              className="h-full rounded-full bg-[#34857b] transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
           <div className="mt-6 mb-2 lg:hidden">
-            <span className="text-xl font-bold text-lime-700 tracking-tight">
-              lovers<span className="text-lime-500">dc</span>
+            <span className="text-xl font-bold text-[#1f5d54] tracking-tight">
+              lovers<span className="text-[#34857b]">dc</span>
             </span>
           </div>
         </div>
@@ -155,7 +155,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={next}
                 disabled={!canContinue}
-                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#4d7c0f] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#3f6212] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#34857b] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1f5d54] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {step === 7 ? (
                   <>
@@ -221,15 +221,15 @@ function AIAnalysisStep({ data }: { data: any }) {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
       <div className="relative mb-6">
-        <div className="absolute -inset-4 rounded-full bg-lime-400/20 blur-xl animate-pulse" />
-        <Sparkles className="relative mx-auto h-16 w-16 text-lime-600 animate-bounce" />
+        <div className="absolute -inset-4 rounded-full bg-emerald-400/20 blur-xl animate-pulse" />
+        <Sparkles className="relative mx-auto h-16 w-16 text-emerald-600 animate-bounce" />
       </div>
       <h2 className="text-2xl font-bold text-neutral-900">{t(locale, "AI Analysis", "تحليل بالذكاء الاصطناعي")}</h2>
       <p className="mt-2 text-sm text-neutral-500">
         {t(locale, "Computing your personalized diet plan...", "نحسب خطتك الغذائية المخصصة...")}
       </p>
-      <div className="mt-6 w-full max-w-xs h-2 rounded-full bg-lime-100 overflow-hidden">
-        <div className="h-full bg-lime-500 animate-pulse rounded-full" style={{ width: '60%' }} />
+      <div className="mt-6 w-full max-w-xs h-2 rounded-full bg-emerald-100 overflow-hidden">
+        <div className="h-full bg-emerald-500 animate-pulse rounded-full" style={{ width: '60%' }} />
       </div>
     </div>
   )
@@ -245,86 +245,73 @@ function PreviewPanel({
   step: number
 }) {
   const { locale } = useLocale()
-  const analysis = useMemo(
-    () =>
-      analyzeUser(
-        {
-          age: data.age,
-          gender: data.gender,
-          heightCm: data.heightCm,
-          startWeightKg: data.weightKg,
-          currentWeightKg: data.weightKg,
-          goal: data.goal,
-          activityLevel: data.activity,
-        },
-        locale
-      ),
-    [data, locale]
-  )
-
+  void bmi
   return (
-    <div className="hidden lg:flex sticky top-0 h-screen flex-col items-center justify-center bg-[#4d7c0f] text-white p-8">
-      <div
-        className="absolute -top-20 -start-20 size-64 rounded-full bg-lime-600/30 blur-3xl"
-        aria-hidden
-      />
-      <div
-        className="absolute -bottom-20 -end-20 size-64 rounded-full bg-lime-400/20 blur-3xl"
-        aria-hidden
-      />
-      <div className="relative z-10 flex w-full max-w-sm flex-col">
-        <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white/80 backdrop-blur-sm">
-          <Sparkles className="size-3.5" />
-          {t(locale, "LIVE PREVIEW", "معاينة مباشرة")}
-        </div>
-        <h2 className="text-2xl font-bold leading-tight">
-          {data.name ? t(locale, `Hello, ${data.name}`, `مرحباً، ${data.name}`) : t(locale, "Your profile", "ملفك الشخصي")}
-        </h2>
-        <p className="mt-2 text-sm text-white/70">
-          {t(locale, "As you fill in your details, we calculate your BMI and tailor the plan.", "بينما تُدخل بياناتك، نحسب مؤشر كتلة جسمك ونصمّم الخطة لك.")}
+    <div className="relative hidden overflow-hidden lg:block">
+      {/* Mint nature scene (inspired by reference) */}
+      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" aria-hidden>
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#e5f7e2" />
+            <stop offset="55%" stopColor="#bfe9cf" />
+            <stop offset="100%" stopColor="#a4ddbf" />
+          </linearGradient>
+          <linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#8fd3b3" />
+            <stop offset="100%" stopColor="#6fc4a0" />
+          </linearGradient>
+          <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#4fae8e" />
+            <stop offset="100%" stopColor="#2f8f72" />
+          </linearGradient>
+          <linearGradient id="hill3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#1f6a57" />
+            <stop offset="100%" stopColor="#134a3c" />
+          </linearGradient>
+        </defs>
+        <rect width="600" height="900" fill="url(#sky)" />
+        {/* sun */}
+        <circle cx="430" cy="170" r="46" fill="#f4fff0" opacity="0.7" />
+        {/* far hills */}
+        <path d="M0 430 Q150 360 300 410 T600 380 L600 900 L0 900 Z" fill="url(#hill1)" opacity="0.85" />
+        {/* mid hills */}
+        <path d="M0 560 Q170 470 340 540 T600 510 L600 900 L0 900 Z" fill="url(#hill2)" opacity="0.95" />
+        {/* near hills */}
+        <path d="M0 700 Q200 620 400 690 T600 660 L600 900 L0 900 Z" fill="url(#hill3)" />
+        {/* trees */}
+        {[ [70,640],[120,665],[500,560],[540,585],[300,600] ].map(([x,y],i)=>(
+          <g key={i} transform={`translate(${x} ${y})`} fill="#0f3b30" opacity="0.85">
+            <polygon points="0,0 14,34 -14,34" />
+            <polygon points="0,18 18,58 -18,58" />
+            <rect x="-3" y="56" width="6" height="14" fill="#0c2f26" />
+          </g>
+        ))}
+        {/* birds */}
+        <path d="M180 150 q10 -8 20 0 q10 -8 20 0" stroke="#0f3b30" strokeWidth="2.5" fill="none" opacity="0.5" />
+        <path d="M240 180 q8 -6 16 0 q8 -6 16 0" stroke="#0f3b30" strokeWidth="2" fill="none" opacity="0.4" />
+      </svg>
+
+      <div className="relative z-10 flex h-full min-h-screen flex-col items-center justify-center p-10 text-center">
+        <p className="text-3xl font-extrabold tracking-[0.4em] text-[#0f3b30] drop-shadow-sm">
+          {t(locale, "WELCOME", "أهلاً بك")}
         </p>
-
-        <div className="mt-8 grid grid-cols-2 gap-3 text-sm">
-          <Stat label={t(locale, "Height", "الطول")} value={`${data.heightCm} ${t(locale, "cm", "سم")}`} />
-          <Stat label={t(locale, "Weight", "الوزن")} value={`${data.weightKg} ${t(locale, "kg", "كجم")}`} />
-          <Stat label={t(locale, "BMI", "مؤشر الكتلة")} value={bmi > 0 ? bmi.toFixed(1) : "—"} />
-          <Stat label={t(locale, "Goal", "الهدف")} value={locale === "ar" ? goalCopy[data.goal].ar : goalCopy[data.goal].en} />
-        </div>
-
-        {step >= 5 && (
-          <div className="mt-6 rounded-2xl border border-white/15 bg-white/5 p-4 text-sm">
-            <p className="font-semibold text-lime-200">{t(locale, "AI Analysis", "تحليل بالذكاء الاصطناعي")}</p>
-            <p className="mt-1 text-white/80 leading-relaxed">{locale === "ar" ? analysis.summaryAr : analysis.summaryEn}</p>
-            <div className="mt-3 flex items-center justify-between text-xs text-white/60">
-              <span>{t(locale, "Daily target", "الهدف اليومي")}</span>
-              <span className="font-semibold text-white">
-                {analysis.recommendedDailyCalories} {t(locale, "kcal", "سعرة")}
-              </span>
-            </div>
-          </div>
-        )}
-
+        <p className="mt-3 max-w-xs text-sm font-medium text-[#0f3b30]/70">
+          {data.name
+            ? t(locale, `Great to have you, ${data.name}!`, `سعداء بانضمامك يا ${data.name}!`)
+            : t(locale, "Let's build your personalized plan.", "لنُجهّز خطتك المخصصة.")}
+        </p>
         <div className="mt-8 flex items-center gap-2">
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
             <div
               key={i}
               className={cn(
                 "h-2 rounded-full transition-all duration-500",
-                i + 1 <= step ? "w-6 bg-white" : "w-2 bg-white/30"
+                i + 1 <= step ? "w-6 bg-[#0f3b30]" : "w-2 bg-[#0f3b30]/25"
               )}
             />
           ))}
         </div>
       </div>
-    </div>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-      <p className="text-xs text-white/60">{label}</p>
-      <p className="mt-1 text-lg font-semibold">{value}</p>
     </div>
   )
 }
@@ -353,7 +340,7 @@ function NameStep({
         value={data.name}
         onChange={(e) => update("name", e.target.value)}
         placeholder={t(locale, "e.g. Ahmed Ahmed", "مثال: أحمد أحمد")}
-        className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3.5 text-base text-neutral-900 outline-none transition focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
+        className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3.5 text-base text-neutral-900 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
         autoFocus
       />
 
@@ -371,8 +358,8 @@ function NameStep({
               className={cn(
                 "flex items-center justify-center gap-2 rounded-2xl border-2 p-4 text-base font-semibold transition-all",
                 active
-                  ? "border-lime-500 bg-lime-50 text-lime-700 shadow-sm"
-                  : "border-neutral-200 bg-white text-neutral-700 hover:border-lime-300"
+                  ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm"
+                  : "border-neutral-200 bg-white text-neutral-700 hover:border-emerald-300"
               )}
             >
               <span className="text-2xl">{g.icon}</span>
@@ -484,8 +471,8 @@ function GoalStep({
               className={cn(
                 "flex items-center gap-3 rounded-2xl border-2 p-4 text-left transition-all",
                 active
-                  ? "border-lime-500 bg-lime-50 shadow-sm"
-                  : "border-neutral-200 bg-white hover:border-lime-300"
+                  ? "border-emerald-500 bg-emerald-50 shadow-sm"
+                  : "border-neutral-200 bg-white hover:border-emerald-300"
               )}
             >
               <span className="text-2xl">{goalCopy[g].icon}</span>
@@ -493,7 +480,7 @@ function GoalStep({
                 <p className="font-semibold text-neutral-900">{locale === "ar" ? goalCopy[g].ar : goalCopy[g].en}</p>
               </div>
               {active && (
-                <Check className="size-5 text-lime-600" />
+                <Check className="size-5 text-emerald-600" />
               )}
             </button>
           )
@@ -527,15 +514,15 @@ function ActivityStep({
               className={cn(
                 "flex w-full items-center gap-3 rounded-xl border-2 p-3.5 text-left transition-all",
                 active
-                  ? "border-lime-500 bg-lime-50"
-                  : "border-neutral-200 bg-white hover:border-lime-300"
+                  ? "border-emerald-500 bg-emerald-50"
+                  : "border-neutral-200 bg-white hover:border-emerald-300"
               )}
             >
               <span className="text-xl">{activityCopy[a].emoji}</span>
               <div className="flex-1">
                 <p className="font-semibold text-neutral-900">{locale === "ar" ? activityCopy[a].ar : activityCopy[a].en}</p>
               </div>
-              {active && <Check className="size-5 text-lime-600" />}
+              {active && <Check className="size-5 text-emerald-600" />}
             </button>
           )
         })}
@@ -573,7 +560,7 @@ function ReviewStep({
       title={t(locale, "Ready to meet your future self?", "جاهز لتقابل نسختك المستقبلية؟")}
       subtitle={t(locale, "Here's a quick summary of what we computed.", "إليك ملخصاً سريعاً لما حسبناه.")}
     >
-      <div className="rounded-2xl border border-lime-100 bg-lime-50/50 p-4">
+      <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4">
         <div className="grid grid-cols-2 gap-3 text-sm">
           <Row label={t(locale, "Name", "الاسم")} value={data.name} />
           <Row label={t(locale, "BMI", "مؤشر الكتلة")} value={bmi.toFixed(1)} />
@@ -663,14 +650,14 @@ function ValueSlider({
           className="w-40 bg-transparent text-center text-6xl font-extrabold tracking-tight text-neutral-900 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           aria-label={unit}
         />
-        <span className="mb-3 text-xl font-semibold text-lime-600">{unit}</span>
+        <span className="mb-3 text-xl font-semibold text-emerald-600">{unit}</span>
       </div>
 
       {/* Slider with fill + thumb */}
       <div className="relative px-1">
         <div className="relative h-3 w-full rounded-full bg-neutral-100">
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-lime-400 to-lime-500"
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500"
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -685,11 +672,11 @@ function ValueSlider({
             [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-7
             [&::-webkit-slider-thumb]:-mt-2 [&::-webkit-slider-thumb]:rounded-full
             [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-white
-            [&::-webkit-slider-thumb]:bg-lime-500 [&::-webkit-slider-thumb]:shadow-lg
-            [&::-webkit-slider-thumb]:shadow-lime-500/40 [&::-webkit-slider-thumb]:transition
+            [&::-webkit-slider-thumb]:bg-emerald-500 [&::-webkit-slider-thumb]:shadow-lg
+            [&::-webkit-slider-thumb]:shadow-emerald-500/40 [&::-webkit-slider-thumb]:transition
             [&::-moz-range-thumb]:size-7 [&::-moz-range-thumb]:rounded-full
             [&::-moz-range-thumb]:border-4 [&::-moz-range-thumb]:border-white
-            [&::-moz-range-thumb]:bg-lime-500 [&::-moz-range-thumb]:shadow-lg"
+            [&::-moz-range-thumb]:bg-emerald-500 [&::-moz-range-thumb]:shadow-lg"
           aria-label={unit}
         />
       </div>
@@ -701,7 +688,7 @@ function ValueSlider({
           <button
             type="button"
             onClick={dec}
-            className="flex size-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-xl font-semibold text-neutral-600 transition hover:border-lime-300 hover:text-lime-700"
+            className="flex size-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-xl font-semibold text-neutral-600 transition hover:border-emerald-300 hover:text-emerald-700"
             aria-label={t(locale, "Decrease", "إنقاص")}
           >
             −
@@ -709,7 +696,7 @@ function ValueSlider({
           <button
             type="button"
             onClick={inc}
-            className="flex size-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-xl font-semibold text-neutral-600 transition hover:border-lime-300 hover:text-lime-700"
+            className="flex size-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-xl font-semibold text-neutral-600 transition hover:border-emerald-300 hover:text-emerald-700"
             aria-label={t(locale, "Increase", "زيادة")}
           >
             +

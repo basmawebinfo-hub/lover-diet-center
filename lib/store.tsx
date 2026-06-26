@@ -272,6 +272,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.hydrated])
 
+  // Apply a pending cart item saved before sign-up (guest -> shop -> sign-up flow)
+  useEffect(() => {
+    if (!state.hydrated || !state.user || typeof window === "undefined") return
+    try {
+      const raw = window.localStorage.getItem("pendingCart")
+      if (raw) {
+        const { productId, quantity } = JSON.parse(raw) as { productId: string; quantity?: number }
+        if (productId) dispatch({ type: "ADD_TO_CART", payload: { productId, quantity: quantity ?? 1 } })
+        window.localStorage.removeItem("pendingCart")
+      }
+    } catch { /* ignore */ }
+  }, [state.hydrated, state.user])
+
   const setUser = useCallback((u: User | null) => dispatch({ type: "SET_USER", payload: u }), [])
   const logWeight = useCallback(
     (log: WeightLog) => {

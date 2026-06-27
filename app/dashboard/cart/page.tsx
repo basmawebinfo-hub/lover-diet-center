@@ -11,11 +11,13 @@ import { createClient } from "@/lib/supabase/client"
 import { placeOrder } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { useCurrency, CURRENCIES } from "@/lib/currency"
 
 export default function CartPage() {
   const router = useRouter()
   const { locale } = useLocale()
   const { state, updateCartQty, removeFromCart, clearCart, placeOrderLocal } = useApp()
+  const { format, currency, setCurrency } = useCurrency()
   const { notify } = useToast()
   const user = state.user
   const [checkedOut, setCheckedOut] = useState(false)
@@ -160,7 +162,7 @@ export default function CartPage() {
                   <div className="flex-1">
                     <p className="font-semibold text-neutral-900">{locale === "ar" ? item.product.nameAr : item.product.nameEn}</p>
                     <p className="mt-1 text-sm font-bold text-emerald-700">
-                      {item.product.price} {t(locale,"AED","درهم")}
+                      {format(item.product.price)}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -197,12 +199,18 @@ export default function CartPage() {
             <div className="rounded-2xl border border-neutral-100 bg-white p-6">
               <h2 className="font-bold text-neutral-900">{t(locale,"Order summary","ملخص الطلب")}</h2>
               <dl className="mt-4 space-y-2 text-sm">
-                <Row label={t(locale,"Subtotal","المجموع الفرعي")} value={`${subtotal} ${t(locale,"AED","درهم")}`} />
-                <Row label={t(locale,"Shipping","الشحن")} value={`${shipping} ${t(locale,"AED","درهم")}`} />
+                <div className="mb-3 flex items-center justify-between">
+                <span className="text-sm font-semibold text-neutral-700">{t(locale,"Currency","العملة")}</span>
+                <select value={currency} onChange={(e)=>setCurrency(e.target.value as typeof currency)} className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-700 focus:border-emerald-400 focus:outline-none">
+                  {CURRENCIES.map((c)=><option key={c.code} value={c.code}>{c.code}</option>)}
+                </select>
+              </div>
+              <Row label={t(locale,"Subtotal","المجموع الفرعي")} value={format(subtotal)} />
+                <Row label={t(locale,"Shipping","الشحن")} value={format(shipping)} />
                 <div className="border-t border-neutral-100 pt-2">
                   <Row
                     label={t(locale,"Total","الإجمالي")}
-                    value={`${total} ${t(locale,"AED","درهم")}`}
+                    value={format(total)}
                     className="text-base font-bold"
                   />
                 </div>

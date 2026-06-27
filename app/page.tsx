@@ -6,6 +6,7 @@ import { Testimonials }  from '@/components/landing/testimonials'
 import { FAQ }           from '@/components/landing/faq'
 import { FinalCTA }      from '@/components/landing/final-cta'
 import { FooterSimple }  from '@/components/ui/footer'
+import { Reveal }        from '@/components/ui/reveal'
 
 export const metadata: Metadata = {
   title: 'Lover Diet Center — Science-Based Nutrition in UAE | مركز التغذية',
@@ -26,11 +27,11 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <HowItWorks />
-      <WhatWeOffer />
-      <Testimonials />
-      <FAQ />
-      <FinalCTA />
+      <Reveal><HowItWorks /></Reveal>
+      <Reveal><WhatWeOffer /></Reveal>
+      <Reveal><Testimonials /></Reveal>
+      <Reveal><FAQ /></Reveal>
+      <Reveal><FinalCTA /></Reveal>
       <FooterSimple />
     </>
   )

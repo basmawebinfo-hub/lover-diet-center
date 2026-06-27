@@ -11,6 +11,8 @@ import type { ActivityLevel, Gender, GoalType, User } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 import { useToast } from "@/components/ui/toast"
+import { createClient } from "@/lib/supabase/client"
+import { upsertProfile } from "@/lib/supabase/db"
 
 const goalCopy: Record<GoalType, { en: string; ar: string; icon: string }> = {
   lose_weight: { en: "Lose Weight", ar: "إنقاص الوزن", icon: "🔥" },
@@ -67,9 +69,15 @@ export default function SettingsPage() {
       gender: draft.gender, heightCm: draft.heightCm,
       currentWeightKg: draft.currentWeightKg, startWeightKg: draft.startWeightKg, goal: draft.goal,
     }, state.weightLogs)
-    setUser({ ...draft, avatarConfig: nextAvatar })
+    const updated = { ...draft, avatarConfig: nextAvatar }
+    setUser(updated)
     setDirty(false)
     notify(t(locale, "Changes saved", "تم حفظ التغييرات"), "success")
+    // Persist to Supabase if signed in
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) upsertProfile(data.user.id, updated).catch(() => {})
+    })
   }
 
   const initials = (draft.nameEn || "U").trim().charAt(0).toUpperCase()

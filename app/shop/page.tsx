@@ -7,6 +7,7 @@ import { Search, ArrowLeft } from "lucide-react"
 import { mockProducts } from "@/lib/mock-data"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { useCurrency, CURRENCIES } from "@/lib/currency"
 
 const CATEGORIES = [
   { id: "all", label: "All", labelAr: "الكل" },
@@ -18,6 +19,7 @@ const CATEGORIES = [
 
 export default function ShopPage() {
   const { locale } = useLocale()
+  const { format, currency, setCurrency } = useCurrency()
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]["id"]>("all")
 
@@ -32,7 +34,6 @@ export default function ShopPage() {
     })
   }, [search, category])
 
-  const aed = t(locale, "AED", "درهم")
 
   return (
     <main className="min-h-screen bg-[#f6faf8]">
@@ -56,7 +57,15 @@ export default function ShopPage() {
               className="w-full bg-transparent text-sm text-neutral-900 outline-none placeholder:text-neutral-400"
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as typeof currency)}
+              className="rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 focus:border-emerald-400 focus:outline-none"
+              aria-label={t(locale, "Currency", "العملة")}
+            >
+              {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
+            </select>
             {CATEGORIES.map((c) => (
               <button
                 key={c.id}
@@ -94,7 +103,7 @@ export default function ShopPage() {
                   <h3 className="font-bold text-neutral-900">{locale === "ar" ? p.nameAr : p.nameEn}</h3>
                   <p className="mt-1 line-clamp-2 text-xs text-neutral-400">{locale === "ar" ? p.descriptionAr : p.descriptionEn}</p>
                   <div className="mt-3 flex items-center justify-between">
-                    <span className="text-lg font-extrabold text-emerald-700">{p.price} {aed}</span>
+                    <span className="text-lg font-extrabold text-emerald-700">{format(p.price)}</span>
                     <span className="text-xs font-semibold text-emerald-600 group-hover:underline">{t(locale, "View", "عرض")}</span>
                   </div>
                 </div>

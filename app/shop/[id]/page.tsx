@@ -1,11 +1,12 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Minus, Plus, ShoppingCart, Check, ShieldCheck, Truck, Leaf } from "lucide-react"
-import { mockProducts } from "@/lib/mock-data"
+import { fetchProducts } from "@/lib/supabase/db"
+import type { Product } from "@/lib/types"
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -21,14 +22,24 @@ export default function ShopProductPage() {
   const { state, addToCart } = useApp()
 
   const id = String(params?.id ?? "")
-  const product = useMemo(() => mockProducts.find((p) => p.id === id), [id])
-  const related = useMemo(() => mockProducts.filter((p) => p.id !== id && p.category === product?.category).slice(0, 4), [id, product])
+  const [allProducts, setAllProducts] = useState<Product[] | null>(null)
+  useEffect(() => { fetchProducts().then(setAllProducts) }, [])
+  const product = useMemo(() => (allProducts ?? []).find((p) => p.id === id), [allProducts, id])
+  const related = useMemo(() => (allProducts ?? []).filter((p) => p.id !== id && p.category === product?.category).slice(0, 4), [allProducts, id, product])
   const [qty, setQty] = useState(1)
 
   const isSignedIn = () => {
     if (state.user) return true
     if (typeof window !== "undefined" && window.localStorage.getItem("loverDietUser")) return true
     return false
+  }
+
+  if (allProducts === null) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f6faf8]">
+        <p className="text-sm text-neutral-400">{t(locale, "Loading…", "جارٍ التحميل…")}</p>
+      </main>
+    )
   }
 
   if (!product) {

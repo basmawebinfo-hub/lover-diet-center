@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
-import type { Session, User, WeightLog } from '@/lib/types'
+import type { Product, Session, User, WeightLog } from '@/lib/types'
 
 // ---- Sessions ----
 export async function insertSession(userId: string, s: Session): Promise<void> {
@@ -236,7 +236,6 @@ export async function adminFetchSessions() {
 }
 
 // ---- Product management (admin) ----
-import type { Product } from '@/lib/types'
 
 export async function adminFetchProducts(): Promise<Product[]> {
   const supabase = createClient()

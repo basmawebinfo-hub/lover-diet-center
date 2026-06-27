@@ -43,8 +43,8 @@ export default function ShopPage() {
     <main className="min-h-screen bg-[#f6faf8]">
       {/* Hero */}
       <section className="bg-gradient-to-br from-[#0D4F4A] via-[#15604f] to-[#10b981] px-4 pt-28 pb-16 text-center text-white">
-        <h1 className="text-4xl font-extrabold sm:text-5xl">{t(locale, "Our Shop", "متجرنا")}</h1>
-        <p className="mx-auto mt-3 max-w-xl text-white/80">
+        <h1 className="text-4xl font-extrabold sm:text-5xl animate-fade-up">{t(locale, "Our Shop", "متجرنا")}</h1>
+        <p className="mx-auto mt-3 max-w-xl text-white/80 animate-fade-up delay-200">
           {t(locale, "Healthy snacks, drinks and supplements — handpicked by our nutrition team.", "سناكس صحية، مشروبات، ومكمّلات — مختارة بعناية من فريق التغذية لدينا.")}
         </p>
       </section>
@@ -97,7 +97,7 @@ export default function ShopPage() {
               <Link
                 key={p.id}
                 href={`/shop/${p.id}`}
-                className="group overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="group hover-lift overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm"
               >
                 <div className="relative h-44 overflow-hidden bg-emerald-50">
                   <Image src={p.imageUrl} alt={locale === "ar" ? p.nameAr : p.nameEn} fill sizes="(max-width:640px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />

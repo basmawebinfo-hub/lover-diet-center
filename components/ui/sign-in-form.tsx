@@ -44,7 +44,15 @@ export function SignIn2() {
         return
       }
 
-      router.push(redirect)
+      // Admins go straight to the admin dashboard
+      const { data: auth } = await supabase.auth.getUser()
+      let dest = redirect
+      if (auth.user) {
+        const { data: prof } = await supabase.from('profiles').select('role').eq('id', auth.user.id).single()
+        if ((prof as { role?: string } | null)?.role === 'admin') dest = '/admin'
+      }
+
+      router.push(dest)
       router.refresh()
     } catch {
       setError(t(locale, 'Something went wrong. Please try again.', 'حدث خطأ ما. حاول مرة أخرى.'))

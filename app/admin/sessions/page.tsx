@@ -1,14 +1,18 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { adminSessions } from "@/lib/admin-mock"
+import { adminFetchSessions } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 
 export default function AdminSessionsPage() {
   const { locale } = useLocale()
-  const upcoming = adminSessions.filter(s=>s.status==="scheduled")
-  const past = adminSessions.filter(s=>s.status!=="scheduled")
+  const [rows, setRows] = useState(adminSessions.map(s=>({...s})))
+  useEffect(()=>{ adminFetchSessions().then((real)=>{ if(real.length) setRows(real.map(r=>({ id:r.id, client:r.client, type:r.type, typeAr:r.type, doctor:r.doctor, date:r.date, time:r.time, status:r.status as "scheduled"|"completed"|"cancelled" }))) }) },[])
+  const upcoming = rows.filter(s=>s.status==="scheduled")
+  const past = rows.filter(s=>s.status!=="scheduled")
   const cls: Record<string,string> = { scheduled:"bg-emerald-50 text-emerald-700", completed:"bg-neutral-100 text-neutral-500", cancelled:"bg-red-50 text-red-500" }
   const lbl: Record<string,{en:string;ar:string}> = { scheduled:{en:"Scheduled",ar:"مجدولة"}, completed:{en:"Completed",ar:"مكتملة"}, cancelled:{en:"Cancelled",ar:"ملغية"} }
 

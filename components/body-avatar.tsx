@@ -80,7 +80,7 @@ export function BodyAvatar({
   )
 
   const improved = previous && previous.stage !== current.stage
-  const { px, cls } = SIZE_MAP[size]
+  const { cls } = SIZE_MAP[size]
 
   return (
     <div className={cn("flex flex-col items-center gap-2", className)}>

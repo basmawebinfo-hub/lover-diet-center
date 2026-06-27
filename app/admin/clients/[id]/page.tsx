@@ -10,7 +10,7 @@ import {
 import { AdminShell } from "@/components/admin/admin-shell"
 import { StatChip } from "@/components/dashboard/stat-widgets"
 import { WeightChart } from "@/components/dashboard/weight-chart"
-import { adminFetchClientDetail, type ClientDetail } from "@/lib/supabase/db"
+import { adminFetchClientDetail, adminUpdateSessionStatus, type ClientDetail } from "@/lib/supabase/db"
 import { useCurrency } from "@/lib/currency"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -184,7 +184,17 @@ export default function AdminClientDetailPage() {
                         <p className="text-xs text-neutral-400">{s.date} {s.time && `· ${s.time}`}</p>
                       </div>
                     </div>
-                    <span className={cn("rounded-full px-2.5 py-1 text-xs font-bold", sessionCls[s.status] || "bg-neutral-100 text-neutral-500")}>{s.status}</span>
+                    <select
+                      value={s.status}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        setData((prev) => prev ? { ...prev, sessions: prev.sessions.map((x) => x.id === s.id ? { ...x, status: v } : x) } : prev)
+                        adminUpdateSessionStatus(s.id, v).catch(() => {})
+                      }}
+                      className={cn("rounded-full border-0 px-2.5 py-1 text-xs font-bold focus:outline-none", sessionCls[s.status] || "bg-neutral-100 text-neutral-500")}
+                    >
+                      {["scheduled", "completed", "cancelled"].map((st) => <option key={st} value={st}>{st}</option>)}
+                    </select>
                   </div>
                 ))}
               </div>

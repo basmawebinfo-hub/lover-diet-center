@@ -37,13 +37,13 @@ export function HeroSection() {
           {/* ── LEFT: Copy ── */}
           <div className="flex flex-col">
             {/* Pill */}
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-4 py-1.5 text-sm font-semibold text-neutral-600">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-4 py-1.5 text-sm font-semibold text-neutral-600 animate-fade-up">
               <span className="size-2 rounded-full bg-lime-500" />
               {t(locale, 'Together for a better life', 'معًا من أجل حياة أفضل')}
             </div>
 
             {/* Headline */}
-            <h1 className="mt-5 text-[clamp(2.5rem,5.2vw,3.6rem)] font-extrabold leading-[1.06] tracking-tight text-neutral-900">
+            <h1 className="mt-5 text-[clamp(2.5rem,5.2vw,3.6rem)] font-extrabold leading-[1.06] tracking-tight text-neutral-900 animate-fade-up delay-100">
               {locale === 'ar' ? (
                 <>اصنع حياة <span className="text-lime-500">صحية</span><br />مع طعام <span className="text-lime-500">طازج</span></>
               ) : (
@@ -52,7 +52,7 @@ export function HeroSection() {
             </h1>
 
             {/* Sub */}
-            <p className="mt-5 max-w-md text-[clamp(0.95rem,1.6vw,1.05rem)] leading-relaxed text-neutral-500">
+            <p className="mt-5 max-w-md text-[clamp(0.95rem,1.6vw,1.05rem)] leading-relaxed text-neutral-500 animate-fade-up delay-200">
               {t(locale, 'Personalized nutrition plans, chef-prepared balanced meals, and certified experts — delivered to your door.', 'خطط تغذية مخصصة، ووجبات متوازنة محضّرة على يد الطهاة، وخبراء معتمدون — تصلك حتى باب منزلك.')}
             </p>
 

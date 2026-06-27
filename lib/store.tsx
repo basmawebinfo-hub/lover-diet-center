@@ -24,7 +24,7 @@ import type {
   WeightLog,
 } from "./types"
 import { createClient } from "@/lib/supabase/client"
-import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog } from "@/lib/supabase/db"
+import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, fetchProfile, fetchWaterLogs } from "@/lib/supabase/db"
 import {
   mockDoctorPlan,
   mockMeals,
@@ -62,7 +62,7 @@ type Action =
   | { type: "UPDATE_SESSION"; payload: { id: string; changes: Partial<Session> } }
   | { type: "PLACE_ORDER"; payload: Order }
   | { type: "LOG_WATER"; payload: WaterLog }
-  | { type: "SYNC_FROM_DB"; payload: { sessions?: Session[]; weightLogs?: WeightLog[] } }
+  | { type: "SYNC_FROM_DB"; payload: { sessions?: Session[]; weightLogs?: WeightLog[]; waterLogs?: WaterLog[] } }
 
 const STORAGE_KEY = "loversdc:state:v1"
 
@@ -158,6 +158,7 @@ function reducer(state: AppState, action: Action): AppState {
         ...state,
         sessions: action.payload.sessions ?? state.sessions,
         weightLogs: action.payload.weightLogs ?? state.weightLogs,
+        waterLogs: action.payload.waterLogs ?? state.waterLogs,
       }
     default:
       return state
@@ -255,16 +256,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user || !active) return
-      const [sessions, weightLogs] = await Promise.all([
-        fetchSessions(data.user.id),
-        fetchWeightLogs(data.user.id),
+      const uid = data.user.id
+      const [profile, sessions, weightLogs, waterLogs] = await Promise.all([
+        fetchProfile(uid),
+        fetchSessions(uid),
+        fetchWeightLogs(uid),
+        fetchWaterLogs(uid),
       ])
       if (!active) return
+      // Merge the real DB profile into the user (DB is the source of truth)
+      if (profile) {
+        dispatch({
+          type: "SET_USER",
+          payload: {
+            ...(state.user as User),
+            ...profile,
+            id: uid,
+            email: profile.email || data.user.email || "",
+            role: (profile as { role?: string }).role,
+          } as User,
+        })
+      }
       dispatch({
         type: "SYNC_FROM_DB",
         payload: {
           sessions: sessions.length ? sessions : undefined,
           weightLogs: weightLogs.length ? weightLogs : undefined,
+          waterLogs: waterLogs.length ? waterLogs : undefined,
         },
       })
     })
@@ -343,7 +361,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     []
   )
   const logWater = useCallback(
-    (date: string, liters: number) => dispatch({ type: "LOG_WATER", payload: { date, liters } }),
+    (date: string, liters: number) => {
+      dispatch({ type: "LOG_WATER", payload: { date, liters } })
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) import("@/lib/supabase/db").then((m) => m.upsertWaterLog(data.user!.id, date, liters).catch(() => {}))
+      })
+    },
     []
   )
   const resetOnboarding = useCallback(() => {

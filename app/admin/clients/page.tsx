@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { Search, ChevronLeft } from "lucide-react"
+import { Search, ChevronLeft, Download } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { adminClients } from "@/lib/admin-mock"
 import { adminFetchClients } from "@/lib/supabase/db"
@@ -39,12 +39,30 @@ export default function AdminClientsPage() {
   const statusLbl: Record<string,{en:string;ar:string}> = { active:{en:"Active",ar:"نشط"}, trial:{en:"Trial",ar:"تجريبي"}, inactive:{en:"Inactive",ar:"غير نشط"} }
   const kg = t(locale,"kg","كجم")
 
+  function exportAll() {
+    const header = ["Name", "Email", "Phone", "Gender", "Age", "Start kg", "Current kg", "Target kg", "Goal", "Joined"]
+    const lines = rows.map((c) => [c.nameEn, c.email, c.phone, c.gender, String(c.age), String(c.startWeightKg), String(c.currentWeightKg), String(c.targetWeightKg), c.goal, c.joinedAt])
+    const csv = [header, ...lines].map((r) => r.map((x) => `"${String(x ?? "").replace(/"/g, '""')}"`).join(",")).join("\n")
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "clients.csv"
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <AdminShell>
       <div className="mx-auto max-w-6xl space-y-6">
-        <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium text-emerald-600">{t(locale,"Clients","العملاء")}</p>
-          <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale,"Client Management","إدارة العملاء")}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium text-emerald-600">{t(locale,"Clients","العملاء")}</p>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale,"Client Management","إدارة العملاء")}</h1>
+          </div>
+          <button onClick={exportAll} className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-bold text-neutral-700 hover:bg-neutral-50">
+            <Download className="size-4" /> {t(locale,"Export CSV","تصدير CSV")}
+          </button>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

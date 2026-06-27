@@ -11,12 +11,12 @@ const FLOW: AdminOrder["status"][] = ["pending","processing","shipped","delivere
 
 export default function AdminOrdersPage() {
   const { locale } = useLocale()
-  const [orders, setOrders] = useState(adminOrders)
+  const [orders, setOrders] = useState<typeof adminOrders>([])
   const [filter, setFilter] = useState<"all" | AdminOrder["status"]>("all")
 
   useEffect(() => {
     adminFetchOrders().then((real) => {
-      if (real.length) setOrders(real.map((o) => ({ id: o.id, client: o.client, date: o.date, items: o.items, total: o.total, status: o.status as AdminOrder["status"] })))
+      setOrders(real.map((o) => ({ id: o.id, client: o.client, date: o.date, items: o.items, total: o.total, status: o.status as AdminOrder["status"] })))
     })
   }, [])
   const aed = t(locale,"AED","درهم")

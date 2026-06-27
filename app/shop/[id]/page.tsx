@@ -9,6 +9,7 @@ import { mockProducts } from "@/lib/mock-data"
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { useCurrency, CURRENCIES } from "@/lib/currency"
 import { useToast } from "@/components/ui/toast"
 
 export default function ShopProductPage() {
@@ -16,6 +17,7 @@ export default function ShopProductPage() {
   const router = useRouter()
   const { locale } = useLocale()
   const { notify } = useToast()
+  const { format, currency, setCurrency } = useCurrency()
   const { state, addToCart } = useApp()
 
   const id = String(params?.id ?? "")
@@ -38,7 +40,6 @@ export default function ShopProductPage() {
     )
   }
 
-  const aed = t(locale, "AED", "درهم")
   const name = locale === "ar" ? product.nameAr : product.nameEn
   const desc = locale === "ar" ? product.descriptionAr : product.descriptionEn
 
@@ -88,7 +89,13 @@ export default function ShopProductPage() {
             </span>
             <h1 className="mt-3 text-3xl font-extrabold text-neutral-900">{name}</h1>
             <p className="mt-3 leading-relaxed text-neutral-500">{desc}</p>
-            <p className="mt-5 text-4xl font-black text-emerald-700">{product.price} <span className="text-lg font-bold text-neutral-400">{aed}</span></p>
+            <p className="mt-5 text-4xl font-black text-emerald-700">{format(product.price)}</p>
+
+            <div className="mt-3">
+              <select value={currency} onChange={(e)=>setCurrency(e.target.value as typeof currency)} className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-700 focus:border-emerald-400 focus:outline-none" aria-label={t(locale,"Currency","العملة")}>
+                {CURRENCIES.map((c)=><option key={c.code} value={c.code}>{c.code} — {locale==="ar"?c.ar:c.en}</option>)}
+              </select>
+            </div>
 
             {/* Qty */}
             <div className="mt-6 flex items-center gap-4">
@@ -154,7 +161,7 @@ export default function ShopProductPage() {
                   </div>
                   <div className="p-3">
                     <h3 className="truncate text-sm font-bold text-neutral-900">{locale === "ar" ? p.nameAr : p.nameEn}</h3>
-                    <span className="text-sm font-extrabold text-emerald-700">{p.price} {aed}</span>
+                    <span className="text-sm font-extrabold text-emerald-700">{format(p.price)}</span>
                   </div>
                 </Link>
               ))}

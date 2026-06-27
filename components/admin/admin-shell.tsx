@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -98,11 +99,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#f6faf8] lg:grid lg:grid-cols-[260px_1fr]">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:border-e lg:border-neutral-100 lg:bg-white">
-        <div className="flex items-center gap-2 px-6 py-6">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-emerald-600 text-sm font-black text-white">A</span>
+        <div className="flex items-center gap-2.5 px-6 py-6">
+          <Image src="/ldc-logo.png" alt="Lover Diet Center" width={40} height={40} className="size-10 rounded-full object-cover animate-pop" />
           <div>
             <p className="text-base font-extrabold leading-none text-neutral-900">{t(locale, "Admin", "الإدارة")}</p>
-            <p className="text-[11px] text-neutral-400">loversdc</p>
+            <p className="text-[11px] text-emerald-600 font-semibold">loversdc</p>
           </div>
         </div>
         <NavList />
@@ -119,7 +120,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       {/* Mobile top bar */}
       <div className="flex items-center justify-between border-b border-neutral-100 bg-white px-4 py-3 lg:hidden">
         <div className="flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-emerald-600 text-xs font-black text-white">A</span>
+          <Image src="/ldc-logo.png" alt="Lover Diet Center" width={32} height={32} className="size-8 rounded-full object-cover" />
           <span className="font-extrabold text-neutral-900">{t(locale, "Admin", "الإدارة")}</span>
         </div>
         <button onClick={() => setOpen(true)} className="rounded-lg p-2 text-neutral-600"><Menu className="size-5" /></button>

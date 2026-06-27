@@ -234,3 +234,57 @@ export async function adminFetchSessions() {
     }
   })
 }
+
+// ---- Product management (admin) ----
+import type { Product } from '@/lib/types'
+
+export async function adminFetchProducts(): Promise<Product[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false })
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => ({
+    id: r.id as string,
+    nameEn: (r.name_en as string) ?? '',
+    nameAr: (r.name_ar as string) ?? '',
+    descriptionEn: (r.description_en as string) ?? '',
+    descriptionAr: (r.description_ar as string) ?? '',
+    imageUrl: (r.image_url as string) ?? '',
+    price: Number(r.price) || 0,
+    category: (r.category as Product['category']) ?? 'snack',
+    inStock: (r.in_stock as boolean) ?? true,
+  }))
+}
+
+export async function adminUpsertProduct(p: Product): Promise<boolean> {
+  const supabase = createClient()
+  const row = {
+    id: p.id,
+    name_en: p.nameEn,
+    name_ar: p.nameAr,
+    description_en: p.descriptionEn,
+    description_ar: p.descriptionAr,
+    image_url: p.imageUrl,
+    price: p.price,
+    category: p.category,
+    in_stock: p.inStock,
+  }
+  const { error } = await supabase.from('products').upsert(row, { onConflict: 'id' })
+  return !error
+}
+
+export async function adminDeleteProduct(id: string): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase.from('products').delete().eq('id', id)
+  return !error
+}
+
+// Upload a product image to Supabase Storage ('product-images' bucket) -> returns public URL
+export async function uploadProductImage(file: File): Promise<string | null> {
+  const supabase = createClient()
+  const ext = file.name.split('.').pop() || 'png'
+  const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  const { error } = await supabase.storage.from('product-images').upload(path, file, { upsert: true, cacheControl: '3600' })
+  if (error) return null
+  const { data } = supabase.storage.from('product-images').getPublicUrl(path)
+  return data.publicUrl ?? null
+}

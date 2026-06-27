@@ -24,12 +24,8 @@ import type {
   WeightLog,
 } from "./types"
 import { createClient } from "@/lib/supabase/client"
-import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, fetchProfile, fetchWaterLogs } from "@/lib/supabase/db"
-import {
-  mockDoctorPlan,
-  mockMeals,
-  mockProducts,
-} from "./mock-data"
+import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, fetchProfile, fetchWaterLogs, fetchProducts, fetchMeals } from "@/lib/supabase/db"
+
 
 type AppState = {
   hydrated: boolean
@@ -63,6 +59,7 @@ type Action =
   | { type: "PLACE_ORDER"; payload: Order }
   | { type: "LOG_WATER"; payload: WaterLog }
   | { type: "SYNC_FROM_DB"; payload: { sessions?: Session[]; weightLogs?: WeightLog[]; waterLogs?: WaterLog[] } }
+  | { type: "SET_CATALOG"; payload: { products?: Product[]; meals?: Meal[] } }
 
 const STORAGE_KEY = "loversdc:state:v1"
 
@@ -160,6 +157,12 @@ function reducer(state: AppState, action: Action): AppState {
         weightLogs: action.payload.weightLogs ?? state.weightLogs,
         waterLogs: action.payload.waterLogs ?? state.waterLogs,
       }
+    case "SET_CATALOG":
+      return {
+        ...state,
+        products: action.payload.products ?? state.products,
+        meals: action.payload.meals ?? state.meals,
+      }
     default:
       return state
   }
@@ -214,9 +217,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             user: parsed,
             // Real user starts with a clean slate — no fake logs/sessions.
             // meals/products are a shared catalog; doctorPlan is assigned by the clinic.
-            meals: mockMeals,
-            products: mockProducts,
-            doctorPlan: mockDoctorPlan,
+            meals: [],
+            products: [],
+            doctorPlan: null,
           },
         })
         return
@@ -231,9 +234,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       payload: {
         ...initialState,
         user: null,
-        meals: mockMeals,
-        products: mockProducts,
-        doctorPlan: mockDoctorPlan,
+        meals: [],
+        products: [],
+        doctorPlan: null,
       },
     })
   }, [])
@@ -248,6 +251,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // quota exceeded — ignore for now
     }
   }, [state])
+
+  // Load the public catalog (products + meals) from Supabase for everyone
+  useEffect(() => {
+    if (!state.hydrated) return
+    let active = true
+    Promise.all([fetchProducts(), fetchMeals()]).then(([products, meals]) => {
+      if (!active) return
+      dispatch({ type: "SET_CATALOG", payload: { products, meals: meals as unknown as Meal[] } })
+    })
+    return () => { active = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.hydrated])
 
   // Once hydrated, pull the signed-in user's real data from Supabase
   useEffect(() => {
@@ -379,9 +394,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       payload: {
         ...initialState,
         user: null,
-        meals: mockMeals,
-        products: mockProducts,
-        doctorPlan: mockDoctorPlan,
+        meals: [],
+        products: [],
+        doctorPlan: null,
       },
     })
   }, [])

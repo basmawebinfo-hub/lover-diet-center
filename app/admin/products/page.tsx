@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { Plus, Pencil, Trash2, X, Upload, Loader2 } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
-import { mockProducts } from "@/lib/mock-data"
 import { adminFetchProducts, adminUpsertProduct, adminDeleteProduct, uploadProductImage } from "@/lib/supabase/db"
 import type { Product } from "@/lib/types"
 import { useCurrency, CURRENCIES } from "@/lib/currency"
@@ -22,13 +21,13 @@ export default function AdminProductsPage() {
   const { locale } = useLocale()
   const { format, currency, setCurrency } = useCurrency()
   const { notify } = useToast()
-  const [items, setItems] = useState<Product[]>(mockProducts.map((p) => ({ ...p })))
+  const [items, setItems] = useState<Product[]>([])
   const [editing, setEditing] = useState<Product | null>(null)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const load = () => adminFetchProducts().then((real) => { if (real.length) setItems(real) })
+  const load = () => adminFetchProducts().then((real) => setItems(real))
   useEffect(() => { load() }, [])
 
   async function save() {

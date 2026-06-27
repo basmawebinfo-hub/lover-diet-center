@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   description: 'Advanced fat-breaking and body sculpting sessions at Lover Diet Center UAE. جلسات تكسير دهون ونحت الجسم المتقدّمة.',
 }
 
+import { Reveal } from '@/components/ui/reveal'
+
 export default function BodySculptingPage() {
-  return <BodySculptingContent />
+  return (
+    <Reveal className="animate-fade-in">
+      <BodySculptingContent />
+    </Reveal>
+  )
 }

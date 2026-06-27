@@ -84,10 +84,13 @@ export default function AdminAnalyticsPage() {
             <p className="py-10 text-center text-sm text-neutral-400">{t(locale, "No clients yet.", "لا يوجد عملاء بعد.")}</p>
           ) : (
             <div className="space-y-3">
-              {[["female", "👩", genders.female, "#e07a9c"], ["male", "👨", genders.male, "#4f86c6"]].map(([k, emoji, n, col]: [string, string, number, string]) => (
-                <div key={k}>
-                  <div className="mb-1 flex justify-between text-sm"><span>{emoji} {k === "female" ? t(locale, "Female", "إناث") : t(locale, "Male", "ذكور")}</span><span className="font-bold">{n}</span></div>
-                  <div className="h-2.5 w-full rounded-full bg-neutral-100"><div className="h-full rounded-full" style={{ width: `${(n / totalClients) * 100}%`, background: col }} /></div>
+              {([
+                { k: "female", emoji: "👩", n: genders.female, col: "#e07a9c", label: t(locale, "Female", "إناث") },
+                { k: "male", emoji: "👨", n: genders.male, col: "#4f86c6", label: t(locale, "Male", "ذكور") },
+              ]).map((g) => (
+                <div key={g.k}>
+                  <div className="mb-1 flex justify-between text-sm"><span>{g.emoji} {g.label}</span><span className="font-bold">{g.n}</span></div>
+                  <div className="h-2.5 w-full rounded-full bg-neutral-100"><div className="h-full rounded-full" style={{ width: `${(g.n / totalClients) * 100}%`, background: g.col }} /></div>
                 </div>
               ))}
             </div>

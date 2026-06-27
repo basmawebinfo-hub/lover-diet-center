@@ -12,11 +12,11 @@ export default function AdminClientsPage() {
   const { locale } = useLocale()
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<"all" | "active" | "trial" | "inactive">("all")
-  const [rows, setRows] = useState(adminClients.map((c) => ({ ...c })))
+  const [rows, setRows] = useState<typeof adminClients>([])
 
   useEffect(() => {
     adminFetchClients().then((real) => {
-      if (real.length) {
+      {
         // Map DB rows to the table shape (status/plan default for now)
         setRows(real.map((r) => ({
           id: r.id, nameEn: r.nameEn, nameAr: r.nameAr, email: r.email, phone: r.phone,

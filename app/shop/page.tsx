@@ -1,10 +1,11 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Search, ArrowLeft } from "lucide-react"
-import { mockProducts } from "@/lib/mock-data"
+import { fetchProducts } from "@/lib/supabase/db"
+import type { Product } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 import { useCurrency, CURRENCIES } from "@/lib/currency"
@@ -22,9 +23,12 @@ export default function ShopPage() {
   const { format, currency, setCurrency } = useCurrency()
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]["id"]>("all")
+  const [products, setProducts] = useState<Product[] | null>(null)
+
+  useEffect(() => { fetchProducts().then(setProducts) }, [])
 
   const filtered = useMemo(() => {
-    return mockProducts.filter((p) => {
+    return (products ?? []).filter((p) => {
       if (category !== "all" && p.category !== category) return false
       if (search) {
         const q = search.toLowerCase()
@@ -83,8 +87,10 @@ export default function ShopPage() {
         </div>
 
         {/* Grid */}
-        {filtered.length === 0 ? (
-          <p className="py-16 text-center text-neutral-400">{t(locale, "No products found.", "لا توجد منتجات.")}</p>
+        {products === null ? (
+          <p className="py-16 text-center text-neutral-400">{t(locale, "Loading…", "جارٍ التحميل…")}</p>
+        ) : filtered.length === 0 ? (
+          <p className="py-16 text-center text-neutral-400">{t(locale, "No products yet. Check back soon!", "لا توجد منتجات بعد. تابعنا قريباً!")}</p>
         ) : (
           <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
             {filtered.map((p) => (

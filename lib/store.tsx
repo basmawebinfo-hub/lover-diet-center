@@ -273,7 +273,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             ...profile,
             id: uid,
             email: profile.email || data.user.email || "",
-            role: (profile as { role?: string }).role,
+            role: (profile as { role?: "user" | "admin" }).role,
           } as User,
         })
       }

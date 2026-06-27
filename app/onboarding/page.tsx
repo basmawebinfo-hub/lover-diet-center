@@ -8,6 +8,8 @@ import type { ActivityLevel, Gender, GoalType, User } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 import { useLocale, t } from "@/lib/locale"
+import { createClient } from "@/lib/supabase/client"
+import { upsertProfile } from "@/lib/supabase/db"
 
 const TOTAL_STEPS = 8
 
@@ -68,7 +70,7 @@ export default function OnboardingPage() {
     const user: User = {
       id: `u_${Date.now()}`,
       nameEn: data.name,
-      email: `${data.name.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+      email: "",  // filled from the signed-in auth user below
       age: data.age,
       gender: data.gender,
       heightCm: data.heightCm,
@@ -89,12 +91,16 @@ export default function OnboardingPage() {
       ),
       createdAt: new Date().toISOString(),
     }
-    setUser(user)
-    markIntroSeen()
-    // Save to localStorage before redirect
-    localStorage.setItem("loverDietUser", JSON.stringify(user))
-    // Redirect to dashboard
-    router.push("/dashboard")
+    // Attach the real signed-in email + persist the profile to Supabase
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data: auth }) => {
+      const finalUser = { ...user, id: auth.user?.id || user.id, email: auth.user?.email || user.email }
+      setUser(finalUser)
+      markIntroSeen()
+      localStorage.setItem("loverDietUser", JSON.stringify(finalUser))
+      if (auth.user) await upsertProfile(auth.user.id, finalUser).catch(() => {})
+      router.push("/dashboard")
+    })
   }
 
   const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100
@@ -189,7 +195,7 @@ function AIAnalysisStep({ data }: { data: any }) {
       const user: User = {
         id: `u_${Date.now()}`,
         nameEn: data.name,
-        email: `${data.name.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+        email: "",  // filled from the signed-in auth user below
         age: data.age,
         gender: data.gender,
         heightCm: data.heightCm,
@@ -210,10 +216,15 @@ function AIAnalysisStep({ data }: { data: any }) {
         ),
         createdAt: new Date().toISOString(),
       }
-      setUser(user)
-      markIntroSeen()
-      localStorage.setItem("loverDietUser", JSON.stringify(user))
-      router.push("/dashboard")
+      const supabase = createClient()
+      supabase.auth.getUser().then(async ({ data: auth }) => {
+        const finalUser = { ...user, id: auth.user?.id || user.id, email: auth.user?.email || user.email }
+        setUser(finalUser)
+        markIntroSeen()
+        localStorage.setItem("loverDietUser", JSON.stringify(finalUser))
+        if (auth.user) await upsertProfile(auth.user.id, finalUser).catch(() => {})
+        router.push("/dashboard")
+      })
     }, 4000)
     return () => clearTimeout(timer)
   }, [router, data, setUser, markIntroSeen])

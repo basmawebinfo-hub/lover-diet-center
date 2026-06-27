@@ -1,6 +1,6 @@
 "use client"
 
-import Image from "next/image"
+import { Avatar3D } from "@/components/avatar-3d"
 import { useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -93,18 +93,9 @@ export function BodyAvatar({
         )}
         style={fullBody ? { aspectRatio: "3 / 4" } : undefined}
       >
-        <Image
-          key={current.stage}
-          src={`/body-stages/${current.gender}/${current.stage}.png`}
-          alt={`Body stage: ${current.label}`}
-          fill
-          className={cn(
-            "transition-all duration-700 ease-in-out",
-            fullBody ? "object-contain object-bottom" : "object-cover object-top"
-          )}
-          priority
-          sizes={fullBody ? "(max-width:640px) 33vw, 220px" : `${px}px`}
-        />
+        <div className="absolute inset-0 flex items-end justify-center p-3">
+          <Avatar3D bmi={current.bmi} gender={current.gender} className="h-full" />
+        </div>
 
         {/* Improvement badge */}
         {improved && (
@@ -159,13 +150,9 @@ export function BodyComparison({
       <div className="flex flex-col items-center gap-2 opacity-60">
         <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">{t(locale, "Before", "قبل")}</p>
         <div className="relative w-[140px] h-[140px] rounded-2xl overflow-hidden bg-neutral-100">
-          <Image
-            src={`/body-stages/${start.gender}/${start.stage}.png`}
-            alt="Starting body"
-            fill
-            className="object-cover object-top grayscale"
-            sizes="140px"
-          />
+          <div className="absolute inset-0 flex items-end justify-center p-2 grayscale">
+            <Avatar3D bmi={start.bmi} gender={start.gender} className="h-full" />
+          </div>
         </div>
         <p className="text-sm font-bold text-neutral-500">{startWeightKg} {kg}</p>
       </div>
@@ -190,13 +177,9 @@ export function BodyComparison({
           "relative w-[140px] h-[140px] rounded-2xl overflow-hidden bg-neutral-100",
           !sameStage && "ring-2 ring-emerald-400 ring-offset-2"
         )}>
-          <Image
-            src={`/body-stages/${current.gender}/${current.stage}.png`}
-            alt="Current body"
-            fill
-            className="object-cover object-top"
-            sizes="140px"
-          />
+          <div className="absolute inset-0 flex items-end justify-center p-2">
+            <Avatar3D bmi={current.bmi} gender={current.gender} className="h-full" />
+          </div>
         </div>
         <p className="text-sm font-bold text-emerald-700">{currentWeightKg} {kg}</p>
       </div>

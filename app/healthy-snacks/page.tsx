@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   description: 'Guilt-free protein bars, dried fruits, nuts, and organic supplements from Lover Diet Center UAE. ألواح بروتين ومكسرات ومكمّلات صحية معتمدة.',
 }
 
+import { Reveal } from '@/components/ui/reveal'
+
 export default function HealthySnacksPage() {
-  return <HealthySnacksContent />
+  return (
+    <Reveal className="animate-fade-in">
+      <HealthySnacksContent />
+    </Reveal>
+  )
 }

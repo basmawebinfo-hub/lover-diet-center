@@ -1,9 +1,10 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Search, Users } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { adminClients } from "@/lib/admin-mock"
+import { adminFetchClients } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 
@@ -11,8 +12,23 @@ export default function AdminClientsPage() {
   const { locale } = useLocale()
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<"all" | "active" | "trial" | "inactive">("all")
+  const [rows, setRows] = useState(adminClients.map((c) => ({ ...c })))
 
-  const filtered = useMemo(() => adminClients.filter((c) => {
+  useEffect(() => {
+    adminFetchClients().then((real) => {
+      if (real.length) {
+        // Map DB rows to the table shape (status/plan default for now)
+        setRows(real.map((r) => ({
+          id: r.id, nameEn: r.nameEn, nameAr: r.nameAr, email: r.email, phone: r.phone,
+          gender: r.gender, age: r.age, startWeightKg: r.startWeightKg, currentWeightKg: r.currentWeightKg,
+          targetWeightKg: r.targetWeightKg, goal: r.goal, plan: "—",
+          status: "active" as const, joinedAt: r.joinedAt, lastActive: r.joinedAt,
+        })))
+      }
+    })
+  }, [])
+
+  const filtered = useMemo(() => rows.filter((c) => {
     if (status !== "all" && c.status !== status) return false
     if (search) { const q = search.toLowerCase(); return c.nameEn.toLowerCase().includes(q) || c.nameAr.includes(search) || c.email.toLowerCase().includes(q) }
     return true

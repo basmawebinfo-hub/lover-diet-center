@@ -14,19 +14,19 @@ export default function AdminOverviewPage() {
   const aed = t(locale, "AED", "درهم")
 
   const [clientsCount, setClientsCount] = useState<number | null>(null)
-  const [orders, setOrders] = useState(adminOrders)
+  const [orders, setOrders] = useState<typeof adminOrders>([])
   const [sessionsCount, setSessionsCount] = useState<number | null>(null)
 
   useEffect(() => {
-    adminFetchClients().then((r) => { if (r.length) setClientsCount(r.length) })
-    adminFetchOrders().then((r) => { if (r.length) setOrders(r.map((o)=>({ id:o.id, client:o.client, date:o.date, items:o.items, total:o.total, status:o.status as typeof adminOrders[number]["status"] }))) })
-    adminFetchSessions().then((r) => { if (r.length) setSessionsCount(r.filter((s)=>s.status==="scheduled").length) })
+    adminFetchClients().then((r) => setClientsCount(r.length))
+    adminFetchOrders().then((r) => { setOrders(r.map((o)=>({ id:o.id, client:o.client, date:o.date, items:o.items, total:o.total, status:o.status as typeof adminOrders[number]["status"] }))) })
+    adminFetchSessions().then((r) => setSessionsCount(r.filter((s)=>s.status==="scheduled").length))
   }, [])
 
   const totalRevenue = adminRevenue.reduce((s, r) => s + r.value, 0)
-  const activeClients = clientsCount ?? adminClients.filter((c) => c.status === "active").length
+  const activeClients = clientsCount ?? 0
   const pendingOrders = orders.filter((o) => o.status === "pending" || o.status === "processing").length
-  const upcomingSessions = sessionsCount ?? adminSessions.filter((s) => s.status === "scheduled").length
+  const upcomingSessions = sessionsCount ?? 0
 
   const maxRev = Math.max(...adminRevenue.map((r) => r.value))
 

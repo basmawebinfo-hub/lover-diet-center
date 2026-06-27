@@ -6,6 +6,7 @@ import { useApp } from "@/lib/store"
 import { analyzeUser, buildAvatarConfig, calculateBMI } from "@/lib/analysis"
 import type { ActivityLevel, Gender, GoalType, User } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useLocale, t } from "@/lib/locale"
 import { createClient } from "@/lib/supabase/client"
@@ -124,8 +125,9 @@ export default function OnboardingPage() {
             />
           </div>
           <div className="mt-6 mb-2 lg:hidden">
-            <span className="text-xl font-bold text-[#1f5d54] tracking-tight">
-              lovers<span className="text-[#34857b]">dc</span>
+            <span className="inline-flex items-center gap-2">
+              <Image src="/ldc-logo.png" alt="Lover Diet Center" width={32} height={32} className="size-8 rounded-full object-cover" />
+              <span className="text-xl font-bold text-[#1f5d54] tracking-tight">lovers<span className="text-[#34857b]">dc</span></span>
             </span>
           </div>
         </div>

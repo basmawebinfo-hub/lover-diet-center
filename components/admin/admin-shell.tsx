@@ -10,7 +10,8 @@ import {
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 import { useApp } from "@/lib/store"
-import { ADMIN_EMAIL } from "@/lib/admin-mock"
+import { createClient } from "@/lib/supabase/client"
+import { isAdmin } from "@/lib/supabase/db"
 
 const NAV = [
   { href: "/admin", en: "Overview", ar: "نظرة عامة", icon: LayoutDashboard },
@@ -31,16 +32,30 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [allowed, setAllowed] = useState(false)
   const [open, setOpen] = useState(false)
 
-  // Frontend-only gate (real auth/role check comes with the backend).
+  // Real role check: the store loads the signed-in user's profile (incl. role) from Supabase.
   useEffect(() => {
-    const email =
-      state.user?.email ||
-      (typeof window !== "undefined"
-        ? (() => { try { return JSON.parse(localStorage.getItem("loverDietUser") || "{}").email } catch { return "" } })()
-        : "")
-    const adminFlag = typeof window !== "undefined" && localStorage.getItem("ldc_admin") === "1"
-    setAllowed(email === ADMIN_EMAIL || adminFlag)
-    setChecked(true)
+    let active = true
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!active) return
+      if (!data.user) {
+        // not signed in -> allow only if a known admin role is already in state (none) 
+        setAllowed(state.user?.role === "admin")
+        setChecked(true)
+        return
+      }
+      // Prefer role already in state; otherwise query it directly
+      if (state.user?.role) {
+        setAllowed(state.user.role === "admin")
+        setChecked(true)
+        return
+      }
+      const admin = await isAdmin(data.user.id)
+      if (!active) return
+      setAllowed(admin)
+      setChecked(true)
+    })
+    return () => { active = false }
   }, [state.user])
 
   if (!checked) return null

@@ -326,3 +326,38 @@ export async function fetchMeals(): Promise<Meal[]> {
     tags: (r.tags as string[]) ?? [],
   }))
 }
+
+// ---- Admin: full detail for a single client ----
+export type ClientDetail = {
+  profile: Record<string, unknown> | null
+  weightLogs: { date: string; weightKg: number }[]
+  waterLogs: { date: string; liters: number }[]
+  orders: { id: string; total: number; status: string; date: string; items: { name: string; quantity: number; price: number }[] }[]
+  sessions: { id: string; type: string; doctor: string; date: string; time: string; status: string }[]
+}
+
+export async function adminFetchClientDetail(userId: string): Promise<ClientDetail> {
+  const supabase = createClient()
+  const [{ data: profile }, { data: wl }, { data: water }, { data: ord }, { data: ses }] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', userId).single(),
+    supabase.from('weight_logs').select('date, weight_kg').eq('user_id', userId).order('date', { ascending: true }),
+    supabase.from('water_logs').select('date, liters').eq('user_id', userId).order('date', { ascending: true }),
+    supabase.from('orders').select('id, total, status, created_at, order_items(quantity, price_at_purchase, products(name_en))').eq('user_id', userId).order('created_at', { ascending: false }),
+    supabase.from('sessions').select('id, type, doctor_name, date, time, status').eq('user_id', userId).order('date', { ascending: false }),
+  ])
+  return {
+    profile: (profile as Record<string, unknown>) ?? null,
+    weightLogs: ((wl as Record<string, unknown>[]) ?? []).map((r) => ({ date: r.date as string, weightKg: Number(r.weight_kg) })),
+    waterLogs: ((water as Record<string, unknown>[]) ?? []).map((r) => ({ date: r.date as string, liters: Number(r.liters) })),
+    orders: ((ord as Record<string, unknown>[]) ?? []).map((r) => ({
+      id: r.id as string, total: Number(r.total), status: r.status as string, date: ((r.created_at as string) ?? '').slice(0, 10),
+      items: ((r.order_items as Record<string, unknown>[]) ?? []).map((it) => ({
+        name: ((it.products as { name_en?: string } | null)?.name_en) ?? '—',
+        quantity: Number(it.quantity), price: Number(it.price_at_purchase),
+      })),
+    })),
+    sessions: ((ses as Record<string, unknown>[]) ?? []).map((r) => ({
+      id: r.id as string, type: (r.type as string) ?? '', doctor: (r.doctor_name as string) ?? '', date: (r.date as string) ?? '', time: (r.time as string) ?? '', status: (r.status as string) ?? 'scheduled',
+    })),
+  }
+}

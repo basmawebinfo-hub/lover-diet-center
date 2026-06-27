@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Search, Users } from "lucide-react"
+import Link from "next/link"
+import { Search, ChevronLeft } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { adminClients } from "@/lib/admin-mock"
 import { adminFetchClients } from "@/lib/supabase/db"
@@ -70,21 +71,22 @@ export default function AdminClientsPage() {
                   <th className="p-4 text-start font-medium">{t(locale,"Progress","التقدّم")}</th>
                   <th className="p-4 text-start font-medium">{t(locale,"Status","الحالة")}</th>
                   <th className="p-4 text-start font-medium">{t(locale,"Last active","آخر نشاط")}</th>
+                  <th className="p-4 text-start font-medium"></th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((c)=>{
                   const lost = (c.startWeightKg - c.currentWeightKg).toFixed(1)
                   return (
-                    <tr key={c.id} className="border-b border-neutral-50 hover:bg-neutral-50/50">
+                    <tr key={c.id} className="border-b border-neutral-50 transition-colors hover:bg-emerald-50/40">
                       <td className="p-4">
-                        <div className="flex items-center gap-3">
+                        <Link href={`/admin/clients/${c.id}`} className="flex items-center gap-3 group">
                           <span className="flex size-9 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">{c.nameEn.charAt(0)}</span>
                           <div>
-                            <p className="font-semibold text-neutral-900">{locale==="ar"?c.nameAr:c.nameEn}</p>
+                            <p className="font-semibold text-neutral-900 group-hover:text-emerald-700">{locale==="ar"?c.nameAr:c.nameEn}</p>
                             <p className="text-xs text-neutral-400">{c.email}</p>
                           </div>
-                        </div>
+                        </Link>
                       </td>
                       <td className="p-4 text-neutral-600">{c.plan}</td>
                       <td className="p-4">
@@ -93,6 +95,11 @@ export default function AdminClientsPage() {
                       </td>
                       <td className="p-4"><span className={cn("rounded-full px-2.5 py-1 text-xs font-bold", statusCls[c.status])}>{locale==="ar"?statusLbl[c.status].ar:statusLbl[c.status].en}</span></td>
                       <td className="p-4 text-neutral-500">{c.lastActive}</td>
+                      <td className="p-4 text-end">
+                        <Link href={`/admin/clients/${c.id}`} className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:border-emerald-300 hover:text-emerald-700">
+                          {t(locale,"View","عرض")} <ChevronLeft className="size-3.5 rtl:rotate-0 rotate-180" />
+                        </Link>
+                      </td>
                     </tr>
                   )
                 })}

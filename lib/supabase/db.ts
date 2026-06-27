@@ -287,3 +287,21 @@ export async function uploadProductImage(file: File): Promise<string | null> {
   const { data } = supabase.storage.from('product-images').getPublicUrl(path)
   return data.publicUrl ?? null
 }
+
+// Public product catalog read (RLS: products are world-readable)
+export async function fetchProducts(): Promise<Product[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: true })
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => ({
+    id: r.id as string,
+    nameEn: (r.name_en as string) ?? '',
+    nameAr: (r.name_ar as string) ?? '',
+    descriptionEn: (r.description_en as string) ?? '',
+    descriptionAr: (r.description_ar as string) ?? '',
+    imageUrl: (r.image_url as string) ?? '',
+    price: Number(r.price) || 0,
+    category: (r.category as Product['category']) ?? 'snack',
+    inStock: (r.in_stock as boolean) ?? true,
+  }))
+}

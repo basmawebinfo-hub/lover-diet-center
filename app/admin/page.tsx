@@ -1,20 +1,32 @@
 "use client"
 
 import Link from "next/link"
+import { useEffect, useState } from "react"
 import { Users, ShoppingBag, DollarSign, Calendar, TrendingUp, ArrowUpRight } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { StatChip } from "@/components/dashboard/stat-widgets"
 import { adminClients, adminOrders, adminSessions, adminRevenue } from "@/lib/admin-mock"
+import { adminFetchClients, adminFetchOrders, adminFetchSessions } from "@/lib/supabase/db"
 import { useLocale, t } from "@/lib/locale"
 
 export default function AdminOverviewPage() {
   const { locale } = useLocale()
   const aed = t(locale, "AED", "درهم")
 
+  const [clientsCount, setClientsCount] = useState<number | null>(null)
+  const [orders, setOrders] = useState(adminOrders)
+  const [sessionsCount, setSessionsCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    adminFetchClients().then((r) => { if (r.length) setClientsCount(r.length) })
+    adminFetchOrders().then((r) => { if (r.length) setOrders(r.map((o)=>({ id:o.id, client:o.client, date:o.date, items:o.items, total:o.total, status:o.status as typeof adminOrders[number]["status"] }))) })
+    adminFetchSessions().then((r) => { if (r.length) setSessionsCount(r.filter((s)=>s.status==="scheduled").length) })
+  }, [])
+
   const totalRevenue = adminRevenue.reduce((s, r) => s + r.value, 0)
-  const activeClients = adminClients.filter((c) => c.status === "active").length
-  const pendingOrders = adminOrders.filter((o) => o.status === "pending" || o.status === "processing").length
-  const upcomingSessions = adminSessions.filter((s) => s.status === "scheduled").length
+  const activeClients = clientsCount ?? adminClients.filter((c) => c.status === "active").length
+  const pendingOrders = orders.filter((o) => o.status === "pending" || o.status === "processing").length
+  const upcomingSessions = sessionsCount ?? adminSessions.filter((s) => s.status === "scheduled").length
 
   const maxRev = Math.max(...adminRevenue.map((r) => r.value))
 

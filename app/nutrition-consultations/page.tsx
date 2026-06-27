@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   description: 'One-on-one personalized nutrition consultations with certified dietitians at Lover Diet Center UAE. استشارات غذائية فردية مع أخصائيين معتمدين.',
 }
 
+import { Reveal } from '@/components/ui/reveal'
+
 export default function NutritionConsultationsPage() {
-  return <NutritionConsultationsContent />
+  return (
+    <Reveal className="animate-fade-in">
+      <NutritionConsultationsContent />
+    </Reveal>
+  )
 }

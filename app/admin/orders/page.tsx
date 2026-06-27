@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { adminOrders, type AdminOrder } from "@/lib/admin-mock"
+import { adminFetchOrders, adminUpdateOrderStatus } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 
@@ -12,13 +13,22 @@ export default function AdminOrdersPage() {
   const { locale } = useLocale()
   const [orders, setOrders] = useState(adminOrders)
   const [filter, setFilter] = useState<"all" | AdminOrder["status"]>("all")
+
+  useEffect(() => {
+    adminFetchOrders().then((real) => {
+      if (real.length) setOrders(real.map((o) => ({ id: o.id, client: o.client, date: o.date, items: o.items, total: o.total, status: o.status as AdminOrder["status"] })))
+    })
+  }, [])
   const aed = t(locale,"AED","درهم")
 
   const statusCls: Record<string,string> = { pending:"bg-amber-50 text-amber-600", processing:"bg-blue-50 text-blue-600", shipped:"bg-indigo-50 text-indigo-600", delivered:"bg-emerald-50 text-emerald-700", cancelled:"bg-red-50 text-red-500" }
   const statusLbl: Record<string,{en:string;ar:string}> = { pending:{en:"Pending",ar:"قيد الانتظار"}, processing:{en:"Processing",ar:"قيد التجهيز"}, shipped:{en:"Shipped",ar:"تم الشحن"}, delivered:{en:"Delivered",ar:"تم التوصيل"}, cancelled:{en:"Cancelled",ar:"ملغي"} }
 
   const shown = filter==="all" ? orders : orders.filter(o=>o.status===filter)
-  const setStatus = (id:string, s:AdminOrder["status"]) => setOrders(prev=>prev.map(o=>o.id===id?{...o,status:s}:o))
+  const setStatus = (id:string, s:AdminOrder["status"]) => {
+    setOrders(prev=>prev.map(o=>o.id===id?{...o,status:s}:o))
+    adminUpdateOrderStatus(id, s).catch(()=>{})
+  }
 
   return (
     <AdminShell>

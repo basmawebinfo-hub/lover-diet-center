@@ -64,26 +64,28 @@ export default function AdminClientDetailPage() {
     : ""
 
   function exportCsv() {
+    const d = data
+    if (!d) return
     const rows: string[][] = [
       ["Field", "Value"],
       ["Name", nameEn],
-      ["Email", (get("email") as string) || ""],
+      ["Email", String(get("email") ?? "")],
       ["Phone", phone],
       ["Age", String(get("age") ?? "")],
-      ["Gender", (get("gender") as string) || ""],
+      ["Gender", String(get("gender") ?? "")],
       ["Height (cm)", String(get("height_cm") ?? "")],
       ["Start weight (kg)", String(start)],
       ["Current weight (kg)", String(current)],
       ["Target weight (kg)", String(target)],
-      ["Goal", (get("goal") as string) || ""],
-      ["Activity", (get("activity_level") as string) || ""],
-      ["Orders", String(data.orders.length)],
-      ["Sessions", String(data.sessions.length)],
-      [],
+      ["Goal", String(get("goal") ?? "")],
+      ["Activity", String(get("activity_level") ?? "")],
+      ["Orders", String(d.orders.length)],
+      ["Sessions", String(d.sessions.length)],
+      ["", ""],
       ["Weight log date", "Weight (kg)"],
-      ...data.weightLogs.map((w) => [w.date, String(w.weightKg)]),
+      ...d.weightLogs.map((w) => [w.date, String(w.weightKg)]),
     ]
-    const csv = rows.map((r) => r.map((c) => `"${(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n")
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n")
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")

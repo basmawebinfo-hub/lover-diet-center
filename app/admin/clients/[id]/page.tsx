@@ -5,7 +5,7 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import {
   ArrowLeft, Scale, Target, Flame, Droplets, ShoppingBag, Calendar,
-  Mail, Phone, User as UserIcon, Cake, Ruler, Activity, Loader2,
+  Mail, Phone, User as UserIcon, Cake, Ruler, Activity, Loader2, MessageCircle, Download,
 } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { StatChip } from "@/components/dashboard/stat-widgets"
@@ -58,6 +58,41 @@ export default function AdminClientDetailPage() {
   const toGoal = Math.max(0, current - target)
   const latestWater = data.waterLogs.length ? data.waterLogs[data.waterLogs.length - 1].liters : 0
 
+  const phone = (get("phone") as string) || ""
+  const waLink = phone
+    ? `https://wa.me/${phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hello ${nameEn}, this is Lover Diet Center.`)}`
+    : ""
+
+  function exportCsv() {
+    const rows: string[][] = [
+      ["Field", "Value"],
+      ["Name", nameEn],
+      ["Email", (get("email") as string) || ""],
+      ["Phone", phone],
+      ["Age", String(get("age") ?? "")],
+      ["Gender", (get("gender") as string) || ""],
+      ["Height (cm)", String(get("height_cm") ?? "")],
+      ["Start weight (kg)", String(start)],
+      ["Current weight (kg)", String(current)],
+      ["Target weight (kg)", String(target)],
+      ["Goal", (get("goal") as string) || ""],
+      ["Activity", (get("activity_level") as string) || ""],
+      ["Orders", String(data.orders.length)],
+      ["Sessions", String(data.sessions.length)],
+      [],
+      ["Weight log date", "Weight (kg)"],
+      ...data.weightLogs.map((w) => [w.date, String(w.weightKg)]),
+    ]
+    const csv = rows.map((r) => r.map((c) => `"${(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n")
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `${nameEn.replace(/\s+/g, "_")}_profile.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const sessionCls: Record<string, string> = { scheduled: "bg-emerald-50 text-emerald-700", completed: "bg-neutral-100 text-neutral-500", cancelled: "bg-red-50 text-red-500" }
   const orderCls: Record<string, string> = { pending: "bg-amber-50 text-amber-600", processing: "bg-blue-50 text-blue-600", shipped: "bg-indigo-50 text-indigo-600", confirmed: "bg-blue-50 text-blue-600", delivered: "bg-emerald-50 text-emerald-700", cancelled: "bg-red-50 text-red-500" }
 
@@ -89,6 +124,18 @@ export default function AdminClientDetailPage() {
             <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">{(get("goal") as string) || "—"}</span>
             <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-bold text-neutral-600">{(get("gender") as string) === "female" ? t(locale, "Female", "أنثى") : t(locale, "Male", "ذكر")}</span>
           </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-wrap gap-3">
+          {waLink && (
+            <a href={waLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700">
+              <MessageCircle className="size-4" /> {t(locale, "Message on WhatsApp", "مراسلة عبر واتساب")}
+            </a>
+          )}
+          <button onClick={exportCsv} className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-bold text-neutral-700 hover:bg-neutral-50">
+            <Download className="size-4" /> {t(locale, "Export CSV", "تصدير CSV")}
+          </button>
         </div>
 
         {/* Stats */}

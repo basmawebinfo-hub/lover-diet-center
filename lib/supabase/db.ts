@@ -97,7 +97,7 @@ export async function placeOrder(
 
 // ---- Profiles ----
 
-export async function fetchProfile(userId: string): Promise<Partial<User> & { role?: string } | null> {
+export async function fetchProfile(userId: string): Promise<(Partial<User> & { role?: "user" | "admin" }) | null> {
   const supabase = createClient()
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
   if (error || !data) return null
@@ -117,7 +117,7 @@ export async function fetchProfile(userId: string): Promise<Partial<User> & { ro
     targetWeightKg: Number(r.target_weight) || 0,
     activityLevel: (r.activity_level as User['activityLevel']) ?? 'light',
     createdAt: (r.created_at as string) ?? new Date().toISOString(),
-    role: (r.role as string) ?? 'user',
+    role: ((r.role as string) === "admin" ? "admin" : "user"),
   }
 }
 

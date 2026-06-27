@@ -24,6 +24,7 @@ create table if not exists public.profiles (
   target_weight   numeric,
   activity_level  text,
   locale          text default 'en',
+  role            text not null default 'user' check (role in ('user','admin')),
   has_seen_intro  boolean default false,
   created_at      timestamptz default now()
 );
@@ -93,6 +94,20 @@ create table if not exists public.weight_logs (
 create index if not exists weight_logs_user_idx on public.weight_logs(user_id, date);
 
 -- =====================================================================
+-- 4b) WATER LOGS  (per user, one row per day)
+-- =====================================================================
+create table if not exists public.water_logs (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  date       date not null,
+  liters     numeric not null default 0,
+  created_at timestamptz default now(),
+  unique (user_id, date)
+);
+create index if not exists water_logs_user_idx on public.water_logs(user_id, date);
+
+
+-- =====================================================================
 -- 5) ORDERS + ORDER ITEMS
 -- =====================================================================
 create table if not exists public.orders (
@@ -157,6 +172,7 @@ alter table public.profiles    enable row level security;
 alter table public.meals       enable row level security;
 alter table public.products    enable row level security;
 alter table public.weight_logs enable row level security;
+alter table public.water_logs  enable row level security;
 alter table public.orders      enable row level security;
 alter table public.order_items enable row level security;
 alter table public.sessions    enable row level security;
@@ -174,6 +190,7 @@ create policy "profiles_insert_own" on public.profiles for insert with check (au
 
 -- Per-user tables: full control over own rows only
 create policy "weight_own" on public.weight_logs for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "water_own" on public.water_logs for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "orders_own" on public.orders      for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "sessions_own" on public.sessions  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "plans_own" on public.meal_plans   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
@@ -185,6 +202,29 @@ create policy "order_items_own" on public.order_items for all
 create policy "plan_items_own" on public.plan_items for all
   using (exists (select 1 from public.meal_plans p where p.id = plan_id and p.user_id = auth.uid()))
   with check (exists (select 1 from public.meal_plans p where p.id = plan_id and p.user_id = auth.uid()));
+
+
+-- =====================================================================
+-- ADMIN ACCESS — admins can read/manage all rows
+-- =====================================================================
+-- Helper: is the current user an admin?
+create or replace function public.is_admin()
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin');
+$$;
+
+-- Admins can read all profiles, weight logs, orders, sessions, plans
+create policy "profiles_admin_read"  on public.profiles    for select using (public.is_admin());
+create policy "weight_admin_read"    on public.weight_logs for select using (public.is_admin());
+create policy "water_admin_read"     on public.water_logs  for select using (public.is_admin());
+create policy "orders_admin_all"     on public.orders      for all using (public.is_admin()) with check (public.is_admin());
+create policy "order_items_admin"    on public.order_items for all using (public.is_admin()) with check (public.is_admin());
+create policy "sessions_admin_all"   on public.sessions    for all using (public.is_admin()) with check (public.is_admin());
+create policy "plans_admin_all"      on public.meal_plans  for all using (public.is_admin()) with check (public.is_admin());
+
+-- Admins can manage the public catalogs (meals & products)
+create policy "meals_admin_write"    on public.meals    for all using (public.is_admin()) with check (public.is_admin());
+create policy "products_admin_write" on public.products for all using (public.is_admin()) with check (public.is_admin());
 
 -- =====================================================================
 -- SEED DATA — meals & products (from current app data)

@@ -361,3 +361,9 @@ export async function adminFetchClientDetail(userId: string): Promise<ClientDeta
     })),
   }
 }
+
+export async function adminUpdateSessionStatus(sessionId: string, status: string): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase.from('sessions').update({ status }).eq('id', sessionId)
+  return !error
+}

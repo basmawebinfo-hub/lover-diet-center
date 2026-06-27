@@ -94,3 +94,71 @@ export async function placeOrder(
   }
   return orderId
 }
+
+// ---- Profiles ----
+import type { User } from '@/lib/types'
+
+export async function fetchProfile(userId: string): Promise<Partial<User> & { role?: string } | null> {
+  const supabase = createClient()
+  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
+  if (error || !data) return null
+  const r = data as Record<string, unknown>
+  return {
+    id: r.id as string,
+    nameEn: (r.name_en as string) ?? '',
+    nameAr: (r.name_ar as string) ?? undefined,
+    email: (r.email as string) ?? '',
+    phone: (r.phone as string) ?? undefined,
+    age: (r.age as number) ?? 0,
+    gender: (r.gender as User['gender']) ?? 'male',
+    heightCm: Number(r.height_cm) || 0,
+    startWeightKg: Number(r.start_weight_kg) || 0,
+    currentWeightKg: Number(r.current_weight) || 0,
+    goal: (r.goal as User['goal']) ?? 'lose_weight',
+    targetWeightKg: Number(r.target_weight) || 0,
+    activityLevel: (r.activity_level as User['activityLevel']) ?? 'light',
+    createdAt: (r.created_at as string) ?? new Date().toISOString(),
+    role: (r.role as string) ?? 'user',
+  }
+}
+
+export async function upsertProfile(userId: string, u: Partial<User>): Promise<boolean> {
+  const supabase = createClient()
+  const row: Record<string, unknown> = { id: userId }
+  if (u.nameEn !== undefined) row.name_en = u.nameEn
+  if (u.nameAr !== undefined) row.name_ar = u.nameAr
+  if (u.email !== undefined) row.email = u.email
+  if (u.phone !== undefined) row.phone = u.phone
+  if (u.age !== undefined) row.age = u.age
+  if (u.gender !== undefined) row.gender = u.gender
+  if (u.heightCm !== undefined) row.height_cm = u.heightCm
+  if (u.startWeightKg !== undefined) row.start_weight_kg = u.startWeightKg
+  if (u.currentWeightKg !== undefined) row.current_weight = u.currentWeightKg
+  if (u.goal !== undefined) row.goal = u.goal
+  if (u.targetWeightKg !== undefined) row.target_weight = u.targetWeightKg
+  if (u.activityLevel !== undefined) row.activity_level = u.activityLevel
+  const { error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' })
+  return !error
+}
+
+export async function isAdmin(userId: string): Promise<boolean> {
+  const supabase = createClient()
+  const { data } = await supabase.from('profiles').select('role').eq('id', userId).single()
+  return (data as { role?: string } | null)?.role === 'admin'
+}
+
+// ---- Water logs ----
+export async function upsertWaterLog(userId: string, date: string, liters: number): Promise<void> {
+  const supabase = createClient()
+  await supabase.from('water_logs').upsert(
+    { user_id: userId, date, liters },
+    { onConflict: 'user_id,date' },
+  )
+}
+
+export async function fetchWaterLogs(userId: string): Promise<{ date: string; liters: number }[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase.from('water_logs').select('*').eq('user_id', userId)
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => ({ date: r.date as string, liters: Number(r.liters) }))
+}

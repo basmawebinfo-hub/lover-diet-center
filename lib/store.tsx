@@ -258,7 +258,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     let active = true
     Promise.all([fetchProducts(), fetchMeals()]).then(([products, meals]) => {
       if (!active) return
-      dispatch({ type: "SET_CATALOG", payload: { products, meals: meals as unknown as Meal[] } })
+      dispatch({ type: "SET_CATALOG", payload: { products, meals } })
     })
     return () => { active = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps

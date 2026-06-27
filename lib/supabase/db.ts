@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
-import type { Product, Session, User, WeightLog } from '@/lib/types'
+import type { Meal, Product, Session, User, WeightLog } from '@/lib/types'
 
 // ---- Sessions ----
 export async function insertSession(userId: string, s: Session): Promise<void> {
@@ -306,8 +306,8 @@ export async function fetchProducts(): Promise<Product[]> {
   }))
 }
 
-// Public meals catalog read
-export async function fetchMeals(): Promise<{ id:string; nameEn:string; nameAr:string; imageUrl:string; calories:number; protein:number }[]> {
+// Public meals catalog read (full Meal)
+export async function fetchMeals(): Promise<Meal[]> {
   const supabase = createClient()
   const { data, error } = await supabase.from('meals').select('*').order('created_at', { ascending: true })
   if (error || !data) return []
@@ -315,8 +315,14 @@ export async function fetchMeals(): Promise<{ id:string; nameEn:string; nameAr:s
     id: r.id as string,
     nameEn: (r.name_en as string) ?? '',
     nameAr: (r.name_ar as string) ?? '',
+    descriptionEn: (r.description_en as string) ?? '',
+    descriptionAr: (r.description_ar as string) ?? '',
     imageUrl: (r.image_url as string) ?? '',
     calories: Number(r.calories) || 0,
     protein: Number(r.protein) || 0,
+    carbs: Number(r.carbs) || 0,
+    fat: Number(r.fat) || 0,
+    mealType: (r.meal_type as Meal['mealType']) ?? 'snack',
+    tags: (r.tags as string[]) ?? [],
   }))
 }

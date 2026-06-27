@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/client'
-import { mockMeals, mockProducts } from '@/lib/mock-data'
 import type { Meal, Product } from '@/lib/types'
 
 // Map snake_case rows from Supabase to the app's camelCase types
@@ -38,10 +37,10 @@ export async function fetchMeals(): Promise<Meal[]> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase.from('meals').select('*')
-    if (error || !data || data.length === 0) return mockMeals
+    if (error || !data) return []
     return data.map(rowToMeal)
   } catch {
-    return mockMeals
+    return []
   }
 }
 
@@ -49,9 +48,9 @@ export async function fetchProducts(): Promise<Product[]> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase.from('products').select('*')
-    if (error || !data || data.length === 0) return mockProducts
+    if (error || !data) return []
     return data.map(rowToProduct)
   } catch {
-    return mockProducts
+    return []
   }
 }

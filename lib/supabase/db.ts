@@ -305,3 +305,18 @@ export async function fetchProducts(): Promise<Product[]> {
     inStock: (r.in_stock as boolean) ?? true,
   }))
 }
+
+// Public meals catalog read
+export async function fetchMeals(): Promise<{ id:string; nameEn:string; nameAr:string; imageUrl:string; calories:number; protein:number }[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase.from('meals').select('*').order('created_at', { ascending: true })
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => ({
+    id: r.id as string,
+    nameEn: (r.name_en as string) ?? '',
+    nameAr: (r.name_ar as string) ?? '',
+    imageUrl: (r.image_url as string) ?? '',
+    calories: Number(r.calories) || 0,
+    protein: Number(r.protein) || 0,
+  }))
+}

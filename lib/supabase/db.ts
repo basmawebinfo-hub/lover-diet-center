@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
-import type { Session, WeightLog } from '@/lib/types'
+import type { Session, User, WeightLog } from '@/lib/types'
 
 // ---- Sessions ----
 export async function insertSession(userId: string, s: Session): Promise<void> {
@@ -96,7 +96,6 @@ export async function placeOrder(
 }
 
 // ---- Profiles ----
-import type { User } from '@/lib/types'
 
 export async function fetchProfile(userId: string): Promise<Partial<User> & { role?: string } | null> {
   const supabase = createClient()

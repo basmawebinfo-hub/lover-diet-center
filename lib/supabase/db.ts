@@ -161,3 +161,76 @@ export async function fetchWaterLogs(userId: string): Promise<{ date: string; li
   if (error || !data) return []
   return data.map((r: Record<string, unknown>) => ({ date: r.date as string, liters: Number(r.liters) }))
 }
+
+// ---- Admin reads (RLS allows these only for role='admin') ----
+export async function adminFetchClients() {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .neq('role', 'admin')
+    .order('created_at', { ascending: false })
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => ({
+    id: r.id as string,
+    nameEn: (r.name_en as string) ?? '',
+    nameAr: (r.name_ar as string) ?? '',
+    email: (r.email as string) ?? '',
+    phone: (r.phone as string) ?? '',
+    gender: ((r.gender as string) === 'female' ? 'female' : 'male') as 'male' | 'female',
+    age: (r.age as number) ?? 0,
+    startWeightKg: Number(r.start_weight_kg) || 0,
+    currentWeightKg: Number(r.current_weight) || 0,
+    targetWeightKg: Number(r.target_weight) || 0,
+    goal: (r.goal as string) ?? '',
+    joinedAt: ((r.created_at as string) ?? '').slice(0, 10),
+  }))
+}
+
+export async function adminFetchOrders() {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id, total, status, created_at, user_id, profiles(name_en), order_items(quantity)')
+    .order('created_at', { ascending: false })
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => {
+    const prof = r.profiles as { name_en?: string } | null
+    const items = (r.order_items as { quantity: number }[]) ?? []
+    return {
+      id: r.id as string,
+      client: prof?.name_en ?? '—',
+      date: ((r.created_at as string) ?? '').slice(0, 10),
+      items: items.reduce((s, it) => s + (it.quantity || 0), 0),
+      total: Number(r.total) || 0,
+      status: (r.status as string) ?? 'pending',
+    }
+  })
+}
+
+export async function adminUpdateOrderStatus(orderId: string, status: string): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase.from('orders').update({ status }).eq('id', orderId)
+  return !error
+}
+
+export async function adminFetchSessions() {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('sessions')
+    .select('id, type, doctor_name, date, time, status, profiles(name_en)')
+    .order('date', { ascending: false })
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => {
+    const prof = r.profiles as { name_en?: string } | null
+    return {
+      id: r.id as string,
+      client: prof?.name_en ?? '—',
+      type: (r.type as string) ?? '',
+      doctor: (r.doctor_name as string) ?? 'Dr. Wael Mostafa',
+      date: (r.date as string) ?? '',
+      time: (r.time as string) ?? '',
+      status: (r.status as string) ?? 'scheduled',
+    }
+  })
+}

@@ -140,6 +140,7 @@ export type User = {
   activityLevel: ActivityLevel
   avatarConfig: AvatarConfig
   createdAt: string
+  role?: "user" | "admin"
 }
 
 export type AvatarConfig = {

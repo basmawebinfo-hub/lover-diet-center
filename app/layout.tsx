@@ -26,6 +26,12 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.loversdc.com'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: 'LoverDiet',
+    statusBarStyle: 'default',
+  },
   title: {
     default: 'Lover Diet Center — Science-Based Nutrition in UAE',
     template: '%s | Lover Diet Center',

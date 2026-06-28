@@ -33,6 +33,17 @@ export default function AdminClientDetailPage() {
     adminFetchClientDetail(id).then((d) => { setData(d); setLoaded(true) })
   }, [id])
 
+  const { notify } = useToast()
+  const [meals, setMeals] = useState<{ id: string; nameEn: string; nameAr: string }[]>([])
+  const [planOpen, setPlanOpen] = useState(false)
+  const [savingPlan, setSavingPlan] = useState(false)
+  const [planForm, setPlanForm] = useState({
+    doctorName: "Dr. Wael Mostafa", startDate: "", endDate: "", goal: "lose_weight",
+    dailyCalories: 1800, waterLiters: 2.5, notesEn: "", notesAr: "",
+    days: {} as Record<number, string>,
+  })
+  useEffect(() => { fetchMeals().then((m) => setMeals(m.map((x) => ({ id: x.id, nameEn: x.nameEn, nameAr: x.nameAr })))) }, [])
+
   const p = data?.profile
   const get = (k: string) => (p?.[k] as string | number | null | undefined)
 
@@ -124,22 +135,10 @@ export default function AdminClientDetailPage() {
   const latestWater = data.waterLogs.length ? data.waterLogs[data.waterLogs.length - 1].liters : 0
 
   const phone = (get("phone") as string) || ""
-  const { notify } = useToast()
-  const [meals, setMeals] = useState<{ id: string; nameEn: string; nameAr: string }[]>([])
-  const [planOpen, setPlanOpen] = useState(false)
-  const [savingPlan, setSavingPlan] = useState(false)
   const DAYS = [
     { i: 0, en: "Sun", ar: "الأحد" }, { i: 1, en: "Mon", ar: "الإثنين" }, { i: 2, en: "Tue", ar: "الثلاثاء" },
     { i: 3, en: "Wed", ar: "الأربعاء" }, { i: 4, en: "Thu", ar: "الخميس" }, { i: 5, en: "Fri", ar: "الجمعة" }, { i: 6, en: "Sat", ar: "السبت" },
   ]
-  const [planForm, setPlanForm] = useState({
-    doctorName: "Dr. Wael Mostafa", startDate: "", endDate: "", goal: "lose_weight",
-    dailyCalories: 1800, waterLiters: 2.5, notesEn: "", notesAr: "",
-    days: {} as Record<number, string>,
-  })
-
-  useEffect(() => { fetchMeals().then((m) => setMeals(m.map((x) => ({ id: x.id, nameEn: x.nameEn, nameAr: x.nameAr })))) }, [])
-
   async function savePlan() {
     setSavingPlan(true)
     const items = Object.entries(planForm.days).filter(([, mealId]) => mealId).map(([d, mealId]) => ({ dayOfWeek: Number(d), mealId }))

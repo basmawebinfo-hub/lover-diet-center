@@ -5,12 +5,13 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import {
   ArrowLeft, Scale, Target, Flame, Droplets, ShoppingBag, Calendar,
-  Mail, Phone, User as UserIcon, Cake, Ruler, Activity, Loader2, MessageCircle, Download,
+  Mail, Phone, User as UserIcon, Cake, Ruler, Activity, Loader2, MessageCircle, Download, ClipboardList, X, Plus,
 } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { StatChip } from "@/components/dashboard/stat-widgets"
 import { WeightChart } from "@/components/dashboard/weight-chart"
-import { adminFetchClientDetail, adminUpdateSessionStatus, type ClientDetail } from "@/lib/supabase/db"
+import { adminFetchClientDetail, adminUpdateSessionStatus, adminUpsertPlan, fetchMeals, type ClientDetail } from "@/lib/supabase/db"
+import { useToast } from "@/components/ui/toast"
 import { useCurrency } from "@/lib/currency"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -40,7 +41,66 @@ export default function AdminClientDetailPage() {
           <p className="text-lg font-bold text-neutral-900">{t(locale, "Client not found", "العميل غير موجود")}</p>
           <Link href="/admin/clients" className="mt-4 inline-block rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white">{t(locale, "Back to clients", "العودة للعملاء")}</Link>
         </div>
-      </AdminShell>
+  
+      {/* Plan editor modal */}
+      {planOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setPlanOpen(false)} />
+          <div className="relative z-10 max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Create / Edit Plan", "إنشاء / تعديل خطة")}</h2>
+              <button onClick={() => setPlanOpen(false)} className="rounded-lg p-1 text-neutral-400 hover:bg-neutral-50"><X className="size-5" /></button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field2 label={t(locale, "Doctor", "الطبيب")}><input value={planForm.doctorName} onChange={(e) => setPlanForm({ ...planForm, doctorName: e.target.value })} className={inp} /></Field2>
+              <Field2 label={t(locale, "Goal", "الهدف")}>
+                <select value={planForm.goal} onChange={(e) => setPlanForm({ ...planForm, goal: e.target.value })} className={inp}>
+                  {["lose_weight", "gain_muscle", "maintain", "tone"].map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+              </Field2>
+              <Field2 label={t(locale, "Start date", "تاريخ البداية")}><input type="date" value={planForm.startDate} onChange={(e) => setPlanForm({ ...planForm, startDate: e.target.value })} className={inp} /></Field2>
+              <Field2 label={t(locale, "End date", "تاريخ النهاية")}><input type="date" value={planForm.endDate} onChange={(e) => setPlanForm({ ...planForm, endDate: e.target.value })} className={inp} /></Field2>
+              <Field2 label={t(locale, "Daily calories", "السعرات اليومية")}><input type="number" value={planForm.dailyCalories} onChange={(e) => setPlanForm({ ...planForm, dailyCalories: Number(e.target.value) || 0 })} className={inp} /></Field2>
+              <Field2 label={t(locale, "Water (L)", "الماء (لتر)")}><input type="number" step={0.1} value={planForm.waterLiters} onChange={(e) => setPlanForm({ ...planForm, waterLiters: Number(e.target.value) || 0 })} className={inp} /></Field2>
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 gap-3">
+              <Field2 label={t(locale, "Notes (EN)", "ملاحظات (إنجليزي)")}><textarea rows={2} value={planForm.notesEn} onChange={(e) => setPlanForm({ ...planForm, notesEn: e.target.value })} className={inp} /></Field2>
+              <Field2 label={t(locale, "Notes (AR)", "ملاحظات (عربي)")}><textarea dir="rtl" rows={2} value={planForm.notesAr} onChange={(e) => setPlanForm({ ...planForm, notesAr: e.target.value })} className={inp} /></Field2>
+            </div>
+
+            {/* Weekly meals */}
+            <div className="mt-4">
+              <p className="mb-2 text-sm font-bold text-neutral-700">{t(locale, "Weekly meals", "وجبات الأسبوع")}</p>
+              <div className="space-y-2">
+                {DAYS.map((d) => (
+                  <div key={d.i} className="flex items-center gap-3">
+                    <span className="w-16 text-sm font-semibold text-neutral-600">{locale === "ar" ? d.ar : d.en}</span>
+                    <select
+                      value={planForm.days[d.i] || ""}
+                      onChange={(e) => setPlanForm({ ...planForm, days: { ...planForm.days, [d.i]: e.target.value } })}
+                      className={inp}
+                    >
+                      <option value="">{t(locale, "— none —", "— لا شيء —")}</option>
+                      {meals.map((m) => <option key={m.id} value={m.id}>{locale === "ar" ? (m.nameAr || m.nameEn) : m.nameEn}</option>)}
+                    </select>
+                  </div>
+                ))}
+              </div>
+              {meals.length === 0 && <p className="mt-2 text-xs text-amber-600">{t(locale, "No meals in catalog yet — add meals first.", "لا توجد وجبات في الكتالوج — أضف وجبات أولاً.")}</p>}
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <button onClick={() => setPlanOpen(false)} className="flex-1 rounded-xl border border-neutral-200 py-3 text-sm font-semibold text-neutral-600 hover:bg-neutral-50">{t(locale, "Cancel", "إلغاء")}</button>
+              <button onClick={savePlan} disabled={savingPlan} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60">
+                {savingPlan && <Loader2 className="size-4 animate-spin" />} {t(locale, "Save Plan", "حفظ الخطة")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </AdminShell>
     )
   }
 
@@ -59,6 +119,30 @@ export default function AdminClientDetailPage() {
   const latestWater = data.waterLogs.length ? data.waterLogs[data.waterLogs.length - 1].liters : 0
 
   const phone = (get("phone") as string) || ""
+  const { notify } = useToast()
+  const [meals, setMeals] = useState<{ id: string; nameEn: string; nameAr: string }[]>([])
+  const [planOpen, setPlanOpen] = useState(false)
+  const [savingPlan, setSavingPlan] = useState(false)
+  const DAYS = [
+    { i: 0, en: "Sun", ar: "الأحد" }, { i: 1, en: "Mon", ar: "الإثنين" }, { i: 2, en: "Tue", ar: "الثلاثاء" },
+    { i: 3, en: "Wed", ar: "الأربعاء" }, { i: 4, en: "Thu", ar: "الخميس" }, { i: 5, en: "Fri", ar: "الجمعة" }, { i: 6, en: "Sat", ar: "السبت" },
+  ]
+  const [planForm, setPlanForm] = useState({
+    doctorName: "Dr. Wael Mostafa", startDate: "", endDate: "", goal: "lose_weight",
+    dailyCalories: 1800, waterLiters: 2.5, notesEn: "", notesAr: "",
+    days: {} as Record<number, string>,
+  })
+
+  useEffect(() => { fetchMeals().then((m) => setMeals(m.map((x) => ({ id: x.id, nameEn: x.nameEn, nameAr: x.nameAr })))) }, [])
+
+  async function savePlan() {
+    setSavingPlan(true)
+    const items = Object.entries(planForm.days).filter(([, mealId]) => mealId).map(([d, mealId]) => ({ dayOfWeek: Number(d), mealId }))
+    const ok = await adminUpsertPlan(id, { ...planForm, items })
+    setSavingPlan(false)
+    if (ok) { notify(t(locale, "Plan saved", "تم حفظ الخطة"), "success"); setPlanOpen(false) }
+    else notify(t(locale, "Save failed", "فشل الحفظ"), "error")
+  }
   const waLink = phone
     ? `https://wa.me/${phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(`Hello ${nameEn}, this is Lover Diet Center.`)}`
     : ""
@@ -137,6 +221,9 @@ export default function AdminClientDetailPage() {
           )}
           <button onClick={exportCsv} className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-bold text-neutral-700 hover:bg-neutral-50">
             <Download className="size-4" /> {t(locale, "Export CSV", "تصدير CSV")}
+          </button>
+          <button onClick={() => setPlanOpen(true)} className="inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-neutral-800">
+            <ClipboardList className="size-4" /> {t(locale, "Create Plan", "إنشاء خطة")}
           </button>
         </div>
 
@@ -239,4 +326,10 @@ export default function AdminClientDetailPage() {
       </div>
     </AdminShell>
   )
+}
+
+
+const inp = "w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm text-neutral-900 focus:border-emerald-400 focus:outline-none"
+function Field2({ label, children }: { label: string; children: React.ReactNode }) {
+  return (<div><label className="mb-1.5 block text-sm font-semibold text-neutral-700">{label}</label>{children}</div>)
 }

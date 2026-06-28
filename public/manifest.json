@@ -1,12 +1,39 @@
 {
-  "name": "LoverDiet — Science-Based Nutrition",
+  "name": "Lover Diet Center — Science-Based Nutrition",
   "short_name": "LoverDiet",
-  "description": "Personalized diet plans, healthy meal delivery, premium supplements, and expert nutrition guidance.",
+  "description": "Personalized diet plans, healthy meals, premium supplements, and expert nutrition guidance in the UAE.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0a0f0a",
-  "theme_color": "#0a0f0a",
+  "orientation": "portrait",
+  "background_color": "#f6faf8",
+  "theme_color": "#10b981",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": [
+    "health",
+    "lifestyle",
+    "food"
+  ],
   "icons": [
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icon.svg",
       "sizes": "any",

@@ -87,11 +87,7 @@ export default function DashboardOverviewPage() {
         </div>
 
         {/* Notifications */}
-        <ClientNotifications /></p>
-            </div>
-            <Link href="/dashboard/weight" className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-600">{t(locale, "Log now", "سجّل الآن")}</Link>
-          </div>
-        )}
+        <ClientNotifications />
 
         {/* Stat chips */}
         {!hasWeight && (

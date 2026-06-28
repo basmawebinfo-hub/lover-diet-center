@@ -5,7 +5,7 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import {
   ArrowLeft, Scale, Target, Flame, Droplets, ShoppingBag, Calendar,
-  Mail, Phone, User as UserIcon, Cake, Ruler, Activity, Loader2, MessageCircle, Download, ClipboardList, X, Plus,
+  Mail, Phone, User as UserIcon, Cake, Ruler, Activity, Loader2, MessageCircle, Download, ClipboardList, X,
 } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { StatChip } from "@/components/dashboard/stat-widgets"

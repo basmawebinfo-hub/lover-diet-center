@@ -476,3 +476,23 @@ export async function adminUpsertPlan(userId: string, plan: {
   }
   return true
 }
+
+// ---- Admin: create a session/booking for a client ----
+export async function adminCreateSession(s: {
+  userId: string; type: string; doctorName: string; date: string; time: string;
+  durationMinutes: number; location: string; notes?: string;
+}): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase.from('sessions').insert({
+    user_id: s.userId,
+    type: s.type,
+    doctor_name: s.doctorName,
+    date: s.date || null,
+    time: s.time || null,
+    duration_minutes: s.durationMinutes,
+    status: 'scheduled',
+    location: s.location,
+    notes: s.notes ?? null,
+  })
+  return !error
+}

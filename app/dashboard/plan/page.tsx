@@ -7,6 +7,7 @@ import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shel
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { useCurrency } from "@/lib/currency"
 import { WHATSAPP_SUPPORT } from "@/lib/site"
 
 const DAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
@@ -15,6 +16,7 @@ const DAYS_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأرب
 export default function PlanPage() {
   const router = useRouter()
   const { locale } = useLocale()
+  const { format } = useCurrency()
   const { state, addToCart } = useApp()
   const user = state.user
   const plan = state.doctorPlan
@@ -211,7 +213,7 @@ export default function PlanPage() {
                 </div>
                 <p className="mt-3 font-semibold text-neutral-900">{locale === "ar" ? product.nameAr : product.nameEn}</p>
                 <div className="mt-3 flex items-center justify-between">
-                  <span className="font-bold text-emerald-700">{product.price} {t(locale,"AED","درهم")}</span>
+                  <span className="font-bold text-emerald-700">{format(product.price)}</span>
                   <button
                     type="button"
                     onClick={() => addToCart(product.id)}

@@ -24,7 +24,7 @@ import type {
   WeightLog,
 } from "./types"
 import { createClient } from "@/lib/supabase/client"
-import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, fetchProfile, fetchWaterLogs, fetchProducts, fetchMeals, fetchUserOrders } from "@/lib/supabase/db"
+import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, fetchProfile, fetchWaterLogs, fetchProducts, fetchMeals, fetchUserOrders, fetchUserPlan } from "@/lib/supabase/db"
 
 
 type AppState = {
@@ -273,12 +273,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user || !active) return
       const uid = data.user.id
-      const [profile, sessions, weightLogs, waterLogs, orders] = await Promise.all([
+      const [profile, sessions, weightLogs, waterLogs, orders, plan] = await Promise.all([
         fetchProfile(uid),
         fetchSessions(uid),
         fetchWeightLogs(uid),
         fetchWaterLogs(uid),
         fetchUserOrders(uid),
+        fetchUserPlan(uid),
       ])
       if (!active) return
       // Merge the real DB profile into the user (DB is the source of truth)
@@ -303,6 +304,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           orders: orders.length ? orders : undefined,
         },
       })
+      if (plan) dispatch({ type: "UPDATE_PLAN", payload: plan })
     })
     return () => { active = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps

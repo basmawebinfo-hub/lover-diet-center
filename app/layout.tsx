@@ -5,6 +5,7 @@ import { ConditionalShell } from '@/components/conditional-shell'
 import { AppProvider } from '@/lib/store'
 import { LocaleProvider } from '@/lib/locale'
 import { CurrencyProvider } from '@/lib/currency'
+import { InstallPrompt } from '@/components/ui/install-prompt'
 import { ToastProvider } from '@/components/ui/toast'
 import './globals.css'
 
@@ -107,6 +108,7 @@ export default function RootLayout({
             <CurrencyProvider>
               <ToastProvider>
                 <ConditionalShell>{children}</ConditionalShell>
+              <InstallPrompt />
               </ToastProvider>
             </CurrencyProvider>
           </AppProvider>

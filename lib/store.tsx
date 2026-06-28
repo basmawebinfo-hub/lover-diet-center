@@ -370,8 +370,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     []
   )
   const updateSession = useCallback(
-    (id: string, changes: Partial<Session>) =>
-      dispatch({ type: "UPDATE_SESSION", payload: { id, changes } }),
+    (id: string, changes: Partial<Session>) => {
+      dispatch({ type: "UPDATE_SESSION", payload: { id, changes } })
+      // Persist status/changes to Supabase (best-effort)
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data }) => {
+        if (!data.user) return
+        const row: Record<string, unknown> = {}
+        if (changes.status !== undefined) row.status = changes.status
+        if (changes.date !== undefined) row.date = changes.date
+        if (changes.time !== undefined) row.time = changes.time
+        if (changes.notes !== undefined) row.notes = changes.notes
+        if (Object.keys(row).length) supabase.from("sessions").update(row).eq("id", id).then(() => {})
+      })
+    },
     []
   )
   const placeOrderLocal = useCallback(

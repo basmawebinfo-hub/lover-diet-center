@@ -9,6 +9,7 @@ import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shel
 import { useApp } from "@/lib/store"
 import type { Meal } from "@/lib/types"
 import { useLocale, t } from "@/lib/locale"
+import { useCurrency } from "@/lib/currency"
 
 const MEAL_TYPE_AR: Record<Meal["mealType"], string> = {
   breakfast: "فطار",
@@ -21,6 +22,7 @@ export default function MealDetailPage({ params }: { params: Promise<{ id: strin
   const { id } = use(params)
   const router = useRouter()
   const { locale } = useLocale()
+  const { format } = useCurrency()
   const { state, addToCart } = useApp()
 
   const meal = state.meals.find((m) => m.id === id)
@@ -123,7 +125,7 @@ export default function MealDetailPage({ params }: { params: Promise<{ id: strin
                   onClick={() => { addToCart(product.id); router.push("/dashboard/cart") }}
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-4 text-base font-bold text-lime-950 shadow-lg shadow-lime-500/40 transition hover:-translate-y-0.5"
                 >
-                  <ShoppingCart className="size-5" /> {t(locale,"Buy Now","اشترِ الآن")} · {product.price} {t(locale,"AED","درهم")}
+                  <ShoppingCart className="size-5" /> {t(locale,"Buy Now","اشترِ الآن")} · {format(product.price)}
                 </button>
               ) : (
                 <Link

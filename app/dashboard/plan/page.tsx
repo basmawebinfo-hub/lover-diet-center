@@ -2,11 +2,12 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Apple, Flame, Beef, Wheat, Droplet, ChefHat, ShoppingCart } from "lucide-react"
+import { Apple, Flame, Beef, Wheat, Droplet, ChefHat, ShoppingCart, ClipboardList, MessageCircle } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { WHATSAPP_SUPPORT } from "@/lib/site"
 
 const DAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 const DAYS_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"]
@@ -22,7 +23,40 @@ export default function PlanPage() {
     if (!user) router.replace("/onboarding")
   }, [user, router])
 
-  if (!user || !plan) return null
+  if (!user) return null
+
+  // No plan yet -> professional empty state (instead of a blank page)
+  if (!plan) {
+    return (
+      <DashboardShell>
+        <MobileNav />
+        <div className="mx-auto max-w-2xl pb-24 lg:pb-0">
+          <header className="mb-6">
+            <h1 className="text-3xl font-bold text-neutral-900">{t(locale, "My Plan", "خطتي")}</h1>
+          </header>
+          <div className="flex flex-col items-center rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-10 text-center">
+            <span className="flex size-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+              <ClipboardList className="size-8" />
+            </span>
+            <h2 className="mt-5 text-xl font-extrabold text-neutral-900">{t(locale, "Your plan is on the way", "خطتك في الطريق")}</h2>
+            <p className="mt-2 max-w-md text-sm text-neutral-500">
+              {t(locale,
+                "Our nutrition team is preparing a personalized plan for you. Book a consultation to get started faster.",
+                "فريق التغذية لدينا يجهّز لك خطة مخصصة. احجز استشارة لتبدأ أسرع.")}
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <a href={WHATSAPP_SUPPORT} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700">
+                <MessageCircle className="size-4" /> {t(locale, "Book a consultation", "احجز استشارة")}
+              </a>
+              <button onClick={() => router.push("/dashboard/sessions")} className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-5 py-3 text-sm font-bold text-neutral-700 hover:bg-neutral-50">
+                {t(locale, "View sessions", "عرض الجلسات")}
+              </button>
+            </div>
+          </div>
+        </div>
+      </DashboardShell>
+    )
+  }
 
   // Group plan items by day
   const byDay: Record<number, typeof plan.planItems> = {}

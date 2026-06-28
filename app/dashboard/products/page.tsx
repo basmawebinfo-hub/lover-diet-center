@@ -23,7 +23,6 @@ const CATEGORIES = [
 export default function ProductsPage() {
   const router = useRouter()
   const { locale } = useLocale()
-  const { format } = useCurrency()
   const { state, addToCart } = useApp()
   const user = state.user
   const [search, setSearch] = useState("")
@@ -121,6 +120,7 @@ function ProductCard({
   onAdd: () => void
 }) {
   const { locale } = useLocale()
+  const { format } = useCurrency()
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white transition hover:border-emerald-300 hover:shadow-md">
       {/* Clickable image -> details */}

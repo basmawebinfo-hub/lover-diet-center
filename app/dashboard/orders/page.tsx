@@ -8,6 +8,7 @@ import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shel
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { useCurrency } from "@/lib/currency"
 
 const STATUS: Record<string, { en: string; ar: string; cls: string }> = {
   pending:    { en: "Pending",    ar: "قيد الانتظار", cls: "bg-amber-50 text-amber-600" },
@@ -20,6 +21,7 @@ const STATUS: Record<string, { en: string; ar: string; cls: string }> = {
 export default function OrdersPage() {
   const router = useRouter()
   const { locale } = useLocale()
+  const { format } = useCurrency()
   const { state } = useApp()
   const user = state.user
 
@@ -29,7 +31,6 @@ export default function OrdersPage() {
 
   if (!user) return null
 
-  const aed = t(locale, "AED", "درهم")
   const orders = state.orders
 
   return (
@@ -75,13 +76,13 @@ export default function OrdersPage() {
                         <span className="text-neutral-700">
                           {locale === "ar" ? it.nameAr : it.nameEn} <span className="text-neutral-400">× {it.quantity}</span>
                         </span>
-                        <span className="font-semibold text-neutral-900">{it.price * it.quantity} {aed}</span>
+                        <span className="font-semibold text-neutral-900">{format(it.price * it.quantity)}</span>
                       </div>
                     ))}
                   </div>
                   <div className="mt-4 flex items-center justify-between border-t border-neutral-50 pt-4">
                     <span className="text-sm text-neutral-500">{t(locale, "Total", "الإجمالي")}</span>
-                    <span className="text-lg font-bold text-emerald-700">{order.total} {aed}</span>
+                    <span className="text-lg font-bold text-emerald-700">{format(order.total)}</span>
                   </div>
                 </div>
               )

@@ -194,6 +194,42 @@ export default function DashboardOverviewPage() {
             )
           })}
         </div>
+
+        {/* Recent orders + quick contact */}
+        <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_300px]">
+          <div className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Recent Orders", "آخر طلباتك")}</h2>
+              <Link href="/dashboard/orders" className="text-sm font-semibold text-emerald-600 hover:underline">{t(locale, "View all", "عرض الكل")}</Link>
+            </div>
+            {state.orders.length === 0 ? (
+              <div className="py-8 text-center">
+                <p className="text-sm text-neutral-400">{t(locale, "No orders yet.", "لا توجد طلبات بعد.")}</p>
+                <Link href="/shop" className="mt-3 inline-block rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700">{t(locale, "Browse shop", "تصفّح المتجر")}</Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {state.orders.slice(0, 3).map((o) => (
+                  <div key={o.id} className="flex items-center justify-between rounded-2xl border border-neutral-100 p-3">
+                    <div>
+                      <p className="font-bold text-neutral-900">#{o.id.slice(-4)}</p>
+                      <p className="text-xs text-neutral-400">{(o.date || "").slice(0, 10)} · {o.items.length} {t(locale, "items", "عناصر")}</p>
+                    </div>
+                    <span className="font-bold text-emerald-700">${o.total.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <a href="https://wa.me/971000000000" target="_blank" rel="noopener noreferrer" className="flex flex-col justify-between rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-600 to-emerald-500 p-6 text-white shadow-sm transition hover:shadow-md">
+            <div>
+              <p className="text-lg font-extrabold">{t(locale, "Need help?", "محتاج مساعدة؟")}</p>
+              <p className="mt-1 text-sm text-white/80">{t(locale, "Chat with our nutrition team on WhatsApp.", "تواصل مع فريق التغذية عبر واتساب.")}</p>
+            </div>
+            <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-bold backdrop-blur">{t(locale, "Message us", "راسلنا الآن")}</span>
+          </a>
+        </div>
       </div>
     </DashboardShell>
   )

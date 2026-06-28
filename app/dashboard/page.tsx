@@ -52,6 +52,7 @@ export default function DashboardOverviewPage() {
     goal: user.goal, activityLevel: user.activityLevel,
   }, locale)
 
+  const hasWeight = user.currentWeightKg >= 30
   const progress = progressPercent(user)
   const todayStr = new Date().toISOString().slice(0, 10)
   const waterToday = state.waterLogs.find((w) => w.date === todayStr)?.liters ?? 0
@@ -96,10 +97,24 @@ export default function DashboardOverviewPage() {
         )}
 
         {/* Stat chips */}
+        {!hasWeight && (
+          <div className="mb-6 flex flex-col gap-3 rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <span className="flex size-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 text-xl">👋</span>
+              <div>
+                <p className="font-extrabold text-neutral-900">{t(locale, "Welcome! Let's get started", "أهلاً بك! لنبدأ رحلتك")}</p>
+                <p className="text-sm text-neutral-500">{t(locale, "Log your first weight to unlock your personalized plan & stats.", "سجّل وزنك الأول لتفعيل خطتك وإحصائياتك المخصصة.")}</p>
+              </div>
+            </div>
+            <button onClick={() => router.push("/dashboard/weight")} className="shrink-0 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700">
+              {t(locale, "Log my weight", "سجّل وزني")}
+            </button>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatChip tone="emerald" icon={<Scale className="size-5" />} label={t(locale, "Current Weight", "الوزن الحالي")} value={`${user.currentWeightKg.toFixed(1)} ${t(locale,"kg","كجم")}`} delta={`${lostKg.toFixed(1)} ${t(locale,"kg lost","كجم مفقودة")}`} />
           <StatChip tone="violet" icon={<Target className="size-5" />} label={t(locale, "Target", "الهدف")} value={`${user.targetWeightKg.toFixed(1)} ${t(locale,"kg","كجم")}`} delta={`${progress.toFixed(0)}% ${t(locale,"there","أُنجز")}`} />
-          <StatChip tone="amber" icon={<Flame className="size-5" />} label={t(locale, "Daily Calories", "السعرات اليومية")} value={`${analysis.recommendedDailyCalories}`} delta={`${analysis.recommendedProteinG}${t(locale,"g protein","غ بروتين")}`} />
+          <StatChip tone="amber" icon={<Flame className="size-5" />} label={t(locale, "Daily Calories", "السعرات اليومية")} value={analysis.recommendedDailyCalories > 0 ? `${analysis.recommendedDailyCalories}` : "—"} delta={`${analysis.recommendedProteinG}${t(locale,"g protein","غ بروتين")}`} />
           <StatChip tone="sky" icon={<Droplets className="size-5" />} label={t(locale, "Water Today", "ماء اليوم")} value={`${waterToday} ${t(locale,"L","لتر")}`} delta={`${Math.min(100, Math.round((waterToday/waterGoal)*100))}% ${t(locale,"of goal","من الهدف")}`} />
         </div>
 

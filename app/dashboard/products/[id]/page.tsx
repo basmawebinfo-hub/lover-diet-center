@@ -9,6 +9,7 @@ import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shel
 import { useApp } from "@/lib/store"
 import type { Product } from "@/lib/types"
 import { useLocale, t } from "@/lib/locale"
+import { useCurrency } from "@/lib/currency"
 
 const CATEGORY_AR: Record<Product["category"], string> = {
   snack: "سناك",
@@ -21,6 +22,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params)
   const router = useRouter()
   const { locale } = useLocale()
+  const { format } = useCurrency()
   const { state, addToCart } = useApp()
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
@@ -87,8 +89,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             <h1 className="text-3xl font-extrabold tracking-tight text-neutral-900">{locale === "ar" ? product.nameAr : product.nameEn}</h1>
 
             <div className="mt-4 flex items-baseline gap-2">
-              <span className="text-4xl font-extrabold text-neutral-900">{product.price}</span>
-              <span className="text-lg font-semibold text-neutral-400">{t(locale,"AED","درهم")}</span>
+              <span className="text-4xl font-extrabold text-neutral-900">{format(product.price)}</span>
             </div>
 
             <p className="mt-4 leading-relaxed text-neutral-600">{locale === "ar" ? product.descriptionAr : product.descriptionEn}</p>
@@ -151,7 +152,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   </div>
                   <div className="p-3">
                     <p className="truncate text-sm font-semibold text-neutral-900">{locale === "ar" ? p.nameAr : p.nameEn}</p>
-                    <p className="text-xs text-neutral-400">{p.price} {t(locale,"AED","درهم")}</p>
+                    <p className="text-xs text-neutral-400">{format(p.price)}</p>
                   </div>
                 </Link>
               ))}

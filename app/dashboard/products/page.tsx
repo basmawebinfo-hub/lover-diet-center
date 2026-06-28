@@ -10,6 +10,7 @@ import { useApp } from "@/lib/store"
 import type { Product } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { useCurrency } from "@/lib/currency"
 
 const CATEGORIES = [
   { id: "all", label: "All", labelAr: "الكل" },
@@ -22,6 +23,7 @@ const CATEGORIES = [
 export default function ProductsPage() {
   const router = useRouter()
   const { locale } = useLocale()
+  const { format } = useCurrency()
   const { state, addToCart } = useApp()
   const user = state.user
   const [search, setSearch] = useState("")
@@ -142,10 +144,7 @@ function ProductCard({
         </Link>
 
         <div className="mt-auto flex items-center justify-between pt-4">
-          <span className="text-xl font-bold text-neutral-900">
-            {product.price}{" "}
-            <span className="text-xs font-normal text-neutral-500">{t(locale,"AED","درهم")}</span>
-          </span>
+          <span className="text-xl font-bold text-neutral-900">{format(product.price)}</span>
           <button
             type="button"
             onClick={onAdd}

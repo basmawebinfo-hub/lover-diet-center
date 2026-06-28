@@ -444,3 +444,35 @@ export async function fetchUserPlan(userId: string): Promise<import('@/lib/types
     waterLiters: Number(r.water_liters) || 0,
   }
 }
+
+// ---- Admin: create/replace a client's diet plan ----
+export async function adminUpsertPlan(userId: string, plan: {
+  doctorName: string; startDate: string; endDate: string; goal: string;
+  dailyCalories: number; waterLiters: number; notesEn: string; notesAr: string;
+  items: { dayOfWeek: number; mealId: string }[];
+}): Promise<boolean> {
+  const supabase = createClient()
+  // Replace any existing plans for this user (one active plan model)
+  const { data: existing } = await supabase.from('meal_plans').select('id').eq('user_id', userId)
+  if (existing && existing.length) {
+    await supabase.from('meal_plans').delete().eq('user_id', userId)
+  }
+  const { data: created, error } = await supabase.from('meal_plans').insert({
+    user_id: userId,
+    doctor_name: plan.doctorName,
+    start_date: plan.startDate || null,
+    end_date: plan.endDate || null,
+    goal: plan.goal,
+    daily_calories: plan.dailyCalories,
+    water_liters: plan.waterLiters,
+    notes_en: plan.notesEn,
+    notes_ar: plan.notesAr,
+  }).select('id').single()
+  if (error || !created) return false
+  const planId = (created as { id: string }).id
+  const items = plan.items.filter((i) => i.mealId)
+  if (items.length) {
+    await supabase.from('plan_items').insert(items.map((i) => ({ plan_id: planId, day_of_week: i.dayOfWeek, meal_id: i.mealId })))
+  }
+  return true
+}

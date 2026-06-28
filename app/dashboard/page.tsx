@@ -15,6 +15,7 @@ import { useApp } from "@/lib/store"
 import { analyzeUser, progressPercent } from "@/lib/analysis"
 import type { User } from "@/lib/types"
 import { useLocale, t } from "@/lib/locale"
+import { WHATSAPP_SUPPORT } from "@/lib/site"
 import { useToast } from "@/components/ui/toast"
 
 function getLocalUser(): User | null {
@@ -222,7 +223,7 @@ export default function DashboardOverviewPage() {
             )}
           </div>
 
-          <a href="https://wa.me/971000000000" target="_blank" rel="noopener noreferrer" className="flex flex-col justify-between rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-600 to-emerald-500 p-6 text-white shadow-sm transition hover:shadow-md">
+          <a href={WHATSAPP_SUPPORT} target="_blank" rel="noopener noreferrer" className="flex flex-col justify-between rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-600 to-emerald-500 p-6 text-white shadow-sm transition hover:shadow-md">
             <div>
               <p className="text-lg font-extrabold">{t(locale, "Need help?", "محتاج مساعدة؟")}</p>
               <p className="mt-1 text-sm text-white/80">{t(locale, "Chat with our nutrition team on WhatsApp.", "تواصل مع فريق التغذية عبر واتساب.")}</p>

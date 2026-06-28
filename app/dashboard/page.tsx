@@ -15,6 +15,7 @@ import { useApp } from "@/lib/store"
 import { analyzeUser, progressPercent } from "@/lib/analysis"
 import type { User } from "@/lib/types"
 import { useLocale, t } from "@/lib/locale"
+import { ClientNotifications } from "@/components/dashboard/client-notifications"
 import { WHATSAPP_SUPPORT } from "@/lib/site"
 import { useToast } from "@/components/ui/toast"
 
@@ -86,12 +87,8 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
 
-        {/* Reminder */}
-        {!loggedToday && (
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-            <div className="flex items-center gap-3">
-              <span className="flex size-9 items-center justify-center rounded-full bg-amber-100 text-amber-600"><Bell className="size-4" /></span>
-              <p className="text-sm font-medium text-amber-800">{t(locale, "You haven't logged your weight today.", "لم تسجّل وزنك اليوم.")}</p>
+        {/* Notifications */}
+        <ClientNotifications /></p>
             </div>
             <Link href="/dashboard/weight" className="shrink-0 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-600">{t(locale, "Log now", "سجّل الآن")}</Link>
           </div>

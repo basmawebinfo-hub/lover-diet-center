@@ -87,7 +87,10 @@ export function analyzeUser(
     user.gender,
     user.activityLevel
   )
-  const targetCalories = baseTdee + GOAL_DELTA[user.goal]
+  // Never recommend an unsafe / negative calorie target (e.g. new user with weight 0).
+  const calorieFloor = user.gender === "male" ? 1500 : 1200
+  const rawCalories = baseTdee + GOAL_DELTA[user.goal]
+  const targetCalories = user.currentWeightKg < 30 ? 0 : Math.max(calorieFloor, rawCalories)
 
   const target = user.targetWeightKg ?? ideal
   const weightDiff = user.currentWeightKg - target

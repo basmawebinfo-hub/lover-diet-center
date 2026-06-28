@@ -397,3 +397,50 @@ export async function fetchUserOrders(userId: string): Promise<import('@/lib/typ
     }
   })
 }
+
+// ---- User's active diet plan (from meal_plans + plan_items) ----
+export async function fetchUserPlan(userId: string): Promise<import('@/lib/types').DoctorPlan | null> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('meal_plans')
+    .select('id, doctor_name, start_date, end_date, goal, daily_calories, water_liters, notes_en, notes_ar, plan_items(id, day_of_week, meals(id, name_en, name_ar, description_en, description_ar, image_url, calories, protein, carbs, fat, meal_type, tags))')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error || !data) return null
+  const r = data as Record<string, unknown>
+  const planItems = ((r.plan_items as Record<string, unknown>[]) ?? []).map((pi) => {
+    const m = pi.meals as Record<string, unknown> | null
+    return {
+      id: pi.id as string,
+      dayOfWeek: Number(pi.day_of_week) || 0,
+      meal: {
+        id: (m?.id as string) ?? '',
+        nameEn: (m?.name_en as string) ?? '',
+        nameAr: (m?.name_ar as string) ?? '',
+        descriptionEn: (m?.description_en as string) ?? '',
+        descriptionAr: (m?.description_ar as string) ?? '',
+        imageUrl: (m?.image_url as string) ?? '',
+        calories: Number(m?.calories) || 0,
+        protein: Number(m?.protein) || 0,
+        carbs: Number(m?.carbs) || 0,
+        fat: Number(m?.fat) || 0,
+        mealType: (m?.meal_type as import('@/lib/types').Meal['mealType']) ?? 'snack',
+        tags: (m?.tags as string[]) ?? [],
+      },
+    }
+  })
+  return {
+    id: r.id as string,
+    doctorName: (r.doctor_name as string) ?? '',
+    startDate: (r.start_date as string) ?? '',
+    endDate: (r.end_date as string) ?? '',
+    goal: (r.goal as import('@/lib/types').DoctorPlan['goal']) ?? 'lose_weight',
+    notesEn: (r.notes_en as string) ?? '',
+    notesAr: (r.notes_ar as string) ?? '',
+    planItems,
+    dailyCalories: Number(r.daily_calories) || 0,
+    waterLiters: Number(r.water_liters) || 0,
+  }
+}

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
   Scale, Apple, Calendar, ShoppingBag, Target, Flame, Droplets,
-  Bell, Plus, Minus, Search, ArrowUpRight,
+  Plus, Minus, Search, ArrowUpRight,
 } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { BodyAvatar } from "@/components/body-avatar"
@@ -59,7 +59,6 @@ export default function DashboardOverviewPage() {
   const todayStr = new Date().toISOString().slice(0, 10)
   const waterToday = state.waterLogs.find((w) => w.date === todayStr)?.liters ?? 0
   const waterGoal = state.doctorPlan?.waterLiters ?? 2.5
-  const loggedToday = state.weightLogs.some((l) => l.date === todayStr)
   const lostKg = Math.max(0, user.startWeightKg - user.currentWeightKg)
   const firstName = user.nameEn.split(" ")[0]
   const initial = firstName.charAt(0).toUpperCase()

@@ -24,7 +24,7 @@ import type {
   WeightLog,
 } from "./types"
 import { createClient } from "@/lib/supabase/client"
-import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, fetchProfile, fetchWaterLogs, fetchProducts, fetchMeals } from "@/lib/supabase/db"
+import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, fetchProfile, fetchWaterLogs, fetchProducts, fetchMeals, fetchUserOrders } from "@/lib/supabase/db"
 
 
 type AppState = {
@@ -58,7 +58,7 @@ type Action =
   | { type: "UPDATE_SESSION"; payload: { id: string; changes: Partial<Session> } }
   | { type: "PLACE_ORDER"; payload: Order }
   | { type: "LOG_WATER"; payload: WaterLog }
-  | { type: "SYNC_FROM_DB"; payload: { sessions?: Session[]; weightLogs?: WeightLog[]; waterLogs?: WaterLog[] } }
+  | { type: "SYNC_FROM_DB"; payload: { sessions?: Session[]; weightLogs?: WeightLog[]; waterLogs?: WaterLog[]; orders?: Order[] } }
   | { type: "SET_CATALOG"; payload: { products?: Product[]; meals?: Meal[] } }
 
 const STORAGE_KEY = "loversdc:state:v1"
@@ -156,6 +156,7 @@ function reducer(state: AppState, action: Action): AppState {
         sessions: action.payload.sessions ?? state.sessions,
         weightLogs: action.payload.weightLogs ?? state.weightLogs,
         waterLogs: action.payload.waterLogs ?? state.waterLogs,
+        orders: action.payload.orders ?? state.orders,
       }
     case "SET_CATALOG":
       return {
@@ -272,11 +273,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user || !active) return
       const uid = data.user.id
-      const [profile, sessions, weightLogs, waterLogs] = await Promise.all([
+      const [profile, sessions, weightLogs, waterLogs, orders] = await Promise.all([
         fetchProfile(uid),
         fetchSessions(uid),
         fetchWeightLogs(uid),
         fetchWaterLogs(uid),
+        fetchUserOrders(uid),
       ])
       if (!active) return
       // Merge the real DB profile into the user (DB is the source of truth)
@@ -298,6 +300,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           sessions: sessions.length ? sessions : undefined,
           weightLogs: weightLogs.length ? weightLogs : undefined,
           waterLogs: waterLogs.length ? waterLogs : undefined,
+          orders: orders.length ? orders : undefined,
         },
       })
     })

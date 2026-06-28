@@ -16,6 +16,11 @@ import { useCurrency } from "@/lib/currency"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 
+const inp = "w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm text-neutral-900 focus:border-emerald-400 focus:outline-none"
+function Field2({ label, children }: { label: string; children: React.ReactNode }) {
+  return (<div><label className="mb-1.5 block text-sm font-semibold text-neutral-700">{label}</label>{children}</div>)
+}
+
 export default function AdminClientDetailPage() {
   const params = useParams()
   const id = String(params?.id ?? "")
@@ -326,10 +331,4 @@ export default function AdminClientDetailPage() {
       </div>
     </AdminShell>
   )
-}
-
-
-const inp = "w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm text-neutral-900 focus:border-emerald-400 focus:outline-none"
-function Field2({ label, children }: { label: string; children: React.ReactNode }) {
-  return (<div><label className="mb-1.5 block text-sm font-semibold text-neutral-700">{label}</label>{children}</div>)
 }

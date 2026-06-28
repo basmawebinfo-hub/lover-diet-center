@@ -367,3 +367,33 @@ export async function adminUpdateSessionStatus(sessionId: string, status: string
   const { error } = await supabase.from('sessions').update({ status }).eq('id', sessionId)
   return !error
 }
+
+// ---- User's own orders (full Order shape) ----
+export async function fetchUserOrders(userId: string): Promise<import('@/lib/types').Order[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id, total, status, created_at, order_items(quantity, price_at_purchase, products(name_en, name_ar))')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => {
+    const items = ((r.order_items as Record<string, unknown>[]) ?? []).map((it) => {
+      const prod = it.products as { name_en?: string; name_ar?: string } | null
+      const qty = Number(it.quantity) || 1
+      const price = Number(it.price_at_purchase) || 0
+      return { productId: '', nameEn: prod?.name_en ?? '', nameAr: prod?.name_ar ?? prod?.name_en ?? '', quantity: qty, price }
+    })
+    const total = Number(r.total) || 0
+    const subtotal = items.reduce((s, it) => s + it.price * it.quantity, 0)
+    return {
+      id: r.id as string,
+      date: (r.created_at as string) ?? new Date().toISOString(),
+      items,
+      subtotal,
+      shipping: Math.max(0, total - subtotal),
+      total,
+      status: (r.status as import('@/lib/types').Order['status']) ?? 'pending',
+    }
+  })
+}

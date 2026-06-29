@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { Search, ChevronLeft, Download } from "lucide-react"
+import { Search, ChevronLeft, Download, MessageCircle, Ban, Trash2, Loader2 } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { adminClients } from "@/lib/admin-mock"
-import { adminFetchClients } from "@/lib/supabase/db"
+import { adminFetchClients, adminDeleteClient, adminToggleBlock } from "@/lib/supabase/db"
+import { WHATSAPP_NUMBER } from "@/lib/site"
+import { useToast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 import { COUNTRIES } from "@/lib/countries"
@@ -15,6 +17,25 @@ export default function AdminClientsPage() {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<"all" | "active" | "trial" | "inactive">("all")
   const [rows, setRows] = useState<typeof adminClients>([])
+  const { notify } = useToast()
+  const [busy, setBusy] = useState<string | null>(null)
+
+  async function handleDelete(id: string, name: string) {
+    if (!confirm(t(locale, `Delete ${name}? This removes all their data.`, `حذف ${name}؟ سيتم مسح كل بياناته.`))) return
+    setBusy(id)
+    const ok = await adminDeleteClient(id)
+    setBusy(null)
+    if (ok) { setRows((prev) => prev.filter((r) => r.id !== id)); notify(t(locale, "Client deleted", "تم حذف العميل"), "success") }
+    else notify(t(locale, "Delete failed", "فشل الحذف"), "error")
+  }
+
+  async function handleBlock(id: string, blocked: boolean) {
+    setBusy(id)
+    const ok = await adminToggleBlock(id, !blocked)
+    setBusy(null)
+    if (ok) { setRows((prev) => prev.map((r) => r.id === id ? { ...r, blocked: !blocked } : r)); notify(!blocked ? t(locale, "Client blocked", "تم حظر العميل") : t(locale, "Client unblocked", "تم فك الحظر"), "success") }
+    else notify(t(locale, "Action failed", "فشل الإجراء"), "error")
+  }
 
   useEffect(() => {
     adminFetchClients().then((real) => {
@@ -122,9 +143,22 @@ export default function AdminClientsPage() {
                       <td className="p-4"><span className={cn("rounded-full px-2.5 py-1 text-xs font-bold", statusCls[c.status])}>{locale==="ar"?statusLbl[c.status].ar:statusLbl[c.status].en}</span></td>
                       <td className="p-4 text-neutral-500">{c.lastActive}</td>
                       <td className="p-4 text-end">
-                        <Link href={`/admin/clients/${c.id}`} className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:border-emerald-300 hover:text-emerald-700">
-                          {t(locale,"View","عرض")} <ChevronLeft className="size-3.5 rtl:rotate-0 rotate-180" />
-                        </Link>
+                        <div className="inline-flex items-center gap-1.5">
+                          {(c as { phone?: string }).phone && (
+                            <a href={`https://wa.me/${((c as { phone?: string }).phone || "").replace(/[^0-9]/g, "")}`} target="_blank" rel="noopener noreferrer" title={t(locale,"WhatsApp","واتساب")} className="flex size-8 items-center justify-center rounded-lg border border-neutral-200 text-emerald-600 hover:bg-emerald-50">
+                              <MessageCircle className="size-4" />
+                            </a>
+                          )}
+                          <button onClick={() => handleBlock(c.id, (c as { blocked?: boolean }).blocked || false)} disabled={busy === c.id} title={(c as { blocked?: boolean }).blocked ? t(locale,"Unblock","فك الحظر") : t(locale,"Block","حظر")} className={cn("flex size-8 items-center justify-center rounded-lg border", (c as { blocked?: boolean }).blocked ? "border-amber-300 bg-amber-50 text-amber-600" : "border-neutral-200 text-neutral-500 hover:bg-neutral-50")}>
+                            <Ban className="size-4" />
+                          </button>
+                          <button onClick={() => handleDelete(c.id, locale === "ar" ? c.nameAr : c.nameEn)} disabled={busy === c.id} title={t(locale,"Delete","حذف")} className="flex size-8 items-center justify-center rounded-lg border border-neutral-200 text-red-500 hover:bg-red-50">
+                            {busy === c.id ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+                          </button>
+                          <Link href={`/admin/clients/${c.id}`} className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:border-emerald-300 hover:text-emerald-700">
+                            {t(locale,"View","عرض")} <ChevronLeft className="size-3.5 rtl:rotate-0 rotate-180" />
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   )

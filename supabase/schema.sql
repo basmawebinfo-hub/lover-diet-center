@@ -15,6 +15,7 @@ create table if not exists public.profiles (
   name_en         text,
   name_ar         text,
   phone           text,
+  country         text,
   age             int,
   gender          text check (gender in ('male','female')),
   height_cm       numeric,

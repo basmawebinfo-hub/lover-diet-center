@@ -216,6 +216,8 @@ $$;
 
 -- Admins can read all profiles, weight logs, orders, sessions, plans
 create policy "profiles_admin_read"  on public.profiles    for select using (public.is_admin());
+create policy "profiles_admin_update" on public.profiles    for update using (public.is_admin());
+create policy "profiles_admin_delete" on public.profiles    for delete using (public.is_admin());
 create policy "weight_admin_read"    on public.weight_logs for select using (public.is_admin());
 create policy "water_admin_read"     on public.water_logs  for select using (public.is_admin());
 create policy "orders_admin_all"     on public.orders      for all using (public.is_admin()) with check (public.is_admin());

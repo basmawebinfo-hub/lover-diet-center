@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import {
   Scale, Apple, Calendar, ShoppingBag, Target, Flame, Droplets,
   Plus, Minus, Search, ArrowUpRight,
@@ -82,7 +83,9 @@ export default function DashboardOverviewPage() {
               <Search className="size-4" />
               <span>{t(locale, "Search…", "بحث…")}</span>
             </div>
-            <span className="flex size-10 items-center justify-center rounded-full bg-emerald-100 text-base font-bold text-emerald-700">{initial}</span>
+            <span className="relative flex size-10 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-base font-bold text-emerald-700">
+              {user.avatarUrl ? <Image src={user.avatarUrl} alt={firstName} fill sizes="40px" className="object-cover" /> : initial}
+            </span>
           </div>
         </div>
 

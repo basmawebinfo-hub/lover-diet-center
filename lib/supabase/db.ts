@@ -177,6 +177,7 @@ export async function adminFetchClients() {
     nameAr: (r.name_ar as string) ?? '',
     email: (r.email as string) ?? '',
     phone: (r.phone as string) ?? '',
+    country: (r.country as string) ?? '',
     gender: ((r.gender as string) === 'female' ? 'female' : 'male') as 'male' | 'female',
     age: (r.age as number) ?? 0,
     startWeightKg: Number(r.start_weight_kg) || 0,

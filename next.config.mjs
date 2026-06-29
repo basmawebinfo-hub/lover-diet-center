@@ -3,7 +3,10 @@ const nextConfig = {
   images: {
     // Serve modern, smaller formats automatically (Next optimizes local images on Vercel)
     formats: ['image/avif', 'image/webp'],
-    remotePatterns: [],
+    remotePatterns: [
+      { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: '*.supabase.in' },
+    ],
   },
   experimental: {
     // Avoid stale chunk URLs in Turbopack HMR

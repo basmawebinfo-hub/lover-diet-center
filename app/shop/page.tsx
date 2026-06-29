@@ -36,7 +36,7 @@ export default function ShopPage() {
       }
       return true
     })
-  }, [search, category])
+  }, [products, search, category])
 
 
   return (

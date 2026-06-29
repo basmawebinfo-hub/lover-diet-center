@@ -74,7 +74,16 @@ export function SignUpForm() {
         return
       }
 
-      // Session is set automatically (email confirmation OFF). Go to onboarding.
+      // Write the phone + name into the profile right away (session is active; email confirmation OFF)
+      const { data: auth } = await supabase.auth.getUser()
+      if (auth.user) {
+        await supabase.from('profiles').update({
+          phone: fullPhone,
+          name_en: form.name.trim(),
+        }).eq('id', auth.user.id)
+      }
+
+      // Go to onboarding.
       router.push(redirect)
       router.refresh()
     } catch {

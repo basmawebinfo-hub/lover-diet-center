@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Trash2, Minus, Plus, CreditCard, Check, ShoppingBag, MessageCircle } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import Link from "next/link"
+import Image from "next/image"
 import { useApp } from "@/lib/store"
 import type { Order } from "@/lib/types"
 import { useToast } from "@/components/ui/toast"
@@ -186,14 +187,26 @@ export default function CartPage() {
                   key={item.productId}
                   className="flex items-center gap-4 rounded-2xl border border-neutral-100 bg-white p-4"
                 >
-                  <div className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-50 to-white text-2xl">
-                    {item.product.category === "snack"
-                      ? "🥨"
-                      : item.product.category === "drink"
-                        ? "🍵"
-                        : item.product.category === "supplement"
-                          ? "💊"
-                          : "🥗"}
+                  <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-gradient-to-br from-emerald-50 to-white">
+                    {item.product.imageUrl ? (
+                      <Image
+                        src={item.product.imageUrl}
+                        alt={locale === "ar" ? item.product.nameAr : item.product.nameEn}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="flex size-full items-center justify-center text-2xl">
+                        {item.product.category === "snack"
+                          ? "🥨"
+                          : item.product.category === "drink"
+                            ? "🍵"
+                            : item.product.category === "supplement"
+                              ? "💊"
+                              : "🥗"}
+                      </span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-neutral-900">{locale === "ar" ? item.product.nameAr : item.product.nameEn}</p>

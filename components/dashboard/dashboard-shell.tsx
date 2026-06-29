@@ -4,6 +4,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useApp } from "@/lib/store"
+import { useEffect, useState } from "react"
+import { isAdmin } from "@/lib/supabase/db"
+import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 import {
@@ -44,6 +47,27 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const { state } = useApp()
   const user = state.user
   const cartCount = state.cart.reduce((s, c) => s + c.quantity, 0)
+
+  // Admins do not belong in the client dashboard — send them to /admin.
+  const [adminChecked, setAdminChecked] = useState(false)
+  useEffect(() => {
+    let active = true
+    if (user?.role === "admin") { router.replace("/admin"); return }
+    const supabase = createClient()
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!active) return
+      if (!data.user) { setAdminChecked(true); return }
+      if (user?.role) { setAdminChecked(true); return }
+      const admin = await isAdmin(data.user.id)
+      if (!active) return
+      if (admin) { router.replace("/admin"); return }
+      setAdminChecked(true)
+    })
+    return () => { active = false }
+  }, [user, router])
+
+  // While we confirm role (and during redirect), don't flash client UI to an admin.
+  if (user?.role === "admin" || !adminChecked) return null
 
   return (
     <div className="min-h-screen bg-[#f6faf8] lg:grid lg:grid-cols-[280px_1fr]">

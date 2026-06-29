@@ -288,6 +288,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (typeof window !== "undefined") window.location.href = "/blocked"
         return
       }
+      // Admins belong in the admin panel, never the client dashboard.
+      // Redirect them there unless they are already inside /admin.
+      if (
+        profile &&
+        (profile as { role?: string }).role === "admin" &&
+        typeof window !== "undefined" &&
+        !window.location.pathname.startsWith("/admin")
+      ) {
+        window.location.href = "/admin"
+        return
+      }
       // Merge the real DB profile into the user (DB is the source of truth)
       if (profile) {
         dispatch({

@@ -42,10 +42,13 @@ export default function IntroPage() {
     )
   }, [user])
 
-  // Redirect to onboarding if there's no user — runs on every render unconditionally
+  // Redirect to onboarding if there's no user — runs on every render unconditionally.
+  // Admins are sent to the admin panel instead of the client intro.
   useEffect(() => {
     if (!user) {
       router.replace("/onboarding")
+    } else if (user.role === "admin") {
+      router.replace("/admin")
     }
   }, [user, router])
 

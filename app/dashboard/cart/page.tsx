@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Trash2, Minus, Plus, CreditCard, Check, ShoppingBag, MessageCircle, ShoppingBag } from "lucide-react"
+import { Trash2, Minus, Plus, CreditCard, Check, ShoppingBag, MessageCircle } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import Link from "next/link"
 import { useApp } from "@/lib/store"

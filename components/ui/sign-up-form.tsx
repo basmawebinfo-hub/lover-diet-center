@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Loader2, UserPlus, User, Mail, Lock } from 'lucide-react'
+import { Loader2, UserPlus, User, Mail, Lock, Phone } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
+import { COUNTRIES, DEFAULT_COUNTRY } from '@/lib/countries'
 
 export function SignUpForm() {
   const { locale } = useLocale()
@@ -17,13 +18,20 @@ export function SignUpForm() {
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
   })
+  const [country, setCountry] = useState(DEFAULT_COUNTRY.code)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
   const validate = () => {
     if (!form.name.trim() || !form.email.trim() || !form.password || !form.confirmPassword) {
       setError(t(locale, 'Please fill in all fields.', 'يرجى تعبئة جميع الحقول.'))
+      return false
+    }
+    const digits = form.phone.replace(/[^0-9]/g, '')
+    if (digits.length < 6) {
+      setError(t(locale, 'Please enter a valid phone number.', 'يرجى إدخال رقم هاتف صحيح.'))
       return false
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -50,11 +58,13 @@ export function SignUpForm() {
     setIsLoading(true)
     try {
       const supabase = createClient()
+      const dial = COUNTRIES.find((c) => c.code === country)?.dial ?? ''
+      const fullPhone = `${dial}${form.phone.replace(/[^0-9]/g, '')}`
       const { error: signUpError } = await supabase.auth.signUp({
         email: form.email.toLowerCase().trim(),
         password: form.password,
         options: {
-          data: { name: form.name.trim() },
+          data: { name: form.name.trim(), phone: fullPhone, country },
           emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined,
         },
       })
@@ -105,6 +115,32 @@ export function SignUpForm() {
             required
             className={inputClass}
           />
+        </div>
+
+        {/* Phone with country selector */}
+        <div className="flex gap-2">
+          <select
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            className="shrink-0 rounded-xl border border-neutral-200 bg-white px-2 py-3 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#4d7c0f]/30 focus:border-[#4d7c0f]"
+            aria-label={t(locale, 'Country', 'الدولة')}
+          >
+            {COUNTRIES.map((c) => (
+              <option key={c.code} value={c.code}>{c.flag} {c.dial}</option>
+            ))}
+          </select>
+          <div className="relative flex-1">
+            <Phone className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+            <input
+              type="tel"
+              inputMode="numeric"
+              placeholder={t(locale, 'Phone number', 'رقم الهاتف')}
+              value={form.phone}
+              onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value.replace(/[^0-9]/g, '') }))}
+              required
+              className={inputClass}
+            />
+          </div>
         </div>
 
         {/* Email */}

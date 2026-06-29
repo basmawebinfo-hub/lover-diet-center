@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import {
   ArrowLeft, Scale, Target, Droplets, ShoppingBag, Calendar,
   Mail, Phone, User as UserIcon, Cake, Ruler, Activity, Flame, Loader2,
@@ -142,7 +143,9 @@ export default function AdminClientDetailPage() {
 
         {/* Header */}
         <div className="flex flex-col gap-4 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
-          <span className="flex size-16 items-center justify-center rounded-full bg-emerald-100 text-2xl font-black text-emerald-700">{nameEn.charAt(0)}</span>
+          <span className="relative flex size-16 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-2xl font-black text-emerald-700">
+            {get("avatar_url") ? <Image src={String(get("avatar_url"))} alt={nameEn} fill sizes="64px" className="object-cover" /> : nameEn.charAt(0)}
+          </span>
           <div className="flex-1"><h1 className="text-2xl font-extrabold text-neutral-900">{name}</h1><p className="text-sm text-neutral-400">{(get("email") as string) || "—"}</p></div>
           <div className="flex gap-2">
             <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">{(get("goal") as string) || "—"}</span>

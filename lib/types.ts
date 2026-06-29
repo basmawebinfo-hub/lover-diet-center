@@ -139,6 +139,7 @@ export type User = {
   targetWeightKg: number
   activityLevel: ActivityLevel
   avatarConfig: AvatarConfig
+  avatarUrl?: string
   createdAt: string
   role?: "user" | "admin"
 }

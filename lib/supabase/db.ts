@@ -108,6 +108,7 @@ export async function fetchProfile(userId: string): Promise<(Partial<User> & { r
     nameAr: (r.name_ar as string) ?? undefined,
     email: (r.email as string) ?? '',
     phone: (r.phone as string) ?? undefined,
+    avatarUrl: (r.avatar_url as string) ?? undefined,
     age: (r.age as number) ?? 0,
     gender: (r.gender as User['gender']) ?? 'male',
     heightCm: Number(r.height_cm) || 0,

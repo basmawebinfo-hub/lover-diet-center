@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Save, User as UserIcon, Target, ShieldCheck, Camera } from "lucide-react"
+import Image from "next/image"
+import { Save, User as UserIcon, Target, ShieldCheck, Camera, Loader2 } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { TransformationSlider } from "@/components/dashboard/transformation-slider"
 import { useApp } from "@/lib/store"
@@ -12,7 +13,7 @@ import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 import { useToast } from "@/components/ui/toast"
 import { createClient } from "@/lib/supabase/client"
-import { upsertProfile } from "@/lib/supabase/db"
+import { upsertProfile, uploadUserAvatar } from "@/lib/supabase/db"
 
 const goalCopy: Record<GoalType, { en: string; ar: string; icon: string }> = {
   lose_weight: { en: "Lose Weight", ar: "إنقاص الوزن", icon: "🔥" },
@@ -81,6 +82,26 @@ export default function SettingsPage() {
   }
 
   const initials = (draft.nameEn || "U").trim().charAt(0).toUpperCase()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+
+  async function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const supabase = createClient()
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) { notify(t(locale, "Please sign in again.", "يرجى تسجيل الدخول مجدداً."), "error"); return }
+    setUploadingPhoto(true)
+    const url = await uploadUserAvatar(data.user.id, file)
+    setUploadingPhoto(false)
+    if (url) {
+      setDraft((p) => ({ ...p, avatarUrl: url }))
+      setUser({ ...(state.user as typeof draft), avatarUrl: url })
+      notify(t(locale, "Photo updated", "تم تحديث الصورة"), "success")
+    } else {
+      notify(t(locale, "Upload failed (check the 'avatars' bucket).", "فشل الرفع (تحقق من bucket 'avatars')."), "error")
+    }
+  }
 
   const tabs: { id: Tab; label: string; icon: typeof UserIcon }[] = [
     { id: "profile", label: t(locale, "Profile", "الملف"), icon: UserIcon },
@@ -97,13 +118,20 @@ export default function SettingsPage() {
         <section className="flex flex-col gap-4 rounded-3xl border border-neutral-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="flex items-center gap-4">
             <div className="relative shrink-0">
-              <div className="flex size-20 items-center justify-center rounded-3xl bg-gradient-to-br from-lime-100 to-lime-50 text-3xl font-black text-lime-700 shadow-sm ring-1 ring-lime-100">
-                {initials}
+              <div className="relative size-20 overflow-hidden rounded-3xl bg-gradient-to-br from-lime-100 to-lime-50 shadow-sm ring-1 ring-lime-100">
+                {draft.avatarUrl ? (
+                  <Image src={draft.avatarUrl} alt={draft.nameEn || ""} fill sizes="80px" className="object-cover" />
+                ) : (
+                  <div className="flex size-full items-center justify-center text-3xl font-black text-lime-700">{initials}</div>
+                )}
+                {uploadingPhoto && <div className="absolute inset-0 flex items-center justify-center bg-black/30"><Loader2 className="size-5 animate-spin text-white" /></div>}
               </div>
+              <input ref={fileRef} type="file" accept="image/*" onChange={onPickPhoto} className="hidden" />
               <button
                 type="button"
-                onClick={() => notify(t(locale, "Photo upload coming soon", "رفع الصورة قريباً"), "success")}
-                className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-lime-600 text-white shadow ring-2 ring-white transition hover:bg-lime-700 rtl:left-0 rtl:right-auto"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-lime-600 text-white shadow ring-2 ring-white transition hover:bg-lime-700 disabled:opacity-60 rtl:left-0 rtl:right-auto"
                 aria-label={t(locale, "Change photo", "تغيير الصورة")}
               >
                 <Camera className="size-3.5" />

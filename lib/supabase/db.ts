@@ -187,6 +187,7 @@ export async function adminFetchClients() {
     targetWeightKg: Number(r.target_weight) || 0,
     goal: (r.goal as string) ?? '',
     joinedAt: ((r.created_at as string) ?? '').slice(0, 10),
+    blocked: (r.blocked as boolean) ?? false,
   }))
 }
 
@@ -511,4 +512,18 @@ export async function uploadUserAvatar(userId: string, file: File): Promise<stri
   const url = data.publicUrl ?? null
   if (url) await supabase.from('profiles').update({ avatar_url: url }).eq('id', userId)
   return url
+}
+
+// ---- Admin: delete a client's profile (removes them from the dashboard) ----
+export async function adminDeleteClient(userId: string): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase.from('profiles').delete().eq('id', userId)
+  return !error
+}
+
+// ---- Admin: block / unblock a client ----
+export async function adminToggleBlock(userId: string, blocked: boolean): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase.from('profiles').update({ blocked }).eq('id', userId)
+  return !error
 }

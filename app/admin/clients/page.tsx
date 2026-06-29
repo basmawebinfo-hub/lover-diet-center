@@ -8,6 +8,7 @@ import { adminClients } from "@/lib/admin-mock"
 import { adminFetchClients } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { COUNTRIES } from "@/lib/countries"
 
 export default function AdminClientsPage() {
   const { locale } = useLocale()
@@ -22,7 +23,7 @@ export default function AdminClientsPage() {
         setRows(real.map((r) => ({
           id: r.id, nameEn: r.nameEn, nameAr: r.nameAr, email: r.email, phone: r.phone,
           gender: r.gender, age: r.age, startWeightKg: r.startWeightKg, currentWeightKg: r.currentWeightKg,
-          targetWeightKg: r.targetWeightKg, goal: r.goal, plan: "—",
+          targetWeightKg: r.targetWeightKg, goal: r.goal, plan: "—", country: r.country,
           status: "active" as const, joinedAt: r.joinedAt, lastActive: r.joinedAt,
         })))
       }
@@ -85,6 +86,7 @@ export default function AdminClientsPage() {
               <thead>
                 <tr className="border-b border-neutral-100 text-xs uppercase tracking-wider text-neutral-400">
                   <th className="p-4 text-start font-medium">{t(locale,"Client","العميل")}</th>
+                  <th className="p-4 text-start font-medium">{t(locale,"Country","الدولة")}</th>
                   <th className="p-4 text-start font-medium">{t(locale,"Plan","الباقة")}</th>
                   <th className="p-4 text-start font-medium">{t(locale,"Progress","التقدّم")}</th>
                   <th className="p-4 text-start font-medium">{t(locale,"Status","الحالة")}</th>
@@ -105,6 +107,12 @@ export default function AdminClientsPage() {
                             <p className="text-xs text-neutral-400">{c.email}</p>
                           </div>
                         </Link>
+                      </td>
+                      <td className="p-4 text-neutral-600">
+                        {(() => {
+                          const co = COUNTRIES.find((x) => x.code === (c as { country?: string }).country)
+                          return co ? <span className="inline-flex items-center gap-1.5 text-sm"><span>{co.flag}</span><span className="font-medium text-neutral-700">{co.dial}</span></span> : <span className="text-neutral-300">—</span>
+                        })()}
                       </td>
                       <td className="p-4 text-neutral-600">{c.plan}</td>
                       <td className="p-4">

@@ -79,7 +79,7 @@ export default function CartPage() {
       subtotal,
       shipping,
       total,
-      status: "processing",
+      status: "pending",
     }
     setLastOrder(order)
     placeOrderLocal(order) // also clears the cart in the reducer

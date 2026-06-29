@@ -282,6 +282,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         fetchUserPlan(uid),
       ])
       if (!active) return
+      // Blocked clients are signed out and redirected
+      if (profile && (profile as { blocked?: boolean }).blocked) {
+        await supabase.auth.signOut()
+        if (typeof window !== "undefined") window.location.href = "/blocked"
+        return
+      }
       // Merge the real DB profile into the user (DB is the source of truth)
       if (profile) {
         dispatch({

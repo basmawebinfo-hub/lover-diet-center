@@ -95,8 +95,8 @@ export default function SettingsPage() {
     const url = await uploadUserAvatar(data.user.id, file)
     setUploadingPhoto(false)
     if (url) {
-      setDraft((p) => ({ ...p, avatarUrl: url }))
-      setUser({ ...(state.user as typeof draft), avatarUrl: url })
+      setDraft((p) => (p ? { ...p, avatarUrl: url } : p))
+      if (state.user) setUser({ ...state.user, avatarUrl: url })
       notify(t(locale, "Photo updated", "تم تحديث الصورة"), "success")
     } else {
       notify(t(locale, "Upload failed (check the 'avatars' bucket).", "فشل الرفع (تحقق من bucket 'avatars')."), "error")

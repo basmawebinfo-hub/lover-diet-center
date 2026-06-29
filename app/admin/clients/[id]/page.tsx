@@ -6,7 +6,7 @@ import Link from "next/link"
 import {
   ArrowLeft, Scale, Target, Droplets, ShoppingBag, Calendar,
   Mail, Phone, User as UserIcon, Cake, Ruler, Activity, Flame, Loader2,
-  MessageCircle, Download, ClipboardList, X,
+  MessageCircle, Download, ClipboardList, X, Globe,
 } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { StatChip } from "@/components/dashboard/stat-widgets"
@@ -16,6 +16,7 @@ import { useCurrency } from "@/lib/currency"
 import { useToast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { COUNTRIES } from "@/lib/countries"
 
 const DAYS = [
   { i: 0, en: "Sun", ar: "الأحد" }, { i: 1, en: "Mon", ar: "الإثنين" }, { i: 2, en: "Tue", ar: "الثلاثاء" },
@@ -60,6 +61,11 @@ export default function AdminClientDetailPage() {
   const nameEn = (get("name_en") as string) || "—"
   const name = locale === "ar" ? ((get("name_ar") as string) || nameEn) : nameEn
   const phone = (get("phone") as string) || ""
+  const countryCode = (get("country") as string) || ""
+  const countryObj = COUNTRIES.find((c) => c.code === countryCode)
+  const countryLabel = countryObj
+    ? `${countryObj.flag} ${locale === "ar" ? countryObj.ar : countryObj.en} (${countryObj.dial})`
+    : ""
   const start = Number(get("start_weight_kg")) || 0
   const current = Number(get("current_weight")) || 0
   const target = Number(get("target_weight")) || 0
@@ -169,6 +175,7 @@ export default function AdminClientDetailPage() {
               <InfoRow icon={<UserIcon className="size-4" />} label={t(locale, "Full name", "الاسم")} value={nameEn} />
               <InfoRow icon={<Mail className="size-4" />} label={t(locale, "Email", "البريد")} value={(get("email") as string) || ""} />
               <InfoRow icon={<Phone className="size-4" />} label={t(locale, "Phone", "الهاتف")} value={phone} />
+              <InfoRow icon={<Globe className="size-4" />} label={t(locale, "Country", "الدولة")} value={countryLabel} />
               <InfoRow icon={<Cake className="size-4" />} label={t(locale, "Age", "العمر")} value={get("age") ? `${get("age")}` : ""} />
               <InfoRow icon={<Ruler className="size-4" />} label={t(locale, "Height", "الطول")} value={get("height_cm") ? `${get("height_cm")} ${t(locale,"cm","سم")}` : ""} />
               <InfoRow icon={<Activity className="size-4" />} label={t(locale, "Activity", "النشاط")} value={(get("activity_level") as string) || ""} />

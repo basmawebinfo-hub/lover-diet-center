@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Trash2, Minus, Plus, CreditCard, Check, ShoppingBag } from "lucide-react"
+import { Trash2, Minus, Plus, CreditCard, Check, ShoppingBag, MessageCircle, ShoppingBag } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import Link from "next/link"
 import { useApp } from "@/lib/store"
 import type { Order } from "@/lib/types"
 import { useToast } from "@/components/ui/toast"
@@ -11,6 +12,7 @@ import { createClient } from "@/lib/supabase/client"
 import { placeOrder } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { WHATSAPP_NUMBER } from "@/lib/site"
 import { useCurrency, CURRENCIES } from "@/lib/currency"
 
 export default function CartPage() {
@@ -21,6 +23,7 @@ export default function CartPage() {
   const { notify } = useToast()
   const user = state.user
   const [checkedOut, setCheckedOut] = useState(false)
+  const [lastOrder, setLastOrder] = useState<Order | null>(null)
 
   useEffect(() => {
     if (!user) router.replace("/onboarding")
@@ -78,6 +81,7 @@ export default function CartPage() {
       total,
       status: "processing",
     }
+    setLastOrder(order)
     placeOrderLocal(order) // also clears the cart in the reducer
     notify(t(locale, "Order placed successfully", "تم تأكيد طلبك بنجاح"), "success")
     setTimeout(() => {
@@ -86,17 +90,49 @@ export default function CartPage() {
   }
 
   if (checkedOut) {
+    const ord = lastOrder
+    const orderNo = ord ? ord.id.slice(-6).toUpperCase() : ""
+    const waMsg = ord
+      ? `${t(locale, "New order", "طلب جديد")} #${orderNo}\n` +
+        ord.items.map((it) => `• ${locale === "ar" ? it.nameAr : it.nameEn} ×${it.quantity}`).join("\n") +
+        `\n${t(locale, "Total", "الإجمالي")}: ${format(ord.total)}\n${t(locale, "Customer", "العميل")}: ${user?.nameEn ?? ""} ${user?.phone ?? ""}`
+      : ""
+    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`
     return (
       <DashboardShell>
         <MobileNav />
-        <div className="mx-auto max-w-md py-20 text-center">
-          <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-emerald-100">
-            <Check className="size-10 text-emerald-700" />
+        <div className="mx-auto max-w-md py-12">
+          <div className="rounded-3xl border border-neutral-100 bg-white p-7 text-center shadow-sm">
+            <div className="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-emerald-100 animate-pop">
+              <Check className="size-10 text-emerald-700" />
+            </div>
+            <h1 className="text-2xl font-extrabold text-neutral-900">{t(locale, "Order confirmed!", "تم تأكيد طلبك!")}</h1>
+            {orderNo && <p className="mt-1 text-sm font-semibold text-emerald-600">{t(locale, "Order", "رقم الطلب")} #{orderNo}</p>}
+            <p className="mt-2 text-sm text-neutral-500">{t(locale, "We'll deliver within 2-3 days. We'll contact you to confirm.", "سنوصل طلبك خلال 2-3 أيام. سنتواصل معك للتأكيد.")}</p>
+
+            {ord && (
+              <div className="mt-5 space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50/60 p-4 text-start">
+                {ord.items.map((it, i) => (
+                  <div key={i} className="flex justify-between text-sm text-neutral-700">
+                    <span>{locale === "ar" ? it.nameAr : it.nameEn} × {it.quantity}</span>
+                    <span className="font-semibold">{format(it.price * it.quantity)}</span>
+                  </div>
+                ))}
+                <div className="mt-2 flex justify-between border-t border-neutral-200 pt-2 text-base font-bold text-neutral-900">
+                  <span>{t(locale, "Total", "الإجمالي")}</span>
+                  <span className="text-emerald-700">{format(ord.total)}</span>
+                </div>
+              </div>
+            )}
+
+            <a href={waUrl} target="_blank" rel="noopener noreferrer" className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white hover:bg-emerald-700">
+              <MessageCircle className="size-4" /> {t(locale, "Notify clinic on WhatsApp", "أبلغ العيادة عبر واتساب")}
+            </a>
+            <div className="mt-3 flex gap-3">
+              <Link href="/dashboard/orders" className="flex-1 rounded-xl border border-neutral-200 py-2.5 text-sm font-bold text-neutral-700 hover:bg-neutral-50">{t(locale, "My orders", "طلباتي")}</Link>
+              <Link href="/shop" className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-neutral-200 py-2.5 text-sm font-bold text-neutral-700 hover:bg-neutral-50"><ShoppingBag className="size-4" /> {t(locale, "Keep shopping", "تابع التسوق")}</Link>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-neutral-900">{t(locale,"Order placed","تم تأكيد الطلب")}</h1>
-          <p className="mt-2 text-neutral-500">
-            {t(locale,"We'll deliver to your door within 2-3 days. Thanks for choosing us.","سنوصل طلبك إلى بابك خلال 2-3 أيام. شكراً لاختيارك لنا.")}
-          </p>
         </div>
       </DashboardShell>
     )

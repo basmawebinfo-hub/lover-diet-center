@@ -80,6 +80,7 @@ export function SignUpForm() {
         await supabase.from('profiles').update({
           phone: fullPhone,
           name_en: form.name.trim(),
+          country,
         }).eq('id', auth.user.id)
       }
 

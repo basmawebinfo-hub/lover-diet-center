@@ -128,6 +128,7 @@ export async function upsertProfile(userId: string, u: Partial<User>): Promise<b
   if (u.nameAr !== undefined) row.name_ar = u.nameAr
   if (u.email !== undefined) row.email = u.email
   if (u.phone !== undefined) row.phone = u.phone
+  if (u.avatarUrl !== undefined) row.avatar_url = u.avatarUrl
   if (u.age !== undefined) row.age = u.age
   if (u.gender !== undefined) row.gender = u.gender
   if (u.heightCm !== undefined) row.height_cm = u.heightCm
@@ -496,4 +497,17 @@ export async function adminCreateSession(s: {
     notes: s.notes ?? null,
   })
   return !error
+}
+
+// Upload a user avatar to Supabase Storage ('avatars' bucket) -> public URL
+export async function uploadUserAvatar(userId: string, file: File): Promise<string | null> {
+  const supabase = createClient()
+  const ext = file.name.split('.').pop() || 'png'
+  const path = `${userId}/${Date.now()}.${ext}`
+  const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true, cacheControl: '3600' })
+  if (error) return null
+  const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+  const url = data.publicUrl ?? null
+  if (url) await supabase.from('profiles').update({ avatar_url: url }).eq('id', userId)
+  return url
 }

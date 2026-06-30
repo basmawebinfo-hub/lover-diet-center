@@ -22,7 +22,7 @@ function SessionsInner() {
   const searchParams = useSearchParams()
   const { locale } = useLocale()
   const { notify } = useToast()
-  const { state, addSession, updateSession } = useApp()
+  const { state, addSession, updateSession, refreshSessions } = useApp()
   const user = state.user
   const initialType = (searchParams.get("type") as Session["type"]) || "consultation"
   const autoBook = searchParams.get("book") === "1"
@@ -37,6 +37,12 @@ function SessionsInner() {
   useEffect(() => {
     if (!user) router.replace("/onboarding")
   }, [user, router])
+
+  // Always pull the freshest sessions from the DB on open, so sessions an admin
+  // booked after login show up immediately without requiring a re-login.
+  useEffect(() => {
+    if (user) refreshSessions()
+  }, [user, refreshSessions])
 
   if (!user) return null
 

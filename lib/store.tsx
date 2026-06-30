@@ -388,6 +388,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     []
   )
+  const refreshSessions = useCallback(async () => {
+    // Pull the latest sessions for the signed-in user straight from the DB.
+    // This catches sessions an admin booked after the user already loaded the app.
+    const supabase = createClient()
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) return
+    const sessions = await fetchSessions(data.user.id)
+    dispatch({ type: "SYNC_FROM_DB", payload: { sessions } })
+  }, [])
   const updateSession = useCallback(
     (id: string, changes: Partial<Session>) => {
       dispatch({ type: "UPDATE_SESSION", payload: { id, changes } })
@@ -449,6 +458,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateAvatar,
       updatePlan,
       addSession,
+      refreshSessions,
       updateSession,
       placeOrderLocal,
       logWater,
@@ -467,6 +477,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       updateAvatar,
       updatePlan,
       addSession,
+      refreshSessions,
       updateSession,
       placeOrderLocal,
       logWater,

@@ -44,8 +44,8 @@ export default function SettingsPage() {
   const [dirty, setDirty] = useState(false)
 
   useEffect(() => {
-    if (state.hydrated && !user) router.replace("/onboarding")
-  }, [state.hydrated, user, router])
+    if (state.authChecked && !user) router.replace("/onboarding")
+  }, [state.authChecked, user, router])
 
   useEffect(() => { setDraft(user) }, [user])
 

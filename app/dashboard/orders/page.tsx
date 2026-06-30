@@ -26,9 +26,16 @@ export default function OrdersPage() {
   const user = state.user
 
   useEffect(() => {
-    if (state.hydrated && !user) router.replace("/onboarding")
-  }, [state.hydrated, user, router])
+    if (state.authChecked && !user) router.replace("/onboarding")
+  }, [state.authChecked, user, router])
 
+  if (!state.authChecked && !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f6faf8]">
+        <div className="size-8 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600" />
+      </div>
+    )
+  }
   if (!user) return null
 
   const orders = state.orders

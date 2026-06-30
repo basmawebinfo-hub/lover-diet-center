@@ -29,8 +29,8 @@ export default function ProductsPage() {
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]["id"]>("all")
 
   useEffect(() => {
-    if (!user) router.replace("/onboarding")
-  }, [user, router])
+    if (state.authChecked && !user) router.replace("/onboarding")
+  }, [state.authChecked, user, router])
 
   const filtered = useMemo(() => {
     return state.products.filter((p) => {
@@ -47,6 +47,13 @@ export default function ProductsPage() {
     })
   }, [state.products, category, search])
 
+  if (!state.authChecked && !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f6faf8]">
+        <div className="size-8 animate-spin rounded-full border-2 border-emerald-200 border-t-emerald-600" />
+      </div>
+    )
+  }
   if (!user) return null
 
   return (

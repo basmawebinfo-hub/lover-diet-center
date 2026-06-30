@@ -29,6 +29,7 @@ import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, fetchPr
 
 type AppState = {
   hydrated: boolean
+  authChecked: boolean
   user: User | null
   weightLogs: WeightLog[]
   meals: Meal[]
@@ -60,11 +61,13 @@ type Action =
   | { type: "LOG_WATER"; payload: WaterLog }
   | { type: "SYNC_FROM_DB"; payload: { sessions?: Session[]; weightLogs?: WeightLog[]; waterLogs?: WaterLog[]; orders?: Order[] } }
   | { type: "SET_CATALOG"; payload: { products?: Product[]; meals?: Meal[] } }
+  | { type: "AUTH_CHECKED" }
 
 const STORAGE_KEY = "loversdc:state:v1"
 
 const initialState: AppState = {
   hydrated: false,
+  authChecked: false,
   user: null,
   weightLogs: [],
   meals: [],
@@ -82,6 +85,8 @@ function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case "HYDRATE":
       return { ...state, ...action.payload, hydrated: true }
+    case "AUTH_CHECKED":
+      return { ...state, authChecked: true }
     case "SET_USER":
       return { ...state, user: action.payload }
     case "LOG_WEIGHT": {
@@ -272,7 +277,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     let active = true
     const supabase = createClient()
     supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user || !active) return
+      if (!active) return
+      if (!data.user) { dispatch({ type: "AUTH_CHECKED" }); return }
       const uid = data.user.id
       const [profile, sessions, weightLogs, waterLogs, orders, plan] = await Promise.all([
         fetchProfile(uid),
@@ -323,6 +329,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         },
       })
       if (plan) dispatch({ type: "UPDATE_PLAN", payload: plan })
+      dispatch({ type: "AUTH_CHECKED" })
+    }).catch(() => {
+      // Network/auth error — don't trap the user on a loading screen.
+      if (active) dispatch({ type: "AUTH_CHECKED" })
     })
     return () => { active = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps

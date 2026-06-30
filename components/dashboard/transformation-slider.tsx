@@ -93,12 +93,13 @@ export function TransformationSlider({
           <span className={cn("text-lg font-black", atGoal ? "text-lime-700" : "text-lime-600")}>{progressPct}%</span>
         </div>
 
-        {/* Progress bar: fills from START (inline-start) toward GOAL.
-            Uses logical inset so it renders correctly in both RTL and LTR. */}
+        {/* Progress bar: fills from the START side toward the GOAL side.
+            We position explicitly by locale so the fill and the thumb always
+            travel in the same direction (avoids RTL double-flip bugs). */}
         <div className="relative h-3 w-full overflow-hidden rounded-full bg-neutral-100">
           <div
-            className="absolute inset-y-0 rounded-full bg-gradient-to-r from-lime-400 to-lime-600"
-            style={{ insetInlineStart: 0, width: `${fillPct}%` }}
+            className="absolute inset-y-0 right-0 rounded-full bg-lime-500"
+            style={{ width: `${fillPct}%` }}
           />
         </div>
 
@@ -109,7 +110,7 @@ export function TransformationSlider({
           step={0.1}
           value={value}
           onChange={(e) => setValue(parseFloat(e.target.value))}
-          dir="rtl"
+          dir="ltr"
           aria-label={t(locale, "Preview weight", "وزن المعاينة")}
           className="-mt-3 h-3 w-full cursor-pointer appearance-none bg-transparent
             [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-7

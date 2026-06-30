@@ -2,49 +2,22 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { InAppActionButton } from '@/components/in-app-action-button'
 import { ArrowRight, ChefHat } from 'lucide-react'
 import { useLocale, t } from '@/lib/locale'
+import { useCurrency } from '@/lib/currency'
+import { fetchProducts } from '@/lib/supabase/db'
+import type { Product } from '@/lib/types'
 
 export function HealthyMealsContent() {
   const { locale } = useLocale()
+  const { format } = useCurrency()
+  const [meals, setMeals] = useState<Product[] | null>(null)
 
-  const meals = [
-    {
-      id: 'm1',
-      name: t(locale, 'Oats & Berry Bowl', 'شوفان مع التوت'),
-      description: t(locale, 'Steel-cut oats with mixed berries, chia seeds, and almond milk.', 'شوفان مع توت مشكّل وبذور شيا وحليب لوز.'),
-      calories: 380, protein: 14, carbs: 58, fat: 9,
-      type: t(locale, 'Breakfast', 'فطور'),
-      image: '/meals/breakfast.png',
-    },
-    {
-      id: 'm2',
-      name: t(locale, 'Grilled Chicken Quinoa', 'دجاج مشوي مع كينوا'),
-      description: t(locale, 'Lean chicken breast, quinoa, roasted veggies, lemon-tahini drizzle.', 'صدر دجاج مشوي، كينوا، خضار محمّصة، صلصة ليمون وطحينة.'),
-      calories: 520, protein: 42, carbs: 48, fat: 14,
-      type: t(locale, 'Lunch', 'غداء'),
-      image: '/meals/lunch.png',
-    },
-    {
-      id: 'm3',
-      name: t(locale, 'Salmon & Greens', 'سلمون مع الخضار'),
-      description: t(locale, 'Oven-baked salmon fillet over sautéed greens and sweet potato.', 'سلمون مشوي بالفرن مع خضار سوتيه وبطاطا حلوة.'),
-      calories: 480, protein: 38, carbs: 30, fat: 22,
-      type: t(locale, 'Dinner', 'عشاء'),
-      image: '/meals/dinner.png',
-    },
-    {
-      id: 'm4',
-      name: t(locale, 'Protein Snack Box', 'صندوق سناك بروتين'),
-      description: t(locale, 'A balanced mix of nuts, protein bites, and fresh fruit.', 'مزيج متوازن من المكسرات وكرات البروتين والفاكهة الطازجة.'),
-      calories: 210, protein: 16, carbs: 18, fat: 9,
-      type: t(locale, 'Snack', 'سناك'),
-      image: '/meals/snack.png',
-    },
-  ]
-
-  const kcal = t(locale, 'kcal', 'سعرة')
+  useEffect(() => {
+    fetchProducts().then((all) => setMeals(all.filter((p) => p.category === 'meal')))
+  }, [])
 
   return (
     <main className="min-h-screen bg-white">
@@ -76,46 +49,46 @@ export function HealthyMealsContent() {
       {/* Meal Cards */}
       <section className="py-16 px-4">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-neutral-900 text-center mb-10">{t(locale, 'Sample Menu', 'نموذج من القائمة')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {meals.map((meal, i) => (
-              <Link
-                key={i}
-                href={`/dashboard/meals/${meal.id}`}
-                className="group flex flex-col bg-white border border-neutral-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg hover:border-lime-300 transition-all"
-              >
-                <div className="relative h-44 overflow-hidden bg-[#f3fae6]">
-                  <Image src={meal.image} alt={meal.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <span className="absolute left-3 top-3 text-xs font-bold text-lime-700 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full rtl:left-auto rtl:right-3">
-                    {meal.type}
-                  </span>
-                  <span className="absolute right-3 top-3 text-xs font-bold text-neutral-700 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full rtl:right-auto rtl:left-3">
-                    {meal.calories} {kcal}
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col p-4">
-                  <h3 className="font-bold text-neutral-900 group-hover:text-lime-700 transition-colors">{meal.name}</h3>
-                  <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{meal.description}</p>
+          <h2 className="text-2xl font-bold text-neutral-900 text-center mb-10">{t(locale, 'Our Meals', 'وجباتنا')}</h2>
 
-                  {/* Macros */}
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    <span className="rounded-md bg-lime-50 px-2 py-0.5 text-[11px] font-semibold text-lime-700">{t(locale,'P','بروتين')} {meal.protein}g</span>
-                    <span className="rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-600">{t(locale,'C','كربوهيدرات')} {meal.carbs}g</span>
-                    <span className="rounded-md bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-600">{t(locale,'F','دهون')} {meal.fat}g</span>
+          {meals === null ? (
+            <p className="py-10 text-center text-neutral-400">{t(locale, 'Loading…', 'جارٍ التحميل…')}</p>
+          ) : meals.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-neutral-200 bg-white p-12 text-center">
+              <p className="text-neutral-500">{t(locale, 'Our meal menu is being updated — browse the full shop in the meantime.', 'قائمة وجباتنا قيد التحديث — تصفّح المتجر بالكامل في هذه الأثناء.')}</p>
+              <div className="mt-5">
+                <InAppActionButton mode="shop" label={t(locale, 'Browse the shop', 'تصفّح المتجر')} variant="light" />
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {meals.map((meal) => (
+                <Link
+                  key={meal.id}
+                  href={`/shop/${meal.id}`}
+                  className="group flex flex-col bg-white border border-neutral-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg hover:border-lime-300 transition-all"
+                >
+                  <div className="relative h-44 overflow-hidden bg-[#f3fae6]">
+                    {meal.imageUrl ? (
+                      <Image src={meal.imageUrl} alt={locale === 'ar' ? meal.nameAr : meal.nameEn} fill sizes="(max-width:640px) 100vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <span className="flex size-full items-center justify-center text-4xl">🥗</span>
+                    )}
                   </div>
-
-                  <div className="mt-auto flex items-center justify-between pt-4">
-                    <span className="inline-flex items-center gap-1 text-sm font-semibold text-lime-700 group-hover:gap-1.5 transition-all">
-                      {t(locale, 'View details', 'التفاصيل')} <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
-                    </span>
-                    <span className="rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-3.5 py-1.5 text-xs font-bold text-lime-950 shadow-sm">
-                      {t(locale, 'Order now', 'اطلب الآن')}
-                    </span>
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="font-bold text-neutral-900 group-hover:text-lime-700 transition-colors line-clamp-1">{locale === 'ar' ? meal.nameAr : meal.nameEn}</h3>
+                    <p className="mt-2 line-clamp-2 text-sm text-neutral-600">{locale === 'ar' ? meal.descriptionAr : meal.descriptionEn}</p>
+                    <div className="mt-auto flex items-center justify-between pt-4">
+                      <span className="text-lg font-bold text-[#4d7c0f]">{format(meal.price)}</span>
+                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-lime-700 group-hover:gap-1.5 transition-all">
+                        {t(locale, 'View details', 'التفاصيل')} <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

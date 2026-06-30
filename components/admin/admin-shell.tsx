@@ -61,6 +61,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       const admin = await isAdmin(data.user.id)
       if (!active) return
       setAllowed(admin); setChecked(true)
+    }).catch(() => {
+      // Network/auth error — finish the check so we don't hang on a blank screen.
+      if (active) { setAllowed(state.user?.role === "admin"); setChecked(true) }
     })
     return () => { active = false }
   }, [state.user])

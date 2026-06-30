@@ -182,6 +182,7 @@ type AppContextValue = {
   updateAvatar: (cfg: User["avatarConfig"]) => void
   updatePlan: (plan: DoctorPlan) => void
   addSession: (s: Session) => void
+  refreshSessions: () => Promise<void>
   updateSession: (id: string, changes: Partial<Session>) => void
   placeOrderLocal: (order: Order) => void
   logWater: (date: string, liters: number) => void

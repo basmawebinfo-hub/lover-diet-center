@@ -46,6 +46,15 @@ export function TransformationSlider({
   const progress = totalSpan > 0
     ? Math.max(0, Math.min(100, ((startWeightKg - value) / totalSpan) * 100))
     : 0
+  const progressPct = Math.round(progress)
+
+  // Position of the slider thumb along the [lo, hi] track (as a %), so the
+  // filled progress bar and the draggable thumb line up visually.
+  const trackSpan = hi - lo
+  const thumbPct = trackSpan > 0 ? ((hi - value) / trackSpan) * 100 : 0
+  // Where the Start and Goal markers sit on that same track.
+  const startMarkerPct = trackSpan > 0 ? ((hi - startWeightKg) / trackSpan) * 100 : 0
+  const goalMarkerPct = trackSpan > 0 ? ((hi - goalWeightKg) / trackSpan) * 100 : 100
 
   const quick: { w: number; en: string; ar: string }[] = [
     { w: Math.round(startWeightKg * 10) / 10, en: "Start", ar: "البداية" },
@@ -85,14 +94,28 @@ export function TransformationSlider({
         </div>
       </div>
 
-      {/* Slider */}
-      <div className="mx-auto mt-6 max-w-md px-1">
+      {/* Progress headline */}
+      <div className="mx-auto mt-5 max-w-md px-1">
+        <div className="mb-1.5 flex items-baseline justify-between">
+          <span className="text-sm font-semibold text-neutral-500">{t(locale, "Journey progress", "تقدّم رحلتك")}</span>
+          <span className={cn("text-lg font-black", atGoal ? "text-lime-700" : "text-lime-600")}>{progressPct}%</span>
+        </div>
+
+        {/* Slider track with start/goal markers */}
         <div className="relative h-3 w-full rounded-full bg-neutral-100">
+          {/* filled progress aligned to the thumb position */}
           <div
             className="absolute inset-y-0 rounded-full bg-gradient-to-r from-lime-400 to-lime-600 rtl:bg-gradient-to-l"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${thumbPct}%` }}
+          />
+          {/* Goal flag marker */}
+          <span
+            className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500 ring-2 ring-white"
+            style={{ left: `${goalMarkerPct}%` }}
+            aria-hidden
           />
         </div>
+
         <input
           type="range"
           min={lo}
@@ -133,16 +156,16 @@ export function TransformationSlider({
           })}
         </div>
 
-        {/* Delta hints */}
-        <div className="mt-4 flex items-center justify-center gap-6 text-sm">
-          <span className="text-neutral-500">
-            {t(locale, "Lost from start", "المفقود من البداية")}:{" "}
-            <strong className="text-lime-700">{lostFromStart.toFixed(1)} {t(locale, "kg", "كجم")}</strong>
-          </span>
-          <span className="text-neutral-500">
-            {t(locale, "To goal", "حتى الهدف")}:{" "}
-            <strong className="text-orange-500">{toGoal.toFixed(1)} {t(locale, "kg", "كجم")}</strong>
-          </span>
+        {/* Delta cards */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-lime-100 bg-lime-50/60 p-3 text-center">
+            <span className="block text-[11px] font-semibold uppercase tracking-wider text-lime-700/70">{t(locale, "Lost from start", "المفقود من البداية")}</span>
+            <span className="mt-0.5 block text-xl font-black text-lime-700">{lostFromStart.toFixed(1)}<span className="ms-1 text-xs font-bold text-lime-700/60">{t(locale, "kg", "كجم")}</span></span>
+          </div>
+          <div className="rounded-2xl border border-orange-100 bg-orange-50/60 p-3 text-center">
+            <span className="block text-[11px] font-semibold uppercase tracking-wider text-orange-500/80">{t(locale, "To goal", "حتى الهدف")}</span>
+            <span className="mt-0.5 block text-xl font-black text-orange-500">{toGoal.toFixed(1)}<span className="ms-1 text-xs font-bold text-orange-500/60">{t(locale, "kg", "كجم")}</span></span>
+          </div>
         </div>
       </div>
     </div>

@@ -25,10 +25,6 @@ export function TransformationSlider({
 }) {
   const { locale } = useLocale()
 
-  // Slider goes from the heavier end to the lighter end so dragging feels like "progress".
-  const hi = Math.max(startWeightKg, goalWeightKg, currentWeightKg)
-  const lo = Math.min(startWeightKg, goalWeightKg, currentWeightKg)
-
   const [value, setValue] = useState<number>(Math.round(currentWeightKg * 10) / 10)
 
   const stage = useMemo(
@@ -48,13 +44,9 @@ export function TransformationSlider({
     : 0
   const progressPct = Math.round(progress)
 
-  // Position of the slider thumb along the [lo, hi] track (as a %), so the
-  // filled progress bar and the draggable thumb line up visually.
-  const trackSpan = hi - lo
-  const thumbPct = trackSpan > 0 ? ((hi - value) / trackSpan) * 100 : 0
-  // Where the Start and Goal markers sit on that same track.
-  const startMarkerPct = trackSpan > 0 ? ((hi - startWeightKg) / trackSpan) * 100 : 0
-  const goalMarkerPct = trackSpan > 0 ? ((hi - goalWeightKg) / trackSpan) * 100 : 100
+  // The visual bar runs from START (0%) to GOAL (100%). The fill = progress,
+  // so the filled portion always matches the headline percentage exactly.
+  const fillPct = progress
 
   const quick: { w: number; en: string; ar: string }[] = [
     { w: Math.round(startWeightKg * 10) / 10, en: "Start", ar: "البداية" },
@@ -101,28 +93,23 @@ export function TransformationSlider({
           <span className={cn("text-lg font-black", atGoal ? "text-lime-700" : "text-lime-600")}>{progressPct}%</span>
         </div>
 
-        {/* Slider track with start/goal markers */}
-        <div className="relative h-3 w-full rounded-full bg-neutral-100">
-          {/* filled progress aligned to the thumb position */}
+        {/* Progress bar: fills from START (inline-start) toward GOAL.
+            Uses logical inset so it renders correctly in both RTL and LTR. */}
+        <div className="relative h-3 w-full overflow-hidden rounded-full bg-neutral-100">
           <div
-            className="absolute inset-y-0 rounded-full bg-gradient-to-r from-lime-400 to-lime-600 rtl:bg-gradient-to-l"
-            style={{ width: `${thumbPct}%` }}
-          />
-          {/* Goal flag marker */}
-          <span
-            className="absolute top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-500 ring-2 ring-white"
-            style={{ left: `${goalMarkerPct}%` }}
-            aria-hidden
+            className="absolute inset-y-0 rounded-full bg-gradient-to-r from-lime-400 to-lime-600"
+            style={{ insetInlineStart: 0, width: `${fillPct}%` }}
           />
         </div>
 
         <input
           type="range"
-          min={lo}
-          max={hi}
+          min={goalWeightKg}
+          max={startWeightKg}
           step={0.1}
           value={value}
           onChange={(e) => setValue(parseFloat(e.target.value))}
+          dir="rtl"
           aria-label={t(locale, "Preview weight", "وزن المعاينة")}
           className="-mt-3 h-3 w-full cursor-pointer appearance-none bg-transparent
             [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:size-7

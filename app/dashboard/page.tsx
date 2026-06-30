@@ -40,12 +40,18 @@ export default function DashboardOverviewPage() {
   const router = useRouter()
   const { locale } = useLocale()
   const { notify } = useToast()
-  const { state, logWater } = useApp()
+  const { state, logWater, refreshSessions } = useApp()
   const user = useMemo(() => state.user || getLocalUser(), [state.user])
 
   useEffect(() => {
     if (state.authChecked && !user) router.replace("/onboarding")
   }, [state.authChecked, user, router])
+
+  // Keep the upcoming-sessions count fresh: pull sessions from the DB on open
+  // so a session an admin booked after login shows up without a re-login.
+  useEffect(() => {
+    if (user) refreshSessions()
+  }, [user, refreshSessions])
 
   if (!state.authChecked && !user) {
     return (

@@ -547,6 +547,215 @@ export async function adminUpsertPlan(userId: string, plan: {
   return true
 }
 
+// ============================================================================
+// Admin: Plan Builder (non-destructive CRUD on meal_plans + plan_items)
+// ----------------------------------------------------------------------------
+// The older adminUpsertPlan() destructively replaces every plan a user has.
+// The functions below let the admin manage multiple plans and edit any one
+// of them without losing history. They rely on the existing FK cascade:
+// deleting a meal_plan row automatically removes its plan_items.
+// ============================================================================
+
+export type PlanMeta = {
+  doctorName: string
+  startDate: string    // '' or 'YYYY-MM-DD'
+  endDate: string      // '' or 'YYYY-MM-DD'
+  goal: string
+  dailyCalories: number
+  waterLiters: number
+  notesEn: string
+  notesAr: string
+}
+
+export type PlanItemInput = {
+  dayOfWeek: number    // 0..6 (0 = Sunday)
+  mealId: string
+}
+
+export type PlanSummary = {
+  id: string
+  userId: string
+  clientNameEn: string
+  clientNameAr: string
+  doctorName: string
+  goal: string
+  startDate: string
+  endDate: string
+  dailyCalories: number
+  itemCount: number
+  createdAt: string
+}
+
+// List every plan across all clients (admin overview).
+export async function adminFetchAllPlans(): Promise<PlanSummary[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('meal_plans')
+    .select('id, user_id, doctor_name, goal, start_date, end_date, daily_calories, created_at, profiles(name_en, name_ar), plan_items(id)')
+    .order('created_at', { ascending: false })
+  if (error || !data) return []
+  return (data as Record<string, unknown>[]).map((r) => {
+    const prof = (r.profiles as Record<string, unknown> | null)
+    const items = (r.plan_items as Record<string, unknown>[]) ?? []
+    return {
+      id: r.id as string,
+      userId: r.user_id as string,
+      clientNameEn: (prof?.name_en as string) ?? '',
+      clientNameAr: (prof?.name_ar as string) ?? '',
+      doctorName: (r.doctor_name as string) ?? '',
+      goal: (r.goal as string) ?? '',
+      startDate: (r.start_date as string) ?? '',
+      endDate: (r.end_date as string) ?? '',
+      dailyCalories: Number(r.daily_calories) || 0,
+      itemCount: items.length,
+      createdAt: (r.created_at as string) ?? '',
+    }
+  })
+}
+
+// List plans belonging to a single client (admin view on client detail).
+export async function adminFetchPlansForClient(userId: string): Promise<PlanSummary[]> {
+  const all = await adminFetchAllPlans()
+  return all.filter((p) => p.userId === userId)
+}
+
+// Fetch a single plan by id, including its items with the full nested Meal.
+export async function adminFetchPlan(planId: string): Promise<{
+  meta: PlanMeta & { id: string; userId: string; clientNameEn: string; clientNameAr: string }
+  items: { id: string; dayOfWeek: number; meal: import('@/lib/types').Meal }[]
+} | null> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('meal_plans')
+    .select('id, user_id, doctor_name, start_date, end_date, goal, daily_calories, water_liters, notes_en, notes_ar, profiles(name_en, name_ar), plan_items(id, day_of_week, meals(id, name_en, name_ar, description_en, description_ar, image_url, calories, protein, carbs, fat, meal_type, tags))')
+    .eq('id', planId)
+    .maybeSingle()
+  if (error || !data) return null
+  const r = data as Record<string, unknown>
+  const prof = (r.profiles as Record<string, unknown> | null)
+  const items = ((r.plan_items as Record<string, unknown>[]) ?? []).map((pi) => {
+    const m = pi.meals as Record<string, unknown> | null
+    return {
+      id: pi.id as string,
+      dayOfWeek: Number(pi.day_of_week) || 0,
+      meal: {
+        id: (m?.id as string) ?? '',
+        nameEn: (m?.name_en as string) ?? '',
+        nameAr: (m?.name_ar as string) ?? '',
+        descriptionEn: (m?.description_en as string) ?? '',
+        descriptionAr: (m?.description_ar as string) ?? '',
+        imageUrl: (m?.image_url as string) ?? '',
+        calories: Number(m?.calories) || 0,
+        protein: Number(m?.protein) || 0,
+        carbs: Number(m?.carbs) || 0,
+        fat: Number(m?.fat) || 0,
+        mealType: (m?.meal_type as import('@/lib/types').Meal['mealType']) ?? 'snack',
+        tags: (m?.tags as string[]) ?? [],
+      },
+    }
+  })
+  return {
+    meta: {
+      id: r.id as string,
+      userId: r.user_id as string,
+      clientNameEn: (prof?.name_en as string) ?? '',
+      clientNameAr: (prof?.name_ar as string) ?? '',
+      doctorName: (r.doctor_name as string) ?? '',
+      startDate: (r.start_date as string) ?? '',
+      endDate: (r.end_date as string) ?? '',
+      goal: (r.goal as string) ?? 'lose_weight',
+      dailyCalories: Number(r.daily_calories) || 0,
+      waterLiters: Number(r.water_liters) || 0,
+      notesEn: (r.notes_en as string) ?? '',
+      notesAr: (r.notes_ar as string) ?? '',
+    },
+    items,
+  }
+}
+
+// Create a new empty plan for a client. Returns new plan id.
+export async function adminCreatePlan(userId: string, meta: PlanMeta): Promise<string | null> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('meal_plans')
+    .insert({
+      user_id: userId,
+      doctor_name: meta.doctorName || null,
+      start_date: meta.startDate || null,
+      end_date:   meta.endDate   || null,
+      goal:       meta.goal      || null,
+      daily_calories: meta.dailyCalories || null,
+      water_liters:   meta.waterLiters   || null,
+      notes_en:  meta.notesEn || null,
+      notes_ar:  meta.notesAr || null,
+    })
+    .select('id')
+    .single()
+  if (error || !data) {
+    console.error('adminCreatePlan failed', error)
+    return null
+  }
+  return (data as { id: string }).id
+}
+
+// Update the metadata columns on an existing plan (does NOT touch plan_items).
+export async function adminUpdatePlanMeta(planId: string, meta: PlanMeta): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('meal_plans')
+    .update({
+      doctor_name: meta.doctorName || null,
+      start_date: meta.startDate || null,
+      end_date:   meta.endDate   || null,
+      goal:       meta.goal      || null,
+      daily_calories: meta.dailyCalories || null,
+      water_liters:   meta.waterLiters   || null,
+      notes_en:  meta.notesEn || null,
+      notes_ar:  meta.notesAr || null,
+    })
+    .eq('id', planId)
+  if (error) {
+    console.error('adminUpdatePlanMeta failed', error)
+    return false
+  }
+  return true
+}
+
+// Delete a plan (cascade removes its plan_items via the FK).
+export async function adminDeletePlan(planId: string): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase.from('meal_plans').delete().eq('id', planId)
+  if (error) {
+    console.error('adminDeletePlan failed', error)
+    return false
+  }
+  return true
+}
+
+// Replace the full set of plan_items for a plan.
+// Two-step: delete-all then insert-all. Wrapped so partial failure surfaces.
+export async function adminSetPlanItems(planId: string, items: PlanItemInput[]): Promise<boolean> {
+  const supabase = createClient()
+  const { error: delErr } = await supabase.from('plan_items').delete().eq('plan_id', planId)
+  if (delErr) {
+    console.error('adminSetPlanItems delete failed', delErr)
+    return false
+  }
+  const rows = items.filter((i) => i.mealId).map((i) => ({
+    plan_id: planId,
+    day_of_week: Math.max(0, Math.min(6, Number(i.dayOfWeek))),
+    meal_id: i.mealId,
+  }))
+  if (rows.length === 0) return true
+  const { error: insErr } = await supabase.from('plan_items').insert(rows)
+  if (insErr) {
+    console.error('adminSetPlanItems insert failed', insErr)
+    return false
+  }
+  return true
+}
+
+
 // ---- Admin: create a session/booking for a client ----
 export async function adminCreateSession(s: {
   userId: string; type: string; doctorName: string; date: string; time: string;

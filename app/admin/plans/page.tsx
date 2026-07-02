@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { Plus, Pencil, Trash2, X, Upload, Loader2, ChefHat } from "lucide-react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { Plus, Pencil, Trash2, X, Upload, Loader2, ChefHat, ClipboardList, CalendarRange, ChevronRight } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
 import {
   adminFetchMeals,
@@ -10,6 +12,9 @@ import {
   adminDeleteMeal,
   uploadMealImage,
   adminFetchClients,
+  adminFetchAllPlans,
+  adminDeletePlan,
+  type PlanSummary,
 } from "@/lib/supabase/db"
 import type { Meal } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -46,8 +51,11 @@ export default function AdminMealsAndPlansPage() {
   const { locale } = useLocale()
   const { notify } = useToast()
 
+  const router = useRouter()
+
   const [meals, setMeals] = useState<Meal[] | null>(null)
   const [clients, setClients] = useState<Client[]>([])
+  const [plans, setPlans] = useState<PlanSummary[] | null>(null)
   const [filter, setFilter] = useState<Meal["mealType"] | "all">("all")
 
   const [editing, setEditing] = useState<Meal | null>(null)
@@ -58,13 +66,27 @@ export default function AdminMealsAndPlansPage() {
   const fileRef = useRef<HTMLInputElement>(null)
 
   const load = () => adminFetchMeals().then(setMeals)
+  const loadPlans = () => adminFetchAllPlans().then(setPlans)
 
   useEffect(() => {
     load()
+    loadPlans()
     adminFetchClients().then((c) =>
       setClients(c.map((x) => ({ id: x.id, nameEn: x.nameEn, nameAr: x.nameAr, goal: x.goal }))),
     )
   }, [])
+
+  async function removePlan(p: PlanSummary) {
+    const who = locale === "ar" ? (p.clientNameAr || p.clientNameEn) : (p.clientNameEn || p.clientNameAr)
+    if (!confirm(t(locale, `Delete plan for ${who || "this client"}?`, `حذف خطة ${who || "هذا العميل"}؟`))) return
+    const ok = await adminDeletePlan(p.id)
+    if (ok) {
+      notify(t(locale, "Plan deleted.", "تم حذف الخطة."), "success")
+      loadPlans()
+    } else {
+      notify(t(locale, "Delete failed.", "فشل الحذف."), "error")
+    }
+  }
 
   const filteredMeals = (meals ?? []).filter((m) => filter === "all" ? true : m.mealType === filter)
 
@@ -283,6 +305,98 @@ export default function AdminMealsAndPlansPage() {
             ))}
           </div>
         )}
+
+        {/* Meal Plans section */}
+        <section className="pt-4">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Meal Plans", "الخطط الغذائية")}</h2>
+            <Link
+              href="/admin/plans/new"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-emerald-700"
+            >
+              <Plus className="size-3.5" /> {t(locale, "New plan", "خطة جديدة")}
+            </Link>
+          </div>
+
+          {plans === null ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="size-5 animate-spin text-emerald-500" />
+            </div>
+          ) : plans.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-neutral-200 bg-white py-10 text-center">
+              <ClipboardList className="mx-auto size-8 text-neutral-300" />
+              <p className="mt-2 text-sm font-semibold text-neutral-500">
+                {t(locale, "No plans yet.", "لا توجد خطط بعد.")}
+              </p>
+              <p className="mt-1 text-xs text-neutral-400">
+                {t(locale,
+                  "Create the first plan and assign it to a client.",
+                  "أنشئ أول خطة واربطها بعميل.")}
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-neutral-100 text-xs uppercase tracking-wider text-neutral-400">
+                    <th className="p-4 text-start font-medium">{t(locale, "Client", "العميل")}</th>
+                    <th className="p-4 text-start font-medium">{t(locale, "Goal", "الهدف")}</th>
+                    <th className="p-4 text-start font-medium">{t(locale, "Dates", "الفترة")}</th>
+                    <th className="p-4 text-start font-medium">{t(locale, "Meals", "الوجبات")}</th>
+                    <th className="p-4 text-end font-medium">{t(locale, "Actions", "إجراءات")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {plans.map((p) => (
+                    <tr
+                      key={p.id}
+                      className="cursor-pointer border-b border-neutral-50 last:border-none hover:bg-emerald-50/40"
+                      onClick={() => router.push(`/admin/plans/${p.id}`)}
+                    >
+                      <td className="p-4 font-semibold text-neutral-900">
+                        {locale === "ar"
+                          ? (p.clientNameAr || p.clientNameEn || "—")
+                          : (p.clientNameEn || p.clientNameAr || "—")}
+                      </td>
+                      <td className="p-4 text-neutral-500">{p.goal || "—"}</td>
+                      <td className="p-4 text-neutral-500">
+                        {p.startDate || p.endDate ? (
+                          <span className="inline-flex items-center gap-1 text-xs">
+                            <CalendarRange className="size-3.5" />
+                            {p.startDate || "…"} — {p.endDate || "…"}
+                          </span>
+                        ) : "—"}
+                      </td>
+                      <td className="p-4 text-neutral-500">
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                          {p.itemCount}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                          <Link
+                            href={`/admin/plans/${p.id}`}
+                            className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 px-2.5 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50"
+                          >
+                            <Pencil className="size-3" /> {t(locale, "Edit", "تعديل")}
+                          </Link>
+                          <button
+                            onClick={() => removePlan(p)}
+                            aria-label={t(locale, "Delete", "حذف")}
+                            className="flex items-center justify-center rounded-lg border border-red-100 p-1.5 text-red-500 hover:bg-red-50"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
+                          <ChevronRight className="size-4 text-neutral-300" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
 
         {/* Clients section — unchanged */}
         <section className="pt-4">

@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import { HealthySnacksContent } from './healthy-snacks-content'
+import { canonical } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Healthy Snacks & Supplements | السناكس والمكمّلات الصحية',
   description: 'Guilt-free protein bars, dried fruits, nuts, and organic supplements from Lover Diet Center UAE. ألواح بروتين ومكسرات ومكمّلات صحية معتمدة.',
+  alternates: { canonical: canonical('/healthy-snacks') },
 }
 
 import { Reveal } from '@/components/ui/reveal'

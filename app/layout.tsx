@@ -6,6 +6,14 @@ import { AppProvider } from '@/lib/store'
 import { LocaleProvider } from '@/lib/locale'
 import { CurrencyProvider } from '@/lib/currency'
 import { ToastProvider } from '@/components/ui/toast'
+import { JsonLd } from '@/components/seo/json-ld'
+import {
+  SITE_URL,
+  OG_IMAGE,
+  organizationJsonLd,
+  websiteJsonLd,
+  localBusinessJsonLd,
+} from '@/lib/seo'
 import './globals.css'
 
 const hostGrotesk = Host_Grotesk({
@@ -22,10 +30,8 @@ const rubik = Rubik({
   display: 'swap',
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.loversdc.com'
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -55,21 +61,21 @@ export const metadata: Metadata = {
     title: 'Lover Diet Center — Transform Your Health',
     description:
       'Expert nutrition consultations, healthy meal delivery, and body sculpting in the UAE. Join 3,000+ members.',
-    url: siteUrl,
+    url: SITE_URL,
     siteName: 'Lover Diet Center',
     locale: 'en_AE',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Lover Diet Center' }],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Lover Diet Center — Science-Based Nutrition',
     description:
       'Personalized nutrition, chef-prepared meals, and certified experts. Book your free discovery call.',
-    images: ['/og-image.png'],
+    images: [OG_IMAGE.url],
   },
   alternates: {
-    canonical: siteUrl,
+    canonical: SITE_URL,
   },
   robots: {
     index: true,
@@ -95,6 +101,11 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`light-mode ${hostGrotesk.variable} ${rubik.variable}`}
     >
+      <head>
+        <JsonLd id="ld-organization" data={organizationJsonLd} />
+        <JsonLd id="ld-website" data={websiteJsonLd} />
+        <JsonLd id="ld-business" data={localBusinessJsonLd} />
+      </head>
       <body className="font-sans antialiased text-neutral-900">
         <a
           href="#main-content"

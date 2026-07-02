@@ -6,6 +6,7 @@ import { Loader2, UserPlus, User, Mail, Lock, Phone } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
 import { COUNTRIES, DEFAULT_COUNTRY } from '@/lib/countries'
+import { GoogleButton } from '@/components/ui/google-button'
 
 export function SignUpForm() {
   const { locale } = useLocale()
@@ -41,8 +42,8 @@ export function SignUpForm() {
       setError(t(locale, 'Please enter a valid email address.', 'يرجى إدخال بريد إلكتروني صحيح.'))
       return false
     }
-    if (form.password.length < 12) {
-      setError(t(locale, 'Password must be at least 12 characters.', 'يجب أن تكون كلمة المرور 12 حرفاً على الأقل.'))
+    if (form.password.length < 8) {
+      setError(t(locale, 'Password must be at least 8 characters.', 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.'))
       return false
     }
     if (form.password !== form.confirmPassword) {
@@ -107,6 +108,15 @@ export function SignUpForm() {
         </div>
         <h1 className="text-2xl font-semibold text-neutral-900">{t(locale, 'Create your account', 'أنشئ حسابك')}</h1>
         <p className="text-sm text-neutral-500 mt-1">{t(locale, 'Start your health journey today.', 'ابدأ رحلتك الصحية اليوم.')}</p>
+      </div>
+
+      <div className="mb-5">
+        <GoogleButton next={redirect} />
+      </div>
+      <div className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+        <span className="h-px flex-1 bg-neutral-200" />
+        {t(locale, 'or continue with email', 'أو تابع بالبريد الإلكتروني')}
+        <span className="h-px flex-1 bg-neutral-200" />
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">

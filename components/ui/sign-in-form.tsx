@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, LogIn } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
+import { GoogleButton } from '@/components/ui/google-button'
 
 export function SignIn2() {
   const { locale } = useLocale()
@@ -19,6 +20,12 @@ export function SignIn2() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Surface auth-callback errors (e.g. Google OAuth failure, expired recovery link).
+  useEffect(() => {
+    const e = searchParams.get('error')
+    if (e) setError(decodeURIComponent(e))
+  }, [searchParams])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -30,8 +37,8 @@ export function SignIn2() {
         setError(t(locale, 'Please enter your email and password.', 'يرجى إدخال البريد الإلكتروني وكلمة المرور.'))
         return
       }
-      if (password.length < 12) {
-        setError(t(locale, 'Password must be at least 12 characters.', 'يجب أن تكون كلمة المرور 12 حرفاً على الأقل.'))
+      if (password.length < 8) {
+        setError(t(locale, 'Password must be at least 8 characters.', 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.'))
         return
       }
 
@@ -72,6 +79,16 @@ export function SignIn2() {
         </div>
         <h1 className="text-2xl font-bold text-neutral-900">{t(locale, 'Welcome back', 'مرحباً بعودتك')}</h1>
         <p className="text-neutral-500 mt-1">{t(locale, 'Sign in to access your personalized health plan.', 'سجّل الدخول للوصول إلى خطتك الصحية المخصصة.')}</p>
+      </div>
+
+      {/* OAuth */}
+      <div className="mb-5">
+        <GoogleButton next={redirect} />
+      </div>
+      <div className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-wider text-neutral-400">
+        <span className="h-px flex-1 bg-neutral-200" />
+        {t(locale, 'or continue with email', 'أو تابع بالبريد الإلكتروني')}
+        <span className="h-px flex-1 bg-neutral-200" />
       </div>
 
       {/* Form */}

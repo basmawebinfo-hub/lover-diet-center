@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         // Block private / non-marketing surfaces from crawlers.
-        disallow: ['/api/', '/dashboard/', '/admin/', '/onboarding/', '/sign-in', '/sign-up', '/forgot-password', '/blocked'],
+        disallow: ['/api/', '/auth/', '/dashboard/', '/admin/', '/onboarding/', '/sign-in', '/sign-up', '/forgot-password', '/reset-password', '/blocked'],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

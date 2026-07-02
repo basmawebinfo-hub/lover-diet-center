@@ -5,12 +5,13 @@ import { FAQ } from '@/components/landing/faq'
 import { FinalCTA } from '@/components/landing/final-cta'
 import { FooterSimple } from '@/components/ui/footer'
 import type { Metadata } from 'next'
+import { canonical } from '@/lib/seo'
 
 export const metadata: Metadata = {
   title: 'Lover Diet Center — Science-Based Nutrition in UAE',
   description: 'Personalized nutrition consultations, chef-prepared healthy meals, healthy snacks, body sculpting sessions, and training courses.',
   alternates: {
-    canonical: 'https://loversdc.com/en',
+    canonical: canonical('/en'),
   },
 }
 

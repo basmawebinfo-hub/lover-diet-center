@@ -332,6 +332,71 @@ export async function fetchMeals(): Promise<Meal[]> {
   }))
 }
 
+// ---- Admin: Meals CRUD ----
+// meals RLS: public SELECT, admin ALL (backed by public.is_admin()).
+// The client-side upsert therefore only works when signed in as an admin.
+export async function adminFetchMeals(): Promise<Meal[]> {
+  // Same shape as fetchMeals; kept as a separate function so we can add
+  // admin-only column projections later (e.g. hidden/draft meals).
+  return fetchMeals()
+}
+
+export async function adminUpsertMeal(m: Meal): Promise<boolean> {
+  const supabase = createClient()
+  const row = {
+    id: m.id,
+    name_en: m.nameEn,
+    name_ar: m.nameAr || null,
+    description_en: m.descriptionEn || null,
+    description_ar: m.descriptionAr || null,
+    image_url: m.imageUrl || null,
+    calories: Math.max(0, Math.round(m.calories || 0)),
+    protein:  Math.max(0, Math.round(m.protein  || 0)),
+    carbs:    Math.max(0, Math.round(m.carbs    || 0)),
+    fat:      Math.max(0, Math.round(m.fat      || 0)),
+    meal_type: m.mealType,
+    tags: Array.isArray(m.tags) ? m.tags : [],
+  }
+  const { error } = await supabase.from('meals').upsert(row, { onConflict: 'id' })
+  if (error) {
+    console.error('adminUpsertMeal failed', error)
+    return false
+  }
+  return true
+}
+
+export async function adminDeleteMeal(id: string): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase.from('meals').delete().eq('id', id)
+  if (error) {
+    console.error('adminDeleteMeal failed', error)
+    return false
+  }
+  return true
+}
+
+// Upload a meal image to Supabase Storage ('meal-images' bucket) -> returns public URL.
+// Bucket RLS restricts writes to admins; reads are public so the dashboard
+// and marketing pages can render the image.
+export async function uploadMealImage(file: File): Promise<string | null> {
+  const supabase = createClient()
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+  // Path scheme: meals/<timestamp>-<rand>.<ext>. The 'meals/' prefix keeps
+  // the bucket organized and is required by the storage RLS policy.
+  const path = `meals/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  const { error } = await supabase.storage.from('meal-images').upload(path, file, {
+    upsert: true,
+    cacheControl: '3600',
+    contentType: file.type || undefined,
+  })
+  if (error) {
+    console.error('uploadMealImage failed', error)
+    return null
+  }
+  const { data } = supabase.storage.from('meal-images').getPublicUrl(path)
+  return data.publicUrl ?? null
+}
+
 // ---- Admin: full detail for a single client ----
 export type ClientDetail = {
   profile: Record<string, unknown> | null

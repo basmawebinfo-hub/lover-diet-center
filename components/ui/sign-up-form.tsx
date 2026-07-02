@@ -11,7 +11,9 @@ export function SignUpForm() {
   const { locale } = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/onboarding'
+  const rawRedirect = searchParams.get('redirect') || '/onboarding'
+  // Only permit same-site relative paths — prevents open-redirect via ?redirect=//evil.com
+  const redirect = /^\/(?!\/)[A-Za-z0-9\-._~!$&'()*+,;=:@/%]*$/.test(rawRedirect) ? rawRedirect : '/onboarding'
 
   const [form, setForm] = useState({
     name: '',
@@ -39,8 +41,8 @@ export function SignUpForm() {
       setError(t(locale, 'Please enter a valid email address.', 'يرجى إدخال بريد إلكتروني صحيح.'))
       return false
     }
-    if (form.password.length < 8) {
-      setError(t(locale, 'Password must be at least 8 characters.', 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.'))
+    if (form.password.length < 12) {
+      setError(t(locale, 'Password must be at least 12 characters.', 'يجب أن تكون كلمة المرور 12 حرفاً على الأقل.'))
       return false
     }
     if (form.password !== form.confirmPassword) {

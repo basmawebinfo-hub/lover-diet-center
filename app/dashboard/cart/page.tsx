@@ -54,13 +54,17 @@ export default function CartPage() {
   const total = subtotal + shipping
 
   async function checkout() {
-    setCheckedOut(true)
-    // Persist the order to Supabase if signed in (non-blocking for UX)
+    // Do NOT flip checkedOut yet — we only show the success screen after
+    // the order has actually persisted (or been intentionally kept local
+    // for anonymous users).
+    let persistedOrderId: string | null = null
+    let persistFailed = false
+
     try {
       const supabase = createClient()
       const { data } = await supabase.auth.getUser()
       if (data.user) {
-        await placeOrder(
+        persistedOrderId = await placeOrder(
           data.user.id,
           cartItems.map((it) => ({
             productId: it.product.id,
@@ -69,10 +73,23 @@ export default function CartPage() {
           })),
           total,
         )
+        if (!persistedOrderId) {
+          persistFailed = true
+        }
       }
     } catch {
-      // ignore — order still clears locally
+      persistFailed = true
     }
+
+    if (persistFailed) {
+      notify(
+        t(locale, "Could not place order. Please try again.", "تعذر تأكيد الطلب. حاول مرة أخرى."),
+        "error",
+      )
+      return
+    }
+
+    setCheckedOut(true)
     // Build a local order so it shows in "My Orders" (frontend-only for now)
     const order: Order = {
       id: `o_${Date.now()}`,

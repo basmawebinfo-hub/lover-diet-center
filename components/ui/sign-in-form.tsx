@@ -10,7 +10,9 @@ export function SignIn2() {
   const { locale } = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirect = searchParams.get('redirect') || '/dashboard'
+  const rawRedirect = searchParams.get('redirect') || '/dashboard'
+  // Only permit same-site relative paths — prevents open-redirect via ?redirect=//evil.com
+  const redirect = /^\/(?!\/)[A-Za-z0-9\-._~!$&'()*+,;=:@/%]*$/.test(rawRedirect) ? rawRedirect : '/dashboard'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,8 +30,8 @@ export function SignIn2() {
         setError(t(locale, 'Please enter your email and password.', 'يرجى إدخال البريد الإلكتروني وكلمة المرور.'))
         return
       }
-      if (password.length < 6) {
-        setError(t(locale, 'Password must be at least 6 characters.', 'يجب أن تكون كلمة المرور 6 أحرف على الأقل.'))
+      if (password.length < 12) {
+        setError(t(locale, 'Password must be at least 12 characters.', 'يجب أن تكون كلمة المرور 12 حرفاً على الأقل.'))
         return
       }
 

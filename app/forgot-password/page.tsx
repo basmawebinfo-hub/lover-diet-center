@@ -1,63 +1,69 @@
 "use client"
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Check } from 'lucide-react'
+import { ArrowLeft, Mail, Check, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
 
-// Password recovery entry point.
-//
-// The email itself is sent by Supabase Auth (via the SMTP settings in
-// the Supabase Dashboard — Resend in production). We do not send the
-// email ourselves. What THIS component does:
-//
-//   1. Ask Supabase to enqueue a recovery email for `email`.
-//   2. Log the exact SDK response to the browser console for diagnostics.
-//   3. Surface any real error to the user (e.g. rate limit hit, SMTP
-//      misconfigured, domain not verified).
-//   4. On success, show the "check inbox" screen.
-//
-// The link Supabase includes in the email is built from the SiteURL
-// and the "Reset Password" template (which must use {{ .TokenHash }},
-// pointing at /auth/confirm — updated separately in the dashboard).
+const COOLDOWN_SECONDS = 60
+
 export default function ForgotPasswordPage() {
   const { locale } = useLocale()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [cooldown, setCooldown] = useState(0)   // seconds remaining until the resend is unlocked
+  const [resent, setResent] = useState(false)   // set true briefly after a successful resend
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  // Countdown ticker for the resend button.
+  useEffect(() => {
+    if (cooldown <= 0) return
+    timerRef.current = setInterval(() => {
+      setCooldown((s) => {
+        if (s <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current)
+          return 0
+        }
+        return s - 1
+      })
+    }, 1000)
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [cooldown])
+
+  const sendReset = async (opts: { isResend?: boolean } = {}) => {
     setError('')
+    setResent(false)
     setLoading(true)
     const normalized = email.trim().toLowerCase()
 
     try {
       const supabase = createClient()
       const origin = typeof window !== 'undefined' ? window.location.origin : ''
+      console.log('[forgot-password] requesting', opts.isResend ? 'resend' : 'initial', 'for', normalized)
 
-      // Log the attempt so admins can trace failures in the browser console.
-      console.log('[forgot-password] requesting recovery email for', normalized)
-
-      const { data, error: err } = await supabase.auth.resetPasswordForEmail(
+      const { error: err } = await supabase.auth.resetPasswordForEmail(
         normalized,
         { redirectTo: `${origin}/auth/confirm?next=/reset-password` },
       )
 
       if (err) {
-        // Real errors we might see:
-        //   - "For security purposes, you can only request this once every 60 seconds"
-        //   - "Error sending recovery email" (SMTP misconfigured / domain unverified)
-        //   - "Email rate limit exceeded"
         console.error('[forgot-password] resetPasswordForEmail failed', err)
         setError(err.message)
         return
       }
 
-      console.log('[forgot-password] enqueued OK', data)
       setSent(true)
+      setCooldown(COOLDOWN_SECONDS)
+      if (opts.isResend) {
+        setResent(true)
+        // Auto-hide the "resent" confirmation after 4 seconds.
+        setTimeout(() => setResent(false), 4000)
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e)
       console.error('[forgot-password] unexpected exception', e)
@@ -65,6 +71,17 @@ export default function ForgotPasswordPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (loading || cooldown > 0) return
+    sendReset({ isResend: false })
+  }
+
+  const handleResend = () => {
+    if (loading || cooldown > 0 || !email.trim()) return
+    sendReset({ isResend: true })
   }
 
   return (
@@ -80,9 +97,54 @@ export default function ForgotPasswordPage() {
         <h1 className="mt-4 text-2xl font-extrabold tracking-tight text-neutral-900">{t(locale, 'Reset your password', 'إعادة تعيين كلمة المرور')}</h1>
 
         {sent ? (
-          <div className="mt-6 flex items-start gap-3 rounded-2xl bg-lime-50 p-4 text-sm text-lime-800">
-            <Check className="mt-0.5 size-5 shrink-0 text-lime-600" />
-            <p>{t(locale, 'If an account exists for', 'إذا كان هناك حساب مرتبط بـ')} <strong>{email}</strong>{t(locale, ', a reset link is on its way. Check your inbox (and spam folder).', '، فإن رابط إعادة التعيين في طريقه إليك. تحقّق من بريدك (والرسائل غير المرغوبة).')}</p>
+          <div className="mt-6 space-y-4">
+            <div className="flex items-start gap-3 rounded-2xl bg-lime-50 p-4 text-sm text-lime-800">
+              <Check className="mt-0.5 size-5 shrink-0 text-lime-600" />
+              <div>
+                <p>{t(locale, 'If an account exists for', 'إذا كان هناك حساب مرتبط بـ')} <strong>{email}</strong>{t(locale, ', a reset link is on its way. Check your inbox (and spam folder).', '، فإن رابط إعادة التعيين في طريقه إليك. تحقّق من بريدك (والرسائل غير المرغوبة).')}</p>
+                {resent && (
+                  <p className="mt-1 text-xs font-semibold text-lime-700">
+                    {t(locale, 'A new email has been sent.', 'تم إرسال بريد جديد.')}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {error && (
+              <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+            )}
+
+            <div className="rounded-2xl border border-neutral-100 bg-neutral-50/60 p-4 text-sm text-neutral-600">
+              <p className="mb-3">
+                {t(locale,
+                  "Didn't receive it? You can resend the email once the countdown ends.",
+                  "لم يصلك؟ يمكنك إعادة إرسال البريد بعد انتهاء العدّاد.")}
+              </p>
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={cooldown > 0 || loading}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-lime-200 bg-white px-5 py-3 text-sm font-semibold text-lime-800 transition hover:bg-lime-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <RefreshCw className={loading ? 'size-4 animate-spin' : 'size-4'} />
+                {loading
+                  ? t(locale, 'Sending…', 'جارٍ الإرسال…')
+                  : cooldown > 0
+                    ? t(locale, `Resend in ${cooldown}s`, `إعادة الإرسال خلال ${cooldown} ثانية`)
+                    : t(locale, 'Resend email', 'إعادة إرسال البريد')}
+              </button>
+            </div>
+
+            <p className="text-center text-xs text-neutral-400">
+              {t(locale, "Wrong email?", "بريد خاطئ؟")}{' '}
+              <button
+                type="button"
+                onClick={() => { setSent(false); setError(''); setResent(false) }}
+                className="font-semibold text-lime-700 hover:underline"
+              >
+                {t(locale, 'Change it', 'تغييره')}
+              </button>
+            </p>
           </div>
         ) : (
           <>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { ArrowLeft, ArrowRight, Check, Sparkles } from "lucide-react"
+import { ArrowLeft, ArrowRight, Check, Sparkles, Loader2, RefreshCw, AlertCircle, Phone } from "lucide-react"
 import { useApp } from "@/lib/store"
 import { analyzeUser, buildAvatarConfig, calculateBMI } from "@/lib/analysis"
 import type { ActivityLevel, Gender, GoalType, User } from "@/lib/types"
@@ -11,40 +11,96 @@ import { useRouter } from "next/navigation"
 import { useLocale, t } from "@/lib/locale"
 import { createClient } from "@/lib/supabase/client"
 import { upsertProfile } from "@/lib/supabase/db"
+import { COUNTRIES, DEFAULT_COUNTRY } from "@/lib/countries"
 
-const TOTAL_STEPS = 8
+// 9 steps: Name -> Phone -> Age -> Height -> Weight -> Goal -> Activity -> Review -> Finalize
+const TOTAL_STEPS = 9
 
 const goalCopy: Record<GoalType, { en: string; ar: string; icon: string }> = {
-  lose_weight: { en: "Lose Weight", ar: "إنقاص الوزن", icon: "🔥" },
-  tone: { en: "Tone & Sculpt", ar: "نحت الجسم", icon: "💎" },
-  gain_muscle: { en: "Build Muscle", ar: "زيادة العضلات", icon: "💪" },
-  maintain: { en: "Stay Healthy", ar: "الحفاظ على الوزن", icon: "⚖️" },
+  lose_weight: { en: "Lose Weight",  ar: "إنقاص الوزن",     icon: "🔥" },
+  tone:        { en: "Tone & Sculpt", ar: "نحت الجسم",       icon: "💎" },
+  gain_muscle: { en: "Build Muscle",  ar: "زيادة العضلات",   icon: "💪" },
+  maintain:    { en: "Stay Healthy",  ar: "الحفاظ على الوزن", icon: "⚖️" },
 }
 
 const activityCopy: Record<ActivityLevel, { en: string; ar: string; emoji: string }> = {
-  sedentary: { en: "Sedentary", ar: "خامل", emoji: "🛋️" },
-  light: { en: "Light", ar: "خفيف", emoji: "🚶" },
-  moderate: { en: "Moderate", ar: "متوسط", emoji: "🏃" },
-  active: { en: "Active", ar: "نشط", emoji: "🚴" },
+  sedentary:   { en: "Sedentary",   ar: "خامل",     emoji: "🛋️" },
+  light:       { en: "Light",       ar: "خفيف",     emoji: "🚶" },
+  moderate:    { en: "Moderate",    ar: "متوسط",    emoji: "🏃" },
+  active:      { en: "Active",      ar: "نشط",      emoji: "🚴" },
   very_active: { en: "Very Active", ar: "نشط جداً", emoji: "🏋️" },
+}
+
+type OnboardingData = {
+  name: string
+  phone: string        // digits only, without country dial code
+  countryCode: string  // ISO code like "AE" — dial code resolved from COUNTRIES
+  age: number
+  gender: Gender
+  heightCm: number
+  weightKg: number
+  goal: GoalType
+  activity: ActivityLevel
 }
 
 export default function OnboardingPage() {
   const { setUser, markIntroSeen } = useApp()
   const { locale } = useLocale()
   const router = useRouter()
-  const [step, setStep] = useState(1)
-  const [data, setData] = useState({
+
+  // Persist onboarding progress in localStorage so a refresh does not lose data.
+  const [step, setStep] = useState<number>(1)
+  const [data, setData] = useState<OnboardingData>({
     name: "",
+    phone: "",
+    countryCode: DEFAULT_COUNTRY.code,
     age: 30,
-    gender: "male" as Gender,
+    gender: "male",
     heightCm: 175,
     weightKg: 90,
-    goal: "lose_weight" as GoalType,
-    activity: "light" as ActivityLevel,
+    goal: "lose_weight",
+    activity: "light",
   })
 
-  const update = <K extends keyof typeof data>(k: K, v: (typeof data)[K]) =>
+  // Hydrate from localStorage on first mount (SSR-safe).
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    try {
+      const raw = localStorage.getItem("ldc_onboarding_draft")
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (parsed && typeof parsed === "object") {
+          setData((d) => ({ ...d, ...parsed.data }))
+          if (typeof parsed.step === "number" && parsed.step >= 1 && parsed.step <= TOTAL_STEPS) {
+            setStep(parsed.step)
+          }
+        }
+      }
+      // If Supabase auth already has the user's name/phone from sign-up, prefill.
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data: auth }) => {
+        const meta = auth.user?.user_metadata as { name?: string; phone?: string; country?: string } | undefined
+        if (meta) {
+          setData((d) => ({
+            ...d,
+            name: d.name || meta.name || "",
+            phone: d.phone || (meta.phone ? meta.phone.replace(/[^0-9]/g, '').slice(-9) : ""),
+            countryCode: d.countryCode || meta.country || DEFAULT_COUNTRY.code,
+          }))
+        }
+      })
+    } catch { /* ignore */ }
+  }, [])
+
+  // Persist progress on every change.
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    try {
+      localStorage.setItem("ldc_onboarding_draft", JSON.stringify({ step, data }))
+    } catch { /* quota / disabled */ }
+  }, [step, data])
+
+  const update = <K extends keyof OnboardingData>(k: K, v: OnboardingData[K]) =>
     setData((p) => ({ ...p, [k]: v }))
 
   const bmi = useMemo(
@@ -54,65 +110,25 @@ export default function OnboardingPage() {
 
   const canContinue = useMemo(() => {
     if (step === 1) return data.name.trim().length >= 2
-    if (step === 2) return data.age >= 12 && data.age <= 100
-    if (step === 3) return data.heightCm >= 120 && data.heightCm <= 230
-    if (step === 4) return data.weightKg >= 30 && data.weightKg <= 250
+    if (step === 2) {
+      // Phone step: needs >= 6 digits after stripping non-digits.
+      const digits = data.phone.replace(/[^0-9]/g, "")
+      return digits.length >= 6
+    }
+    if (step === 3) return data.age >= 12 && data.age <= 100
+    if (step === 4) return data.heightCm >= 120 && data.heightCm <= 230
+    if (step === 5) return data.weightKg >= 30 && data.weightKg <= 250
     return true
   }, [step, data])
 
-  const next = () => {
-    if (step < TOTAL_STEPS) setStep((s) => s + 1)
-    else finish()
-  }
+  const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS))
   const prev = () => setStep((s) => Math.max(1, s - 1))
-
-  function finish() {
-    const targetWeight = computeTarget(data)
-    const user: User = {
-      id: `u_${Date.now()}`,
-      nameEn: data.name,
-      email: "",  // filled from the signed-in auth user below
-      age: data.age,
-      gender: data.gender,
-      heightCm: data.heightCm,
-      startWeightKg: data.weightKg,
-      currentWeightKg: data.weightKg,
-      goal: data.goal,
-      targetWeightKg: targetWeight,
-      activityLevel: data.activity,
-      avatarConfig: buildAvatarConfig(
-        {
-          gender: data.gender,
-          heightCm: data.heightCm,
-          currentWeightKg: data.weightKg,
-          startWeightKg: data.weightKg,
-          goal: data.goal,
-        },
-        []
-      ),
-      createdAt: new Date().toISOString(),
-    }
-    // Attach the real signed-in email + persist the profile to Supabase
-    const supabase = createClient()
-    supabase.auth.getUser().then(async ({ data: auth }) => {
-      const finalUser = { ...user, id: auth.user?.id || user.id, email: auth.user?.email || user.email }
-      setUser(finalUser)
-      markIntroSeen()
-      localStorage.setItem("loverDietUser", JSON.stringify(finalUser))
-      if (auth.user) await upsertProfile(auth.user.id, finalUser).catch(() => {})
-      router.push("/dashboard")
-    })
-  }
 
   const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100
 
   return (
     <div className="min-h-screen bg-[#e7f5ee] lg:grid lg:grid-cols-2">
-      <PreviewPanel
-        data={data}
-        bmi={bmi}
-        step={step}
-      />
+      <PreviewPanel data={data} step={step} />
       <div className="flex min-h-screen flex-col bg-white">
         <div className="border-b border-neutral-100 px-6 pt-8 pb-6">
           <p className="mb-3 text-xs font-medium text-neutral-400 uppercase tracking-wider">
@@ -135,17 +151,23 @@ export default function OnboardingPage() {
         <div className="flex-1 px-6 py-8">
           <div className="mx-auto max-w-md">
             {step === 1 && <NameStep data={data} update={(k, v) => update(k, v as never)} />}
-            {step === 2 && <AgeStep data={data} update={update} />}
-            {step === 3 && <HeightStep data={data} update={update} />}
-            {step === 4 && <WeightStep data={data} update={update} />}
-            {step === 5 && <GoalStep data={data} update={update} />}
-            {step === 6 && <ActivityStep data={data} update={update} />}
-            {step === 7 && <ReviewStep data={data} bmi={bmi} />}
-            {step === 8 && <AIAnalysisStep data={data} />}
+            {step === 2 && <PhoneStep data={data} update={(k, v) => update(k, v as never)} />}
+            {step === 3 && <AgeStep data={data} update={update} />}
+            {step === 4 && <HeightStep data={data} update={update} />}
+            {step === 5 && <WeightStep data={data} update={update} />}
+            {step === 6 && <GoalStep data={data} update={update} />}
+            {step === 7 && <ActivityStep data={data} update={update} />}
+            {step === 8 && <ReviewStep data={data} bmi={bmi} />}
+            {step === 9 && (
+              <FinalizeStep
+                data={data}
+                onSuccess={() => { /* handled in FinalizeStep */ }}
+              />
+            )}
           </div>
         </div>
 
-        {step !== 8 && (
+        {step !== TOTAL_STEPS && (
           <div className="border-t border-neutral-100 px-6 py-5">
             <div className="mx-auto max-w-md flex items-center gap-3">
               <button
@@ -165,7 +187,7 @@ export default function OnboardingPage() {
                 disabled={!canContinue}
                 className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#34857b] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1f5d54] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {step === 7 ? (
+                {step === TOTAL_STEPS - 1 ? (
                   <>
                     {t(locale, "See My Plan", "اعرض خطتي")}
                     <Sparkles className="size-4" />
@@ -185,19 +207,51 @@ export default function OnboardingPage() {
   )
 }
 
-function AIAnalysisStep({ data }: { data: any }) {
+// ============================================================================
+// FinalizeStep — the CRITICAL fix for the "AI Analysis freezes" bug.
+//
+// Old behavior:
+//   - Fired a 4-second setTimeout, then blindly upserted and pushed /dashboard.
+//   - If the save silently failed (e.g. missing phone -> onboarding gate bounces
+//     the user right back), the user saw an infinite spinner.
+//
+// New behavior — proper state machine:
+//   IDLE  -> SAVING -> DONE       (success path)
+//                   \-> ERROR    (visible message + Retry button)
+//   Instead of a fixed 4s timeout we WAIT for the save. On success we do a
+//   hard navigation (window.location) so any middleware redirect is followed
+//   as a full page load, not a client-side hop that could get stuck.
+// ============================================================================
+function FinalizeStep({ data, onSuccess }: { data: OnboardingData; onSuccess: () => void }) {
   const router = useRouter()
   const { locale } = useLocale()
   const { setUser, markIntroSeen } = useApp()
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // Build user object and save before redirect
+  const [status, setStatus] = useState<"saving" | "error">("saving")
+  const [errorMsg, setErrorMsg] = useState<string>("")
+  const [attempts, setAttempts] = useState(0)
+
+  const run = async () => {
+    setStatus("saving")
+    setErrorMsg("")
+    try {
+      const supabase = createClient()
+      const { data: auth, error: authErr } = await supabase.auth.getUser()
+      if (authErr || !auth.user) {
+        throw new Error("You are not signed in. Please sign in again.")
+      }
+
+      // Compose full phone (dial + digits).
+      const dial = COUNTRIES.find((c) => c.code === data.countryCode)?.dial ?? DEFAULT_COUNTRY.dial
+      const digits = data.phone.replace(/[^0-9]/g, "")
+      const fullPhone = `${dial}${digits}`
       const targetWeight = computeTarget(data)
-      const user: User = {
-        id: `u_${Date.now()}`,
-        nameEn: data.name,
-        email: "",  // filled from the signed-in auth user below
+
+      const finalUser: User = {
+        id: auth.user.id,
+        nameEn: data.name.trim(),
+        email: auth.user.email ?? "",
+        phone: fullPhone,
         age: data.age,
         gender: data.gender,
         heightCm: data.heightCm,
@@ -218,50 +272,102 @@ function AIAnalysisStep({ data }: { data: any }) {
         ),
         createdAt: new Date().toISOString(),
       }
-      const supabase = createClient()
-      supabase.auth.getUser().then(async ({ data: auth }) => {
-        const finalUser = { ...user, id: auth.user?.id || user.id, email: auth.user?.email || user.email }
-        setUser(finalUser)
-        markIntroSeen()
-        localStorage.setItem("loverDietUser", JSON.stringify(finalUser))
-        if (auth.user) await upsertProfile(auth.user.id, finalUser).catch(() => {})
+
+      // Persist to Supabase. This is the critical call — do NOT swallow errors here.
+      const ok = await upsertProfile(auth.user.id, finalUser)
+      if (!ok) throw new Error("Could not save your profile. Please retry.")
+
+      // Update client store + local mirror.
+      setUser(finalUser)
+      markIntroSeen()
+      try { localStorage.setItem("loverDietUser", JSON.stringify(finalUser)) } catch { /* quota */ }
+      // Clear the onboarding draft — we're done with it.
+      try { localStorage.removeItem("ldc_onboarding_draft") } catch { /* ignore */ }
+
+      onSuccess()
+
+      // Hard navigation avoids any client-cached RSC payload from before the
+      // profile was complete. The server will now render /dashboard freshly
+      // with the up-to-date profile.
+      if (typeof window !== "undefined") {
+        window.location.href = "/dashboard"
+      } else {
         router.push("/dashboard")
-      })
-    }, 4000)
-    return () => clearTimeout(timer)
-  }, [router, data, setUser, markIntroSeen])
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Unknown error"
+      console.error("[onboarding] finalize failed", e)
+      setErrorMsg(msg)
+      setStatus("error")
+    }
+  }
+
+  useEffect(() => {
+    run()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attempts])
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <div className="relative mb-6">
-        <div className="absolute -inset-4 rounded-full bg-emerald-400/20 blur-xl animate-pulse" />
-        <Sparkles className="relative mx-auto h-16 w-16 text-emerald-600 animate-bounce" />
-      </div>
-      <h2 className="text-2xl font-bold text-neutral-900">{t(locale, "AI Analysis", "تحليل بالذكاء الاصطناعي")}</h2>
-      <p className="mt-2 text-sm text-neutral-500">
-        {t(locale, "Computing your personalized diet plan...", "نحسب خطتك الغذائية المخصصة...")}
-      </p>
-      <div className="mt-6 w-full max-w-xs h-2 rounded-full bg-emerald-100 overflow-hidden">
-        <div className="h-full bg-emerald-500 animate-pulse rounded-full" style={{ width: '60%' }} />
-      </div>
+      {status === "saving" ? (
+        <>
+          <div className="relative mb-6">
+            <div className="absolute -inset-4 rounded-full bg-emerald-400/20 blur-xl animate-pulse" />
+            <Sparkles className="relative mx-auto h-16 w-16 text-emerald-600 animate-bounce" />
+          </div>
+          <h2 className="text-2xl font-bold text-neutral-900">
+            {t(locale, "Building your plan…", "نجهّز خطتك…")}
+          </h2>
+          <p className="mt-2 text-sm text-neutral-500 max-w-xs">
+            {t(locale,
+              "Saving your profile and computing your personalized targets.",
+              "نحفظ ملفك ونحسب أهدافك المخصصة.")}
+          </p>
+          <div className="mt-6 w-full max-w-xs h-2 rounded-full bg-emerald-100 overflow-hidden">
+            <div className="h-full bg-emerald-500 rounded-full animate-pulse" style={{ width: '75%' }} />
+          </div>
+          <p className="mt-4 text-xs text-neutral-400">
+            {t(locale, "This usually takes a few seconds.", "عادةً ما يستغرق هذا بضع ثوانٍ.")}
+          </p>
+        </>
+      ) : (
+        <>
+          <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+            <AlertCircle className="size-8" />
+          </div>
+          <h2 className="text-xl font-bold text-neutral-900">
+            {t(locale, "We could not save your profile", "تعذّر حفظ ملفك")}
+          </h2>
+          <p className="mt-2 text-sm text-neutral-500 max-w-sm">
+            {errorMsg || t(locale, "Please try again.", "يرجى المحاولة مرة أخرى.")}
+          </p>
+          <button
+            type="button"
+            onClick={() => setAttempts((n) => n + 1)}
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white hover:bg-emerald-700"
+          >
+            <RefreshCw className="size-4" />
+            {t(locale, "Try again", "أعد المحاولة")}
+          </button>
+        </>
+      )}
     </div>
   )
 }
 
+// ============================================================================
+// PreviewPanel — decorative left column (unchanged)
+// ============================================================================
 function PreviewPanel({
   data,
-  bmi,
   step,
 }: {
-  data: { name: string; heightCm: number; weightKg: number; gender: Gender; goal: GoalType; age: number; activity: ActivityLevel }
-  bmi: number
+  data: OnboardingData
   step: number
 }) {
   const { locale } = useLocale()
-  void bmi
   return (
     <div className="relative hidden overflow-hidden lg:block">
-      {/* Mint nature scene (inspired by reference) */}
       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" aria-hidden>
         <defs>
           <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
@@ -283,15 +389,10 @@ function PreviewPanel({
           </linearGradient>
         </defs>
         <rect width="600" height="900" fill="url(#sky)" />
-        {/* sun */}
         <circle cx="430" cy="170" r="46" fill="#f4fff0" opacity="0.7" />
-        {/* far hills */}
         <path d="M0 430 Q150 360 300 410 T600 380 L600 900 L0 900 Z" fill="url(#hill1)" opacity="0.85" />
-        {/* mid hills */}
         <path d="M0 560 Q170 470 340 540 T600 510 L600 900 L0 900 Z" fill="url(#hill2)" opacity="0.95" />
-        {/* near hills */}
         <path d="M0 700 Q200 620 400 690 T600 660 L600 900 L0 900 Z" fill="url(#hill3)" />
-        {/* trees */}
         {[ [70,640],[120,665],[500,560],[540,585],[300,600] ].map(([x,y],i)=>(
           <g key={i} transform={`translate(${x} ${y})`} fill="#0f3b30" opacity="0.85">
             <polygon points="0,0 14,34 -14,34" />
@@ -299,11 +400,7 @@ function PreviewPanel({
             <rect x="-3" y="56" width="6" height="14" fill="#0c2f26" />
           </g>
         ))}
-        {/* birds */}
-        <path d="M180 150 q10 -8 20 0 q10 -8 20 0" stroke="#0f3b30" strokeWidth="2.5" fill="none" opacity="0.5" />
-        <path d="M240 180 q8 -6 16 0 q8 -6 16 0" stroke="#0f3b30" strokeWidth="2" fill="none" opacity="0.4" />
       </svg>
-
       <div className="relative z-10 flex h-full min-h-screen flex-col items-center justify-center p-10 text-center">
         <p className="text-3xl font-extrabold tracking-[0.4em] text-[#0f3b30] drop-shadow-sm">
           {t(locale, "WELCOME", "أهلاً بك")}
@@ -329,14 +426,16 @@ function PreviewPanel({
   )
 }
 
-// === Steps ===
+// ============================================================================
+// Individual steps
+// ============================================================================
 
 function NameStep({
   data,
   update,
 }: {
-  data: { name: string; gender: Gender }
-  update: (k: "name" | "gender", v: string) => void
+  data: OnboardingData
+  update: (k: keyof OnboardingData, v: string | Gender) => void
 }) {
   const { locale } = useLocale()
   const genders: { value: Gender; en: string; ar: string; icon: string }[] = [
@@ -356,7 +455,6 @@ function NameStep({
         className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3.5 text-base text-neutral-900 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
         autoFocus
       />
-
       <p className="mt-6 mb-2 text-sm font-semibold text-neutral-700">
         {t(locale, "You are", "أنت")}
       </p>
@@ -385,12 +483,56 @@ function NameStep({
   )
 }
 
+function PhoneStep({
+  data,
+  update,
+}: {
+  data: OnboardingData
+  update: (k: keyof OnboardingData, v: string) => void
+}) {
+  const { locale } = useLocale()
+  return (
+    <StepFrame
+      title={t(locale, "What's your phone number?", "ما رقم هاتفك؟")}
+      subtitle={t(locale, "So our team can reach you about your plan and orders.", "لنتمكن من التواصل معك بخصوص خطتك وطلباتك.")}
+    >
+      <div className="flex gap-2">
+        <select
+          value={data.countryCode}
+          onChange={(e) => update("countryCode", e.target.value)}
+          aria-label={t(locale, "Country", "الدولة")}
+          className="shrink-0 rounded-xl border border-neutral-200 bg-white px-2 py-3 text-sm text-neutral-900 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+        >
+          {COUNTRIES.map((c) => (
+            <option key={c.code} value={c.code}>{c.flag} {c.dial}</option>
+          ))}
+        </select>
+        <div className="relative flex-1">
+          <Phone className="absolute inset-y-0 start-3 my-auto size-4 text-neutral-400 pointer-events-none" />
+          <input
+            type="tel"
+            inputMode="numeric"
+            value={data.phone}
+            onChange={(e) => update("phone", e.target.value.replace(/[^0-9]/g, ""))}
+            placeholder={t(locale, "5x xxx xxxx", "5x xxx xxxx")}
+            autoFocus
+            className="w-full rounded-xl border border-neutral-200 bg-white ps-9 pe-4 py-3.5 text-base text-neutral-900 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
+          />
+        </div>
+      </div>
+      <p className="mt-3 text-xs text-neutral-400">
+        {t(locale, "Digits only. We'll never share your number.", "أرقام فقط. لن نشارك رقمك.")}
+      </p>
+    </StepFrame>
+  )
+}
+
 function AgeStep({
   data,
   update,
 }: {
-  data: { age: number }
-  update: <K extends "age">(k: K, v: (typeof data)[K]) => void
+  data: OnboardingData
+  update: <K extends keyof OnboardingData>(k: K, v: OnboardingData[K]) => void
 }) {
   const { locale } = useLocale()
   return (
@@ -414,8 +556,8 @@ function HeightStep({
   data,
   update,
 }: {
-  data: { heightCm: number }
-  update: <K extends "heightCm">(k: K, v: (typeof data)[K]) => void
+  data: OnboardingData
+  update: <K extends keyof OnboardingData>(k: K, v: OnboardingData[K]) => void
 }) {
   const { locale } = useLocale()
   return (
@@ -439,8 +581,8 @@ function WeightStep({
   data,
   update,
 }: {
-  data: { weightKg: number }
-  update: <K extends "weightKg">(k: K, v: (typeof data)[K]) => void
+  data: OnboardingData
+  update: <K extends keyof OnboardingData>(k: K, v: OnboardingData[K]) => void
 }) {
   const { locale } = useLocale()
   return (
@@ -464,8 +606,8 @@ function GoalStep({
   data,
   update,
 }: {
-  data: { goal: GoalType }
-  update: <K extends "goal">(k: K, v: (typeof data)[K]) => void
+  data: OnboardingData
+  update: <K extends keyof OnboardingData>(k: K, v: OnboardingData[K]) => void
 }) {
   const { locale } = useLocale()
   return (
@@ -492,9 +634,7 @@ function GoalStep({
               <div className="flex-1">
                 <p className="font-semibold text-neutral-900">{locale === "ar" ? goalCopy[g].ar : goalCopy[g].en}</p>
               </div>
-              {active && (
-                <Check className="size-5 text-emerald-600" />
-              )}
+              {active && <Check className="size-5 text-emerald-600" />}
             </button>
           )
         })}
@@ -507,8 +647,8 @@ function ActivityStep({
   data,
   update,
 }: {
-  data: { activity: ActivityLevel }
-  update: <K extends "activity">(k: K, v: (typeof data)[K]) => void
+  data: OnboardingData
+  update: <K extends keyof OnboardingData>(k: K, v: OnboardingData[K]) => void
 }) {
   const { locale } = useLocale()
   return (
@@ -548,7 +688,7 @@ function ReviewStep({
   data,
   bmi,
 }: {
-  data: { name: string; age: number; gender: Gender; heightCm: number; weightKg: number; goal: GoalType; activity: ActivityLevel }
+  data: OnboardingData
   bmi: number
 }) {
   const { locale } = useLocale()
@@ -648,7 +788,6 @@ function ValueSlider({
 
   return (
     <div className="space-y-6">
-      {/* Big editable value */}
       <div className="flex items-end justify-center gap-2">
         <input
           type="number"
@@ -665,8 +804,6 @@ function ValueSlider({
         />
         <span className="mb-3 text-xl font-semibold text-emerald-600">{unit}</span>
       </div>
-
-      {/* Slider with fill + thumb */}
       <div className="relative px-1">
         <div className="relative h-3 w-full rounded-full bg-neutral-100">
           <div
@@ -693,8 +830,6 @@ function ValueSlider({
           aria-label={unit}
         />
       </div>
-
-      {/* Min / Max labels + fine-tune buttons */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-neutral-400">{min} {unit}</span>
         <div className="flex items-center gap-2">

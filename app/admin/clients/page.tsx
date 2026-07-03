@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { Search, ChevronLeft, Download, MessageCircle, Ban, Trash2, Loader2 } from "lucide-react"
 import { AdminShell } from "@/components/admin/admin-shell"
-import { adminClients } from "@/lib/admin-mock"
 import { adminFetchClients, adminDeleteClient, adminToggleBlock } from "@/lib/supabase/db"
+import type { AdminClient } from "@/lib/types"
 import { WHATSAPP_NUMBER } from "@/lib/site"
 import { useToast } from "@/components/ui/toast"
 import { cn } from "@/lib/utils"
@@ -16,7 +16,7 @@ export default function AdminClientsPage() {
   const { locale } = useLocale()
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState<"all" | "active" | "trial" | "inactive">("all")
-  const [rows, setRows] = useState<typeof adminClients>([])
+  const [rows, setRows] = useState<AdminClient[]>([])
   const { notify } = useToast()
   const [busy, setBusy] = useState<string | null>(null)
 

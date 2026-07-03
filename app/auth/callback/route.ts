@@ -2,27 +2,40 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-// OAuth + magic-link + recovery callback.
-// Called by Supabase after any auth redirect. We exchange the `code`
-// for a full session (writes the cookie so subsequent requests are
-// authenticated) and then redirect the user to the appropriate page.
+// OAuth-only callback (Google, and future providers).
 //
-//   Recovery flow  -> /reset-password  (user picks a new password)
-//   OAuth / others -> `next` param, defaults to /dashboard
+// The client kicks OAuth off via supabase.auth.signInWithOAuth() which stores
+// a PKCE code_verifier cookie in the browser. The user then bounces through
+// the provider (Google) and returns HERE with a ?code=<code>. We exchange it
+// via supabase.auth.exchangeCodeForSession(code), which verifies the code
+// using the PKCE verifier cookie that the browser sent along with this request.
+//
+// Email flows (recovery, magic link, email confirmation) go through
+// /auth/confirm which uses verifyOtp — a stateless flow that does NOT
+// require a PKCE verifier and therefore works across browsers.
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const code = url.searchParams.get('code')
-  const type = url.searchParams.get('type') || ''
-  const next = url.searchParams.get('next') || '/dashboard'
+  const rawNext = url.searchParams.get('next') || '/dashboard'
 
-  // Same-site relative-path guard on the `next` param.
-  const safeNext = /^\/(?!\/)[A-Za-z0-9\-._~!$&'()*+,;=:@/%]*$/.test(next) ? next : '/dashboard'
+  const safeNext = /^\/(?!\/)[A-Za-z0-9\-._~!$&'()*+,;=:@/%]*$/.test(rawNext) ? rawNext : '/dashboard'
+
+  // Provider-side error propagation.
+  const providerError = url.searchParams.get('error_description') || url.searchParams.get('error')
+  if (providerError) {
+    return NextResponse.redirect(
+      new URL(`/sign-in?error=${encodeURIComponent(providerError)}`, url),
+    )
+  }
 
   if (!code) {
-    // Nothing to exchange — surface the error back to sign-in.
-    const errorDesc = url.searchParams.get('error_description') || 'Missing code'
-    return NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(errorDesc)}`, url))
+    return NextResponse.redirect(
+      new URL(`/sign-in?error=${encodeURIComponent('Missing OAuth code.')}`, url),
+    )
   }
+
+  // Prepare the response FIRST so session cookies land on the browser.
+  const response = NextResponse.redirect(new URL(safeNext, url))
 
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -30,11 +43,14 @@ export async function GET(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
-        getAll() { return cookieStore.getAll() },
+        getAll() {
+          return cookieStore.getAll()
+        },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options),
-          )
+          cookiesToSet.forEach(({ name, value, options }) => {
+            try { cookieStore.set(name, value, options) } catch { /* ignore */ }
+            response.cookies.set(name, value, options)
+          })
         },
       },
     },
@@ -42,15 +58,14 @@ export async function GET(request: NextRequest) {
 
   const { error } = await supabase.auth.exchangeCodeForSession(code)
   if (error) {
-    return NextResponse.redirect(
-      new URL(`/sign-in?error=${encodeURIComponent(error.message)}`, url),
-    )
+    // Most common case here: user clicked an OAuth callback from a different
+    // browser than the one that started the flow. That's not fixable — surface
+    // it with a friendly message.
+    const msg = /pkce/i.test(error.message)
+      ? 'Please start the sign-in from the same browser where you clicked "Continue with Google".'
+      : error.message
+    return NextResponse.redirect(new URL(`/sign-in?error=${encodeURIComponent(msg)}`, url))
   }
 
-  // Recovery: force the user through the "set new password" screen.
-  if (type === 'recovery') {
-    return NextResponse.redirect(new URL('/reset-password', url))
-  }
-
-  return NextResponse.redirect(new URL(safeNext, url))
+  return response
 }

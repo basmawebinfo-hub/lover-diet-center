@@ -8,9 +8,23 @@ import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
 
 // User lands here after clicking the recovery link in their email.
-// By this point /auth/callback has already exchanged the recovery `code`
-// for a session, so supabase.auth.getUser() returns the correct user.
-// We simply capture a new password and call updateUser.
+//
+// There are TWO possible flows depending on how the Supabase recovery email
+// template is configured:
+//
+// 1. TokenHash flow (recommended, requires /auth/confirm):
+//    The user lands here with a real session cookie already set by
+//    supabase.auth.verifyOtp() in /auth/confirm/route.ts. supabase.auth.getUser()
+//    returns the correct user, and we can call updateUser({ password }).
+//
+// 2. Fragment flow (legacy Supabase default template):
+//    The email link goes to <project>.supabase.co/auth/v1/verify which then
+//    redirects here with #access_token=…&refresh_token=…&type=recovery in the
+//    URL fragment. The client Supabase SDK's detectSessionInUrl picks it up
+//    when it initializes, but with @supabase/ssr's createBrowserClient the
+//    behaviour differs. We manually parse the fragment and call setSession().
+//
+// Either way, we then just check auth state and let the user pick a password.
 export default function ResetPasswordPage() {
   const { locale } = useLocale()
   const router = useRouter()
@@ -23,13 +37,56 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
 
-  // Verify the recovery session is live.
+  // Boot: handle the fragment case, then verify session.
   useEffect(() => {
     const supabase = createClient()
+
+    // 1) If the URL fragment carries recovery tokens (legacy flow), consume them.
+    //    Fragment sample: #access_token=xxx&refresh_token=yyy&expires_in=3600&type=recovery
+    let usedFragment = false
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.startsWith('#')
+        ? window.location.hash.slice(1)
+        : window.location.hash
+      const params = new URLSearchParams(hash)
+      const access_token = params.get('access_token')
+      const refresh_token = params.get('refresh_token')
+      const type = params.get('type')
+      if (access_token && refresh_token && type === 'recovery') {
+        usedFragment = true
+        supabase.auth
+          .setSession({ access_token, refresh_token })
+          .then(({ data }) => {
+            setAuthed(!!data.user)
+            setChecking(false)
+            // Clear the sensitive tokens from the URL so they aren't logged anywhere.
+            window.history.replaceState(null, '', window.location.pathname)
+          })
+          .catch(() => {
+            setAuthed(false)
+            setChecking(false)
+          })
+      }
+    }
+
+    if (usedFragment) return
+
+    // 2) Normal path: /auth/confirm has already set the session cookie via
+    //    verifyOtp(). Just read it.
     supabase.auth.getUser().then(({ data }) => {
       setAuthed(!!data.user)
       setChecking(false)
     })
+
+    // 3) Also listen for PASSWORD_RECOVERY events (belt-and-suspenders for the
+    //    fragment flow when setSession fires later).
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        setAuthed(true)
+        setChecking(false)
+      }
+    })
+    return () => { sub.subscription.unsubscribe() }
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {

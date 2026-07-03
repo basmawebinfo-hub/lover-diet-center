@@ -215,21 +215,13 @@ export function SegmentedHeader() {
               <ArrowRight className="size-3.5 rtl:rotate-180" />
             </Link>
           ) : (
-            <>
-              <Link
-                href="/sign-in"
-                className="rounded-full px-4 py-2 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
-              >
-                {t(locale, 'Sign in', 'تسجيل الدخول')}
-              </Link>
-              <Link
-                href="/sign-up"
-                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
-              >
-                {t(locale, 'Get Started', 'ابدأ الآن')}
-                <ArrowRight className="size-3.5 rtl:rotate-180" />
-              </Link>
-            </>
+            <Link
+              href="/sign-in"
+              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+            >
+              {t(locale, 'Sign in', 'تسجيل الدخول')}
+              <ArrowRight className="size-3.5 rtl:rotate-180" />
+            </Link>
           )}
         </div>
 
@@ -288,11 +280,11 @@ export function SegmentedHeader() {
           {/* Mobile CTA buttons */}
           <div className="mt-3 flex flex-col gap-2 border-t border-neutral-100 pt-4">
             <Link
-              href={isAuthed ? "/dashboard" : "/sign-up"}
+              href={isAuthed ? "/dashboard" : "/sign-in"}
               onClick={closeMenu}
               className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-lime-400 to-lime-500 py-3.5 text-base font-bold text-lime-950 shadow-sm"
             >
-              {isAuthed ? t(locale, 'Go to Dashboard', 'الذهاب إلى لوحة التحكم') : t(locale, 'Get Started Free', 'ابدأ مجاناً')}
+              {isAuthed ? t(locale, 'Go to Dashboard', 'الذهاب إلى لوحة التحكم') : t(locale, 'Sign in', 'تسجيل الدخول')}
               <ArrowRight className="size-4 rtl:rotate-180" />
             </Link>
             <a
@@ -309,11 +301,11 @@ export function SegmentedHeader() {
             </a>
             {!isAuthed && (
             <Link
-              href="/sign-in"
+              href="/sign-up"
               onClick={closeMenu}
               className="text-center py-2 text-sm font-medium text-neutral-500"
             >
-              {t(locale, 'Already have an account? Sign in', 'لديك حساب بالفعل؟ سجّل الدخول')}
+              {t(locale, "Don't have an account? Create one", 'ليس لديك حساب؟ أنشئ حساباً')}
             </Link>
             )}
           </div>

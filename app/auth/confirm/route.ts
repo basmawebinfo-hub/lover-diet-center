@@ -2,30 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { EmailOtpType } from '@supabase/supabase-js'
+import { RECOVERY_COOKIE } from '@/lib/supabase/middleware'
 
-// Email-link callback used by ALL Supabase email OTP flows:
-//   - Password recovery
-//   - Magic link (passwordless sign-in)
-//   - Email confirmation on sign-up
+// Email OTP callback (recovery / magic link / signup confirm / email change).
 //
-// This handler is the officially-recommended pattern from
-// https://supabase.com/docs/guides/auth/server-side/nextjs
+// verifyOtp() is stateless — no PKCE verifier required, so it works even
+// across browsers / phones. The template must use {{ .TokenHash }} and
+// point at this route with ?token_hash=<h>&type=<t>&next=<path>.
 //
-// The email link produced by Supabase (when the template uses
-// {{ .TokenHash }}) points HERE with:
-//   ?token_hash=<hash>&type=recovery&next=/reset-password
-//
-// verifyOtp() is STATELESS - it does NOT need a PKCE verifier, so it
-// works across browsers, incognito windows, and phone -> laptop switches.
-// It creates a real session cookie server-side which the browser then
-// carries into /reset-password.
+// Security note: when type='recovery' we IGNORE the next param and force
+// the user to /reset-password. Otherwise a tampered link like
+// ?next=/admin could send a recovering user straight into the admin
+// panel with a temporary session. The middleware also enforces this by
+// checking the RECOVERY_COOKIE marker.
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const token_hash = url.searchParams.get('token_hash')
   const type = url.searchParams.get('type') as EmailOtpType | null
   const rawNext = url.searchParams.get('next') || '/dashboard'
-
-  // Same-site relative-path guard on the next param.
   const safeNext = /^\/(?!\/)[A-Za-z0-9\-._~!$&'()*+,;=:@/%]*$/.test(rawNext) ? rawNext : '/dashboard'
 
   if (!token_hash || !type) {
@@ -34,10 +28,11 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  // Prepare the response FIRST so cookie writes made during verifyOtp()
-  // actually land in the browser. Passing this response to createServerClient
-  // (via setAll) is the Next.js App Router pattern.
-  const response = NextResponse.redirect(new URL(safeNext, url))
+  // For recovery flows, ALWAYS land on /reset-password — regardless of what
+  // "next" says. Attackers could otherwise craft a link with next=/admin.
+  const finalNext = type === 'recovery' ? '/reset-password' : safeNext
+
+  const response = NextResponse.redirect(new URL(finalNext, url))
 
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -49,10 +44,8 @@ export async function GET(request: NextRequest) {
           return cookieStore.getAll()
         },
         setAll(cookiesToSet) {
-          // Write session cookies onto BOTH the outgoing response (browser)
-          // and the request-scoped store (so this handler's next call sees them).
           cookiesToSet.forEach(({ name, value, options }) => {
-            try { cookieStore.set(name, value, options) } catch { /* readonly in some contexts */ }
+            try { cookieStore.set(name, value, options) } catch { /* ignore */ }
             response.cookies.set(name, value, options)
           })
         },
@@ -67,6 +60,20 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  // Session cookie has been written to `response`. Redirect the user.
+  // Mark this as a recovery session so middleware sandboxes it.
+  // The cookie is short-lived (10 minutes is plenty for the reset flow),
+  // sameSite=lax, httpOnly=false (we don't rely on it for security — the
+  // Supabase session itself is httpOnly. This cookie is purely a UX
+  // marker read by middleware.)
+  if (type === 'recovery') {
+    response.cookies.set(RECOVERY_COOKIE, '1', {
+      httpOnly: false,
+      sameSite: 'lax',
+      secure: true,
+      path: '/',
+      maxAge: 10 * 60, // 10 minutes
+    })
+  }
+
   return response
 }

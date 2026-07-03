@@ -19,12 +19,20 @@ export function SignIn2() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [flash, setFlash] = useState('')
 
   // Surface auth-callback errors (e.g. Google OAuth failure, expired recovery link).
+  // Also handle success flashes: ?reset=1 -> password was just reset.
   useEffect(() => {
     const e = searchParams.get('error')
     if (e) setError(decodeURIComponent(e))
-  }, [searchParams])
+    if (searchParams.get('reset') === '1') {
+      setFlash(t(locale, 'Password updated. Please sign in with your new password.', 'تم تحديث كلمة المرور. يرجى تسجيل الدخول بكلمة المرور الجديدة.'))
+    }
+    if (searchParams.get('signedout') === '1') {
+      setFlash(t(locale, 'You have been signed out.', 'تم تسجيل خروجك.'))
+    }
+  }, [searchParams, locale])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -96,6 +104,11 @@ export function SignIn2() {
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
             {error}
+          </div>
+        )}
+        {flash && !error && (
+          <div className="bg-lime-50 border border-lime-200 text-lime-800 text-sm px-4 py-3 rounded-xl">
+            {flash}
           </div>
         )}
 

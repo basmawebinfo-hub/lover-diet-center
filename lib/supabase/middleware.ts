@@ -6,26 +6,32 @@ import { isOnboardingComplete } from '@/lib/onboarding'
 // Route classification
 // ----------------------------------------------------------------------------
 
-// Requires an authenticated session.
 const AUTH_REQUIRED = ['/dashboard', '/admin', '/onboarding']
-
-// Additionally requires role='admin'.
 const ADMIN_ONLY = ['/admin']
-
-// Sign-in / sign-up pages — authenticated users get bounced away.
 const GUEST_ONLY = ['/sign-in', '/sign-up']
-
-// Recovery-session sandbox: user in a recovery session is ONLY permitted to
-// visit these paths. Anything else redirects to /reset-password so they set
-// a new password before doing anything else.
 const RECOVERY_SANDBOX = ['/reset-password', '/auth/confirm', '/auth/callback']
 
 // ----------------------------------------------------------------------------
-// Recovery-session cookie
+// Session policy
 // ----------------------------------------------------------------------------
-// /auth/confirm sets this when type=recovery. /reset-password clears it after
-// the password is successfully updated.
+// Idle timeout: sign the user out after 60 minutes without any request.
+// Absolute lifetime: 7 days from first authenticated request.
+const IDLE_MAX_MS = 60 * 60 * 1000       // 60 minutes
+const ABSOLUTE_MAX_MS = 7 * 24 * 60 * 60 * 1000  // 7 days
+
+// Cookie names
 export const RECOVERY_COOKIE = 'ldc_recovery_session'
+const LAST_ACTIVITY_COOKIE = 'ldc_last_activity'
+const SESSION_START_COOKIE = 'ldc_session_start'
+
+// Runtime environment: production uses secure cookies.
+const cookieBase = (maxAgeSec: number) => ({
+  httpOnly: false,
+  sameSite: 'lax' as const,
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+  maxAge: maxAgeSec,
+})
 
 function matches(path: string, prefixes: readonly string[]): boolean {
   return prefixes.some((r) => path === r || path.startsWith(r + '/'))
@@ -53,19 +59,15 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
-  // IMPORTANT: getUser() revalidates the token on every request.
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
+  const now = Date.now()
 
   const inRecovery = request.cookies.get(RECOVERY_COOKIE)?.value === '1'
 
   // ------------------------------------------------------------------------
   // Recovery-session sandbox
   // ------------------------------------------------------------------------
-  // A user who arrived via a password-recovery link has an authenticated
-  // Supabase session, but that session is provisional — they haven't proven
-  // they know a password yet. Confine them to /reset-password until they
-  // either finish setting a new password OR sign out.
   if (inRecovery && user) {
     if (!matches(pathname, RECOVERY_SANDBOX)) {
       return NextResponse.redirect(new URL('/reset-password', request.url))
@@ -73,12 +75,46 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
+  // ------------------------------------------------------------------------
+  // Session lifetime enforcement (BUG #3)
+  // Only enforced when the user IS authenticated. We check both idle and
+  // absolute lifetimes; whichever expires first wins.
+  // ------------------------------------------------------------------------
+  if (user) {
+    const lastActRaw = request.cookies.get(LAST_ACTIVITY_COOKIE)?.value
+    const sessStartRaw = request.cookies.get(SESSION_START_COOKIE)?.value
+    const lastAct = lastActRaw ? Number(lastActRaw) : NaN
+    const sessStart = sessStartRaw ? Number(sessStartRaw) : NaN
+
+    const idleExpired = Number.isFinite(lastAct) && (now - lastAct) > IDLE_MAX_MS
+    const absoluteExpired = Number.isFinite(sessStart) && (now - sessStart) > ABSOLUTE_MAX_MS
+
+    if (idleExpired || absoluteExpired) {
+      // Sign the user out server-side and clear tracking cookies.
+      await supabase.auth.signOut()
+      const url = new URL('/sign-in', request.url)
+      url.searchParams.set('signedout', '1')
+      const bounce = NextResponse.redirect(url)
+      bounce.cookies.delete(LAST_ACTIVITY_COOKIE)
+      bounce.cookies.delete(SESSION_START_COOKIE)
+      bounce.cookies.delete(RECOVERY_COOKIE)
+      return bounce
+    }
+
+    // Refresh activity marker on every authenticated hit.
+    response.cookies.set(LAST_ACTIVITY_COOKIE, String(now), cookieBase(IDLE_MAX_MS / 1000))
+    // Set the absolute-start marker exactly once per session.
+    if (!Number.isFinite(sessStart)) {
+      response.cookies.set(SESSION_START_COOKIE, String(now), cookieBase(ABSOLUTE_MAX_MS / 1000))
+    }
+  }
+
   const authRequired = matches(pathname, AUTH_REQUIRED)
   const adminOnly = matches(pathname, ADMIN_ONLY)
   const guestOnly = matches(pathname, GUEST_ONLY)
 
   // ------------------------------------------------------------------------
-  // Not signed in trying to hit a protected route
+  // Unauthenticated hit on a protected route
   // ------------------------------------------------------------------------
   if (authRequired && !user) {
     const url = new URL('/sign-in', request.url)
@@ -87,7 +123,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // ------------------------------------------------------------------------
-  // Signed in — look up profile for role + onboarding checks
+  // Signed in — profile-aware routing
   // ------------------------------------------------------------------------
   if (user && (authRequired || guestOnly)) {
     const { data: profile } = await supabase
@@ -100,32 +136,23 @@ export async function updateSession(request: NextRequest) {
     const blocked = profile?.blocked === true
     const onboarded = isOnboardingComplete(profile)
 
-    // Blocked accounts: park them on /blocked and nowhere else.
     if (blocked && pathname !== '/blocked') {
       return NextResponse.redirect(new URL('/blocked', request.url))
     }
 
-    // Admins get a pass on onboarding — they created the admin account
-    // via the admin creation flow, not the public sign-up.
-    // /admin still requires role='admin'.
     if (adminOnly && !isAdmin) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 
-    // /dashboard requires onboarding for non-admins.
     if (matches(pathname, ['/dashboard']) && !isAdmin && !onboarded) {
       return NextResponse.redirect(new URL('/onboarding', request.url))
     }
 
-    // Already onboarded: sign-in / sign-up bounce you home.
     if (guestOnly) {
-      // Admins go to /admin; onboarded users go to /dashboard;
-      // partially-onboarded non-admins go to /onboarding.
       const target = isAdmin ? '/admin' : (onboarded ? '/dashboard' : '/onboarding')
       return NextResponse.redirect(new URL(target, request.url))
     }
 
-    // /onboarding when the user is already onboarded — bounce to their real home.
     if (matches(pathname, ['/onboarding']) && (isAdmin || onboarded)) {
       return NextResponse.redirect(new URL(isAdmin ? '/admin' : '/dashboard', request.url))
     }

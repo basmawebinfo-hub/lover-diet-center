@@ -39,7 +39,7 @@ export type Product = {
   descriptionEn: string
   descriptionAr: string
   imageUrl: string
-  price: number // AED
+  price: number // stored in the canonical currency configured in lib/currency.tsx (USD base)
   category: "snack" | "supplement" | "meal" | "drink"
   inStock: boolean
 }
@@ -153,4 +153,51 @@ export type AvatarConfig = {
   skinTone: string
   hairStyle: "short" | "medium" | "long" | "bald"
   clothing: "casual" | "sport" | "formal"
+}
+
+// ============================================================================
+// Admin panel types
+// ----------------------------------------------------------------------------
+// These describe the shapes returned by the admin-facing DB helpers in
+// lib/supabase/db.ts. They used to live in lib/admin-mock.ts alongside seed
+// data; the seed data has been removed, and the types are canonical here so
+// admin pages don't import "mock" modules in production.
+// ============================================================================
+
+export type AdminClient = {
+  id: string
+  nameEn: string
+  nameAr: string
+  email: string
+  phone: string
+  gender: "male" | "female"
+  age: number
+  startWeightKg: number
+  currentWeightKg: number
+  targetWeightKg: number
+  goal: string
+  plan: string
+  status: "active" | "inactive" | "trial"
+  joinedAt: string
+  lastActive: string
+}
+
+export type AdminOrder = {
+  id: string
+  client: string
+  date: string
+  items: number
+  total: number
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
+}
+
+export type AdminSession = {
+  id: string
+  client: string
+  type: string
+  typeAr: string
+  doctor: string
+  date: string
+  time: string
+  status: "scheduled" | "completed" | "cancelled"
 }

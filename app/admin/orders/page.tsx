@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { AdminShell } from "@/components/admin/admin-shell"
-import { adminOrders, type AdminOrder } from "@/lib/admin-mock"
+import type { AdminOrder } from "@/lib/types"
 import { adminFetchOrders, adminUpdateOrderStatus } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -11,7 +11,7 @@ const FLOW: AdminOrder["status"][] = ["pending","processing","shipped","delivere
 
 export default function AdminOrdersPage() {
   const { locale } = useLocale()
-  const [orders, setOrders] = useState<typeof adminOrders>([])
+  const [orders, setOrders] = useState<AdminOrder[]>([])
   const [filter, setFilter] = useState<"all" | AdminOrder["status"]>("all")
 
   useEffect(() => {

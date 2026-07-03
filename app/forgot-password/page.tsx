@@ -6,6 +6,21 @@ import { ArrowLeft, Mail, Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
 
+// Password recovery entry point.
+//
+// The email itself is sent by Supabase Auth (via the SMTP settings in
+// the Supabase Dashboard — Resend in production). We do not send the
+// email ourselves. What THIS component does:
+//
+//   1. Ask Supabase to enqueue a recovery email for `email`.
+//   2. Log the exact SDK response to the browser console for diagnostics.
+//   3. Surface any real error to the user (e.g. rate limit hit, SMTP
+//      misconfigured, domain not verified).
+//   4. On success, show the "check inbox" screen.
+//
+// The link Supabase includes in the email is built from the SiteURL
+// and the "Reset Password" template (which must use {{ .TokenHash }},
+// pointing at /auth/confirm — updated separately in the dashboard).
 export default function ForgotPasswordPage() {
   const { locale } = useLocale()
   const [email, setEmail] = useState('')
@@ -17,29 +32,36 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setError('')
     setLoading(true)
+    const normalized = email.trim().toLowerCase()
+
     try {
       const supabase = createClient()
-      // The recovery email will land the user on /auth/confirm, which calls
-      // verifyOtp() server-side (stateless, cross-browser). After success, it
-      // redirects the user to /reset-password where they can pick a new password.
-      //
-      // IMPORTANT: for this to work, Supabase Dashboard -> Authentication ->
-      // Email Templates -> "Reset password" must use the {{ .TokenHash }}
-      // template variable, NOT {{ .ConfirmationURL }}. The redirect_to below
-      // is the base URL Supabase will resolve {{ .SiteURL }} against.
       const origin = typeof window !== 'undefined' ? window.location.origin : ''
-      const { error: err } = await supabase.auth.resetPasswordForEmail(
-        email.trim().toLowerCase(),
-        {
-          // We point at /auth/confirm and pass next=/reset-password so after
-          // the OTP is verified, the user lands on the password form.
-          redirectTo: `${origin}/auth/confirm?next=/reset-password`,
-        },
+
+      // Log the attempt so admins can trace failures in the browser console.
+      console.log('[forgot-password] requesting recovery email for', normalized)
+
+      const { data, error: err } = await supabase.auth.resetPasswordForEmail(
+        normalized,
+        { redirectTo: `${origin}/auth/confirm?next=/reset-password` },
       )
-      if (err) { setError(err.message); return }
+
+      if (err) {
+        // Real errors we might see:
+        //   - "For security purposes, you can only request this once every 60 seconds"
+        //   - "Error sending recovery email" (SMTP misconfigured / domain unverified)
+        //   - "Email rate limit exceeded"
+        console.error('[forgot-password] resetPasswordForEmail failed', err)
+        setError(err.message)
+        return
+      }
+
+      console.log('[forgot-password] enqueued OK', data)
       setSent(true)
-    } catch {
-      setError(t(locale, 'Something went wrong. Please try again.', 'حدث خطأ ما. حاول مرة أخرى.'))
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e)
+      console.error('[forgot-password] unexpected exception', e)
+      setError(msg || t(locale, 'Something went wrong. Please try again.', 'حدث خطأ ما. حاول مرة أخرى.'))
     } finally {
       setLoading(false)
     }
@@ -60,14 +82,18 @@ export default function ForgotPasswordPage() {
         {sent ? (
           <div className="mt-6 flex items-start gap-3 rounded-2xl bg-lime-50 p-4 text-sm text-lime-800">
             <Check className="mt-0.5 size-5 shrink-0 text-lime-600" />
-            <p>{t(locale, 'If an account exists for', 'إذا كان هناك حساب مرتبط بـ')} <strong>{email}</strong>{t(locale, ', a reset link is on its way. Check your inbox.', '، فإن رابط إعادة التعيين في طريقه إليك. تحقّق من بريدك.')}</p>
+            <p>{t(locale, 'If an account exists for', 'إذا كان هناك حساب مرتبط بـ')} <strong>{email}</strong>{t(locale, ', a reset link is on its way. Check your inbox (and spam folder).', '، فإن رابط إعادة التعيين في طريقه إليك. تحقّق من بريدك (والرسائل غير المرغوبة).')}</p>
           </div>
         ) : (
           <>
             <p className="mt-3 text-sm text-neutral-500">
               {t(locale, "Enter the email linked to your account and we'll send you a reset link.", 'أدخل البريد المرتبط بحسابك وسنرسل لك رابط إعادة التعيين.')}
             </p>
-            {error && <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+            {error && (
+              <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">
+                {error}
+              </p>
+            )}
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-neutral-700">{t(locale, 'Email', 'البريد الإلكتروني')}</label>

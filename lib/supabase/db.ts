@@ -125,6 +125,8 @@ export async function fetchProfile(userId: string): Promise<(Partial<User> & { r
 
 export async function upsertProfile(userId: string, u: Partial<User>): Promise<boolean> {
   const supabase = createClient()
+
+  // Map the camelCase payload to snake_case columns.
   const row: Record<string, unknown> = { id: userId }
   if (u.nameEn !== undefined) row.name_en = u.nameEn
   if (u.nameAr !== undefined) row.name_ar = u.nameAr
@@ -139,8 +141,61 @@ export async function upsertProfile(userId: string, u: Partial<User>): Promise<b
   if (u.goal !== undefined) row.goal = u.goal
   if (u.targetWeightKg !== undefined) row.target_weight = u.targetWeightKg
   if (u.activityLevel !== undefined) row.activity_level = u.activityLevel
+
+  // Auto-flip onboarding_completed to true when the MERGED profile (existing DB
+  // row + this payload) satisfies the completeness heuristic. We only flip
+  // false->true here; we never revert true->false (an admin-editable escape
+  // hatch would live in a separate function).
+  try {
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('name_en, phone, age, gender, height_cm, current_weight, goal, activity_level, onboarding_completed, role')
+      .eq('id', userId)
+      .single()
+    const existingRow = (existing as Record<string, unknown> | null) ?? {}
+    const alreadyDone = existingRow.onboarding_completed === true
+    const merged = { ...existingRow, ...row } as Record<string, unknown>
+    const passes =
+      String(merged.name_en ?? '').trim().length >= 2 &&
+      String(merged.phone ?? '').replace(/[^0-9]/g, '').length >= 6 &&
+      Number(merged.age) >= 12 &&
+      typeof merged.gender === 'string' && (merged.gender as string).length > 0 &&
+      Number(merged.height_cm) >= 100 &&
+      Number(merged.current_weight) >= 30 &&
+      typeof merged.goal === 'string' && (merged.goal as string).length > 0 &&
+      typeof merged.activity_level === 'string' && (merged.activity_level as string).length > 0
+    if (passes && !alreadyDone) {
+      row.onboarding_completed = true
+    }
+    // Admins are exempt from the onboarding gate — keep them true regardless.
+    if (existingRow.role === 'admin' && !alreadyDone) {
+      row.onboarding_completed = true
+    }
+  } catch {
+    // If the pre-fetch failed we still attempt the upsert; the DB column
+    // stays at whatever it was.
+  }
+
   const { error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' })
   return !error
+}
+
+// Explicit setter used by the onboarding finalize step as a belt-and-suspenders
+// on top of upsertProfile's heuristic. Also usable by an admin unblock flow.
+export async function setOnboardingCompleted(
+  userId: string,
+  done: boolean = true,
+): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('profiles')
+    .update({ onboarding_completed: done })
+    .eq('id', userId)
+  if (error) {
+    console.error('[setOnboardingCompleted] failed', error)
+    return false
+  }
+  return true
 }
 
 export async function isAdmin(userId: string): Promise<boolean> {

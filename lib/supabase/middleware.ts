@@ -1,11 +1,15 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { isOnboardingComplete } from '@/lib/onboarding'
+import {
+  ONBOARDING_SELECT_MIN,
+  ONBOARDING_SELECT_FULL,
+  isOnboardedByColumn,
+  isOnboardingComplete,
+} from '@/lib/onboarding'
 
 // ----------------------------------------------------------------------------
 // Route classification
 // ----------------------------------------------------------------------------
-
 const AUTH_REQUIRED = ['/dashboard', '/admin', '/onboarding']
 const ADMIN_ONLY = ['/admin']
 const GUEST_ONLY = ['/sign-in', '/sign-up']
@@ -14,17 +18,14 @@ const RECOVERY_SANDBOX = ['/reset-password', '/auth/confirm', '/auth/callback']
 // ----------------------------------------------------------------------------
 // Session policy
 // ----------------------------------------------------------------------------
-// Idle timeout: sign the user out after 60 minutes without any request.
-// Absolute lifetime: 7 days from first authenticated request.
-const IDLE_MAX_MS = 60 * 60 * 1000       // 60 minutes
-const ABSOLUTE_MAX_MS = 7 * 24 * 60 * 60 * 1000  // 7 days
+const IDLE_MAX_MS = 60 * 60 * 1000              // 60 minutes
+const ABSOLUTE_MAX_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 
 // Cookie names
 export const RECOVERY_COOKIE = 'ldc_recovery_session'
 const LAST_ACTIVITY_COOKIE = 'ldc_last_activity'
 const SESSION_START_COOKIE = 'ldc_session_start'
 
-// Runtime environment: production uses secure cookies.
 const cookieBase = (maxAgeSec: number) => ({
   httpOnly: false,
   sameSite: 'lax' as const,
@@ -65,9 +66,7 @@ export async function updateSession(request: NextRequest) {
 
   const inRecovery = request.cookies.get(RECOVERY_COOKIE)?.value === '1'
 
-  // ------------------------------------------------------------------------
   // Recovery-session sandbox
-  // ------------------------------------------------------------------------
   if (inRecovery && user) {
     if (!matches(pathname, RECOVERY_SANDBOX)) {
       return NextResponse.redirect(new URL('/reset-password', request.url))
@@ -75,11 +74,7 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
-  // ------------------------------------------------------------------------
-  // Session lifetime enforcement (BUG #3)
-  // Only enforced when the user IS authenticated. We check both idle and
-  // absolute lifetimes; whichever expires first wins.
-  // ------------------------------------------------------------------------
+  // Session lifetime enforcement
   if (user) {
     const lastActRaw = request.cookies.get(LAST_ACTIVITY_COOKIE)?.value
     const sessStartRaw = request.cookies.get(SESSION_START_COOKIE)?.value
@@ -90,7 +85,6 @@ export async function updateSession(request: NextRequest) {
     const absoluteExpired = Number.isFinite(sessStart) && (now - sessStart) > ABSOLUTE_MAX_MS
 
     if (idleExpired || absoluteExpired) {
-      // Sign the user out server-side and clear tracking cookies.
       await supabase.auth.signOut()
       const url = new URL('/sign-in', request.url)
       url.searchParams.set('signedout', '1')
@@ -101,9 +95,7 @@ export async function updateSession(request: NextRequest) {
       return bounce
     }
 
-    // Refresh activity marker on every authenticated hit.
     response.cookies.set(LAST_ACTIVITY_COOKIE, String(now), cookieBase(IDLE_MAX_MS / 1000))
-    // Set the absolute-start marker exactly once per session.
     if (!Number.isFinite(sessStart)) {
       response.cookies.set(SESSION_START_COOKIE, String(now), cookieBase(ABSOLUTE_MAX_MS / 1000))
     }
@@ -113,9 +105,7 @@ export async function updateSession(request: NextRequest) {
   const adminOnly = matches(pathname, ADMIN_ONLY)
   const guestOnly = matches(pathname, GUEST_ONLY)
 
-  // ------------------------------------------------------------------------
-  // Unauthenticated hit on a protected route
-  // ------------------------------------------------------------------------
+  // Unauth hit on a protected route
   if (authRequired && !user) {
     const url = new URL('/sign-in', request.url)
     url.searchParams.set('redirect', pathname)
@@ -124,17 +114,44 @@ export async function updateSession(request: NextRequest) {
 
   // ------------------------------------------------------------------------
   // Signed in — profile-aware routing
+  //
+  // Strategy: fetch the SLIM projection first (role, blocked,
+  // onboarding_completed). That's the only data we need for the fast path.
+  // Only when the column is falsy AND we still need to gate the dashboard
+  // do we run a second SELECT for the legacy field-presence fallback —
+  // this handles pre-migration profiles where the column is false but
+  // the row actually has all fields populated.
   // ------------------------------------------------------------------------
   if (user && (authRequired || guestOnly)) {
-    const { data: profile } = await supabase
+    const { data: slim } = await supabase
       .from('profiles')
-      .select('name_en, phone, age, gender, height_cm, current_weight, goal, activity_level, role, blocked')
+      .select(ONBOARDING_SELECT_MIN)
       .eq('id', user.id)
       .single()
 
+    const profile = slim as { role?: string; blocked?: boolean; onboarding_completed?: boolean } | null
+
     const isAdmin = profile?.role === 'admin'
     const blocked = profile?.blocked === true
-    const onboarded = isOnboardingComplete(profile)
+    let onboarded = isOnboardedByColumn(profile)
+
+    // Legacy fallback: only pay for a second SELECT if the column is false
+    // AND we're about to make an onboarding decision.
+    const needsLegacyCheck =
+      !onboarded &&
+      !isAdmin &&
+      (matches(pathname, ['/dashboard']) || guestOnly)
+
+    if (needsLegacyCheck) {
+      const { data: full } = await supabase
+        .from('profiles')
+        .select(ONBOARDING_SELECT_FULL)
+        .eq('id', user.id)
+        .single()
+      if (isOnboardingComplete(full as never)) {
+        onboarded = true
+      }
+    }
 
     if (blocked && pathname !== '/blocked') {
       return NextResponse.redirect(new URL('/blocked', request.url))

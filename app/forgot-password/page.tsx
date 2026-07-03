@@ -19,13 +19,23 @@ export default function ForgotPasswordPage() {
     setLoading(true)
     try {
       const supabase = createClient()
-      // Redirect through /auth/callback so the recovery code is exchanged for
-      // a session server-side, then land the user on /reset-password where
-      // they can pick a new password.
+      // The recovery email will land the user on /auth/confirm, which calls
+      // verifyOtp() server-side (stateless, cross-browser). After success, it
+      // redirects the user to /reset-password where they can pick a new password.
+      //
+      // IMPORTANT: for this to work, Supabase Dashboard -> Authentication ->
+      // Email Templates -> "Reset password" must use the {{ .TokenHash }}
+      // template variable, NOT {{ .ConfirmationURL }}. The redirect_to below
+      // is the base URL Supabase will resolve {{ .SiteURL }} against.
       const origin = typeof window !== 'undefined' ? window.location.origin : ''
-      const { error: err } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-        redirectTo: `${origin}/auth/callback?type=recovery`,
-      })
+      const { error: err } = await supabase.auth.resetPasswordForEmail(
+        email.trim().toLowerCase(),
+        {
+          // We point at /auth/confirm and pass next=/reset-password so after
+          // the OTP is verified, the user lands on the password form.
+          redirectTo: `${origin}/auth/confirm?next=/reset-password`,
+        },
+      )
       if (err) { setError(err.message); return }
       setSent(true)
     } catch {

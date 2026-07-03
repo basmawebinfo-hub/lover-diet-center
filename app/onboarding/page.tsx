@@ -10,7 +10,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useLocale, t } from "@/lib/locale"
 import { createClient } from "@/lib/supabase/client"
-import { upsertProfile } from "@/lib/supabase/db"
+import { upsertProfile, setOnboardingCompleted } from "@/lib/supabase/db"
 import { COUNTRIES, DEFAULT_COUNTRY } from "@/lib/countries"
 
 // 9 steps: Name -> Phone -> Age -> Height -> Weight -> Goal -> Activity -> Review -> Finalize
@@ -276,6 +276,14 @@ function FinalizeStep({ data, onSuccess }: { data: OnboardingData; onSuccess: ()
       // Persist to Supabase. This is the critical call — do NOT swallow errors here.
       const ok = await upsertProfile(auth.user.id, finalUser)
       if (!ok) throw new Error("Could not save your profile. Please retry.")
+
+      // Belt-and-suspenders on top of upsertProfile's completeness heuristic:
+      // explicitly flip profiles.onboarding_completed to true. If this second
+      // call fails we still consider onboarding done — the boolean is a
+      // fast-path index, not the security gate.
+      await setOnboardingCompleted(auth.user.id, true).catch((e) => {
+        console.warn("[onboarding] setOnboardingCompleted failed (non-fatal)", e)
+      })
 
       // Update client store + local mirror.
       setUser(finalUser)

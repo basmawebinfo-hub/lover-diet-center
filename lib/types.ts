@@ -88,6 +88,8 @@ export type OrderItem = {
   nameAr: string
   quantity: number
   price: number // USD — snapshot of the product price at time of purchase (see lib/currency.tsx)
+  imageUrl?: string // Snapshot of the product image URL at fetch time (added PR #20 for Orders History).
+  inStock?: boolean // Whether the product is currently buyable (added PR #20 for Reorder).
 }
 
 export type Order = {
@@ -200,4 +202,34 @@ export type AdminSession = {
   date: string
   time: string
   status: "scheduled" | "completed" | "cancelled"
+}
+
+// ============================================================================
+// Notifications (since PR #21)
+// ----------------------------------------------------------------------------
+// Rows come from the `notifications` DB table.
+// - kind is whitelisted in the DB CHECK constraint to
+//   'order' | 'plan' | 'session' | 'system' | 'payment' | 'reminder'.
+// - read_at is the DB flag: NULL = unread, timestamp = read.
+// - href is an optional deep-link the user can follow from the list.
+// ============================================================================
+
+export type NotificationKind =
+  | "order"
+  | "plan"
+  | "session"
+  | "system"
+  | "payment"
+  | "reminder"
+
+export type UserNotification = {
+  id: string
+  kind: NotificationKind
+  titleEn: string
+  titleAr: string
+  bodyEn: string
+  bodyAr: string
+  href?: string
+  readAt?: string
+  createdAt: string
 }

@@ -615,18 +615,33 @@ export async function adminUpdateSessionStatus(sessionId: string, status: string
 // ---- User's own orders (full Order shape) ----
 export async function fetchUserOrders(userId: string): Promise<import('@/lib/types').Order[]> {
   const supabase = createClient()
+  // NOTE: selecting product_id explicitly (in addition to the joined product) so
+  // the Orders History page can wire the Reorder button — it needs the id to add
+  // back to the cart. We also pull image_url and in_stock so the details view
+  // can show a thumbnail and mark items that are no longer buyable.
   const { data, error } = await supabase
     .from('orders')
-    .select('id, total, status, created_at, order_items(quantity, price_at_purchase, products(name_en, name_ar))')
+    .select('id, total, status, created_at, order_items(quantity, price_at_purchase, product_id, products(id, name_en, name_ar, image_url, in_stock))')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
   if (error || !data) return []
   return data.map((r: Record<string, unknown>) => {
     const items = ((r.order_items as Record<string, unknown>[]) ?? []).map((it) => {
-      const prod = it.products as { name_en?: string; name_ar?: string } | null
+      const prod = it.products as { id?: string; name_en?: string; name_ar?: string; image_url?: string; in_stock?: boolean } | null
       const qty = Number(it.quantity) || 1
       const price = Number(it.price_at_purchase) || 0
-      return { productId: '', nameEn: prod?.name_en ?? '', nameAr: prod?.name_ar ?? prod?.name_en ?? '', quantity: qty, price }
+      // Prefer explicit order_items.product_id (survives even if the product row
+      // was later deleted); fall back to the joined product's id.
+      const productId = (it.product_id as string) ?? prod?.id ?? ''
+      return {
+        productId,
+        nameEn: prod?.name_en ?? '',
+        nameAr: prod?.name_ar ?? prod?.name_en ?? '',
+        quantity: qty,
+        price,
+        imageUrl: prod?.image_url ?? '',
+        inStock: prod?.in_stock !== false,
+      }
     })
     const total = Number(r.total) || 0
     const subtotal = items.reduce((s, it) => s + it.price * it.quantity, 0)
@@ -976,3 +991,59 @@ export async function adminToggleBlock(userId: string, blocked: boolean): Promis
   const { error } = await supabase.from('profiles').update({ blocked }).eq('id', userId)
   return !error
 }
+
+// ============================================================================
+// Notifications (PR #21)
+// ----------------------------------------------------------------------------
+// RLS-scoped by user_id = auth.uid(); we also scope our queries to the caller's
+// userId as a belt-and-suspenders guard. Ordered by created_at DESC.
+// ============================================================================
+
+export async function fetchNotifications(
+  userId: string,
+): Promise<import('@/lib/types').UserNotification[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('id, kind, title_en, title_ar, body_en, body_ar, href, read_at, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(100)
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => ({
+    id: r.id as string,
+    kind: (r.kind as import('@/lib/types').NotificationKind) ?? 'system',
+    titleEn: (r.title_en as string) ?? '',
+    titleAr: (r.title_ar as string) ?? '',
+    bodyEn: (r.body_en as string) ?? '',
+    bodyAr: (r.body_ar as string) ?? '',
+    href: (r.href as string) ?? undefined,
+    readAt: (r.read_at as string) ?? undefined,
+    createdAt: (r.created_at as string) ?? new Date().toISOString(),
+  }))
+}
+
+export async function markNotificationRead(
+  userId: string,
+  notificationId: string,
+): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', notificationId)
+    .eq('user_id', userId)
+    .is('read_at', null) // only flip unread -> read; keep the original timestamp otherwise
+  return !error
+}
+
+export async function markAllNotificationsRead(userId: string): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .is('read_at', null)
+  return !error
+}
+

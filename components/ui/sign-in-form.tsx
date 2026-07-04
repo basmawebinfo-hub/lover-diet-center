@@ -132,6 +132,7 @@ export function SignIn2() {
           <label className="block text-sm font-semibold text-neutral-700 mb-1.5">{t(locale, 'Email', 'البريد الإلكتروني')}</label>
           <input
             type="email"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -149,6 +150,7 @@ export function SignIn2() {
           </div>
           <input
             type="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

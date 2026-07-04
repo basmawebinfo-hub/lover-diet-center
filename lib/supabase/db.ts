@@ -1241,6 +1241,14 @@ export async function adminFetchAuditAdmins(): Promise<{ id: string; name: strin
 // ─────────────────────────────────────────────────────────────
 // Payment helpers (Phase 5 · Payments)
 // ─────────────────────────────────────────────────────────────
+//
+// Every helper accepts an optional `supabase` client. Client code (browser
+// pages) can omit it and the helper will build the browser client itself.
+// Server route handlers MUST pass the ssr client so the session cookie is
+// respected (otherwise the browser createClient() is unauth'd and RLS blocks
+// the row read).
+
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type OrderRow = {
   id: string
@@ -1278,12 +1286,14 @@ export type OrderRow = {
   }>
 }
 
-/** Fetch a single order (with items) for a specific user. RLS-scoped. */
+/** Fetch a single order (with items) for a specific user. RLS-scoped.
+ *  Pass `client` from the ssr server client on server routes. */
 export async function fetchOrderForUser(
   userId: string,
-  orderId: string
+  orderId: string,
+  client?: SupabaseClient
 ): Promise<OrderRow | null> {
-  const supabase = createClient()
+  const supabase = client ?? createClient()
   const { data, error } = await supabase
     .from("orders")
     .select(
@@ -1347,13 +1357,15 @@ export type ShippingAddress = {
   postalCode?: string
 }
 
-/** Persist a shipping address on an order. RLS-scoped. */
+/** Persist a shipping address on an order. RLS-scoped.
+ *  Pass `client` from the ssr server client on server routes. */
 export async function saveOrderShippingAddress(
   userId: string,
   orderId: string,
-  addr: ShippingAddress
+  addr: ShippingAddress,
+  client?: SupabaseClient
 ): Promise<boolean> {
-  const supabase = createClient()
+  const supabase = client ?? createClient()
   const { error } = await supabase
     .from("orders")
     .update({
@@ -1372,14 +1384,16 @@ export async function saveOrderShippingAddress(
   return !error
 }
 
-/** Mark that a payment attempt has been initiated. */
+/** Mark that a payment attempt has been initiated.
+ *  Pass `client` from the ssr server client on server routes. */
 export async function markOrderPaymentInitiated(
   userId: string,
   orderId: string,
   provider: string,
-  paymentIntentId: string
+  paymentIntentId: string,
+  client?: SupabaseClient
 ): Promise<boolean> {
-  const supabase = createClient()
+  const supabase = client ?? createClient()
   const { error } = await supabase
     .from("orders")
     .update({

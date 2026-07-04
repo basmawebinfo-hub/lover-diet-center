@@ -112,7 +112,7 @@ export async function POST(req: Request) {
     )
   }
 
-  const order = await fetchOrderForUser(user.id, body.orderId)
+  const order = await fetchOrderForUser(user.id, body.orderId, supabase)
   if (!order) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 })
   }
@@ -126,7 +126,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Order already paid" }, { status: 409 })
   }
 
-  const saved = await saveOrderShippingAddress(user.id, body.orderId, body.shipping)
+  const saved = await saveOrderShippingAddress(user.id, body.orderId, body.shipping, supabase)
   if (!saved) {
     return NextResponse.json(
       { error: "Failed to save shipping address" },
@@ -164,7 +164,8 @@ export async function POST(req: Request) {
       user.id,
       order.id,
       "paymob",
-      String(paymobOrderId)
+      String(paymobOrderId),
+      supabase
     )
 
     return NextResponse.json({

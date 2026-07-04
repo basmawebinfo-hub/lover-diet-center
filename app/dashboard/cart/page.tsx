@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useState, type MouseEvent } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
-  Trash2, Minus, Plus, CreditCard, Check, ShoppingBag, MessageCircle, Loader2, AlertCircle, ShieldCheck, Package,
+  Trash2, Minus, Plus, CreditCard, ShoppingBag, Loader2, AlertCircle, ShieldCheck, Package,
 } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import Link from "next/link"
@@ -15,9 +15,7 @@ import { createClient } from "@/lib/supabase/client"
 import { placeOrder } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
-import { WHATSAPP_NUMBER } from "@/lib/site"
 import { useCurrency, CURRENCIES } from "@/lib/currency"
-import { validatePhone, phoneErrorMessage } from "@/lib/phone"
 
 // Flat-rate shipping in USD (the canonical currency across the app + DB).
 // If shipping ever becomes variable (weight-based, address-based, etc.), move
@@ -32,8 +30,6 @@ export default function CartPage() {
   const { notify } = useToast()
   const user = state.user
 
-  const [checkedOut, setCheckedOut] = useState(false)
-  const [lastOrder, setLastOrder] = useState<Order | null>(null)
   const [placing, setPlacing] = useState(false)
   const [confirmClear, setConfirmClear] = useState(false)
 
@@ -130,19 +126,6 @@ export default function CartPage() {
     )
   }
   if (!user) return null
-
-  // ==== Success screen ====
-  if (checkedOut) {
-    return (
-      <CheckoutSuccess
-        order={lastOrder}
-        userName={user.nameEn ?? ""}
-        userPhone={user.phone ?? ""}
-        locale={locale}
-        format={format}
-      />
-    )
-  }
 
   // ==== Loading skeleton (products haven't hydrated yet) ====
   if (!state.hydrated) {
@@ -480,145 +463,6 @@ function EmptyCart({ locale }: { locale: "en" | "ar" }) {
         </Link>
       </div>
     </div>
-  )
-}
-
-// ============================================================================
-// CheckoutSuccess — separate component so it stays lean and readable
-// ============================================================================
-function CheckoutSuccess({
-  order, userName, userPhone, locale, format,
-}: {
-  order: Order | null
-  userName: string
-  userPhone: string
-  locale: "en" | "ar"
-  format: (usd: number) => string
-}) {
-  const { notify } = useToast()
-  const [phone, setPhone] = useState(userPhone)
-  const [phoneError, setPhoneError] = useState<string | null>(null)
-
-  const orderNo = order ? order.id.slice(-6).toUpperCase() : ""
-  // Inline (no useMemo) — recomputed on each render, cheap.
-  const validation = validatePhone(phone)
-  const contactLine = validation.valid ? validation.e164 : phone
-  const waMsg = order
-    ? [
-        `${t(locale, "New order", "طلب جديد")} #${orderNo}`,
-        ...order.items.map((it) => `• ${locale === "ar" ? it.nameAr : it.nameEn} ×${it.quantity}`),
-        `${t(locale, "Total", "الإجمالي")}: ${format(order.total)}`,
-        `${t(locale, "Customer", "العميل")}: ${userName} ${contactLine}`,
-      ].join("\n")
-    : ""
-  const waHref = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)}`
-
-  function tryNotifyClinic(e: MouseEvent<HTMLAnchorElement>) {
-    const res = validatePhone(phone)
-    if (!res.valid) {
-      e.preventDefault()
-      setPhoneError(phoneErrorMessage(res, locale))
-      notify(
-        t(locale, "Please enter a valid phone number first.", "من فضلك أدخل رقم هاتف صالحًا أولاً."),
-        "error",
-      )
-      return
-    }
-    setPhoneError(null)
-  }
-
-  return (
-    <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-md py-8 sm:py-12">
-        <div className="rounded-3xl border border-neutral-100 bg-white p-6 text-center shadow-sm sm:p-7">
-          <div className="mx-auto mb-5 flex size-20 items-center justify-center rounded-full bg-emerald-100 animate-pop">
-            <Check className="size-10 text-emerald-700" />
-          </div>
-          <h1 className="text-2xl font-extrabold text-neutral-900">
-            {t(locale, "Order confirmed!", "تم تأكيد طلبك!")}
-          </h1>
-          {orderNo && (
-            <p className="mt-1 text-sm font-semibold text-emerald-600">
-              {t(locale, "Order", "رقم الطلب")} #{orderNo}
-            </p>
-          )}
-          <p className="mt-2 text-sm text-neutral-500">
-            {t(
-              locale,
-              "We'll deliver within 2-3 days. We'll contact you to confirm.",
-              "سنوصل طلبك خلال 2-3 أيام. سنتواصل معك للتأكيد.",
-            )}
-          </p>
-
-          {order && (
-            <div className="mt-5 space-y-2 rounded-2xl border border-neutral-100 bg-neutral-50/60 p-4 text-start">
-              {order.items.map((it, i) => (
-                <div key={i} className="flex justify-between text-sm text-neutral-700">
-                  <span className="line-clamp-1">
-                    {locale === "ar" ? it.nameAr : it.nameEn} × {it.quantity}
-                  </span>
-                  <span className="ms-2 shrink-0 font-semibold">{format(it.price * it.quantity)}</span>
-                </div>
-              ))}
-              <div className="mt-2 flex justify-between border-t border-neutral-200 pt-2 text-base font-bold text-neutral-900">
-                <span>{t(locale, "Total", "الإجمالي")}</span>
-                <span className="text-emerald-700">{format(order.total)}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Phone-verify block for the WhatsApp notify step */}
-          <div className="mt-5 rounded-2xl border border-neutral-100 bg-white p-4 text-start">
-            <label htmlFor="wa-phone" className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              {t(locale, "Your phone (for delivery)", "رقم هاتفك (للتوصيل)")}
-            </label>
-            <input
-              id="wa-phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => { setPhone(e.target.value); setPhoneError(null) }}
-              placeholder="+971 5X XXX XXXX"
-              className={cn(
-                "mt-1 w-full rounded-xl border bg-white px-3 py-2 text-sm text-neutral-900 outline-none focus:ring-2",
-                phoneError
-                  ? "border-red-200 focus:border-red-400 focus:ring-red-100"
-                  : "border-neutral-200 focus:border-emerald-400 focus:ring-emerald-100",
-              )}
-            />
-            {phoneError && (
-              <p className="mt-1 text-xs font-semibold text-red-600">{phoneError}</p>
-            )}
-          </div>
-
-          <a
-            href={waHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={tryNotifyClinic}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white transition hover:bg-emerald-700"
-          >
-            <MessageCircle className="size-4" />
-            {t(locale, "Notify clinic on WhatsApp", "أبلغ العيادة عبر واتساب")}
-          </a>
-          <div className="mt-3 flex gap-3">
-            <Link
-              href="/dashboard/orders"
-              className="flex-1 rounded-xl border border-neutral-200 py-2.5 text-sm font-bold text-neutral-700 hover:bg-neutral-50"
-            >
-              {t(locale, "My orders", "طلباتي")}
-            </Link>
-            <Link
-              href="/dashboard/products"
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-neutral-200 py-2.5 text-sm font-bold text-neutral-700 hover:bg-neutral-50"
-            >
-              <ShoppingBag className="size-4" />
-              {t(locale, "Keep shopping", "تابع التسوق")}
-            </Link>
-          </div>
-        </div>
-      </div>
-    </DashboardShell>
   )
 }
 

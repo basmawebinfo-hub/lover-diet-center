@@ -170,6 +170,67 @@ export default function AdminClientDetailPage() {
 
         {weightLogs.length > 0 ? <WeightChart logs={weightLogs} goalKg={target} /> : <div className="rounded-3xl border border-neutral-100 bg-white p-6 text-center text-sm text-neutral-400 shadow-sm">{t(locale, "No weight logs yet.", "لا توجد سجلات وزن بعد.")}</div>}
 
+        {/* Health Information (PR #35) — shown only if any of the optional
+            fields has a value. All fields are user-declared, non-medical
+            data; no filters / search / analytics on these in v1. */}
+        {(() => {
+          const cityVal = (get("city") as string) || ""
+          const medArr = (p?.medical_conditions as string[] | null) ?? []
+          const alrArr = (p?.allergies as string[] | null) ?? []
+          const foodArr = (p?.food_preferences as string[] | null) ?? []
+          const termsAt = (get("terms_accepted_at") as string) || ""
+          const anyValue = !!(cityVal || medArr.length || alrArr.length || foodArr.length || termsAt)
+          if (!anyValue) return null
+          const Chip = ({ v }: { v: string }) => (
+            <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">{v}</span>
+          )
+          return (
+            <div className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
+              <h2 className="mb-4 text-lg font-bold text-neutral-900">
+                {t(locale, "Health Information", "المعلومات الصحية")}
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {cityVal && (
+                  <div>
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">{t(locale, "City", "المدينة")}</p>
+                    <p className="text-sm text-neutral-800">{cityVal}</p>
+                  </div>
+                )}
+                {termsAt && (
+                  <div>
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">{t(locale, "Terms accepted", "قبول الشروط")}</p>
+                    <p className="text-sm text-neutral-800">{new Date(termsAt).toLocaleString(locale === "ar" ? "ar" : "en")}</p>
+                  </div>
+                )}
+                {medArr.length > 0 && (
+                  <div className="sm:col-span-2">
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">{t(locale, "Medical conditions", "الحالات المرضية")}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {medArr.map((v, i) => <Chip key={`m-${i}`} v={v} />)}
+                    </div>
+                  </div>
+                )}
+                {alrArr.length > 0 && (
+                  <div className="sm:col-span-2">
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">{t(locale, "Allergies", "الحساسية")}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {alrArr.map((v, i) => <Chip key={`a-${i}`} v={v} />)}
+                    </div>
+                  </div>
+                )}
+                {foodArr.length > 0 && (
+                  <div className="sm:col-span-2">
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-neutral-500">{t(locale, "Food preferences", "التفضيلات الغذائية")}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {foodArr.map((v, i) => <Chip key={`f-${i}`} v={v} />)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })()}
+
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Personal info */}
           <div className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">

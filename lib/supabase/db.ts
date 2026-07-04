@@ -57,6 +57,97 @@ export async function insertWeightLog(userId: string, log: WeightLog): Promise<v
   })
 }
 
+/**
+ * Update an existing weight log row by id. The id is trusted only after the
+ * RLS policy checks user_id = auth.uid(); we still scope the update to the
+ * caller's userId as a belt-and-suspenders guard so a stolen client cannot
+ * update another user's rows even if RLS were misconfigured.
+ * If the patch includes `date`, we first delete any other same-day row for
+ * this user to preserve the (user_id, date) uniqueness the app relies on.
+ */
+export async function updateWeightLog(
+  userId: string,
+  logId: string,
+  patch: { weightKg?: number; bodyFatPct?: number | null; note?: string | null; date?: string },
+): Promise<boolean> {
+  const supabase = createClient()
+  const row: Record<string, unknown> = {}
+  if (patch.weightKg !== undefined) row.weight_kg = patch.weightKg
+  if (patch.bodyFatPct !== undefined) row.body_fat_pct = patch.bodyFatPct
+  if (patch.note !== undefined) row.note = patch.note
+  if (patch.date !== undefined) {
+    // Delete any other same-day row for this user so the (user_id, date)
+    // uniqueness invariant survives the date change.
+    await supabase
+      .from('weight_logs')
+      .delete()
+      .eq('user_id', userId)
+      .eq('date', patch.date)
+      .neq('id', logId)
+    row.date = patch.date
+  }
+  if (Object.keys(row).length === 0) return true
+  const { error } = await supabase
+    .from('weight_logs')
+    .update(row)
+    .eq('id', logId)
+    .eq('user_id', userId)
+  return !error
+}
+
+/**
+ * Delete a weight log row by id, scoped to the caller's userId.
+ */
+export async function deleteWeightLog(userId: string, logId: string): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('weight_logs')
+    .delete()
+    .eq('id', logId)
+    .eq('user_id', userId)
+  return !error
+}
+
+/**
+ * Upsert-per-day helper: write a weight_logs row for `date` (default: today),
+ * replacing any existing same-day row. Returns the persisted WeightLog with
+ * its DB-generated id so the caller can put it straight into local state.
+ *
+ * The (user_id, date) invariant is enforced by delete-then-insert, matching
+ * the pattern used by insertWeightLog.
+ */
+export async function upsertWeightLogForDate(
+  userId: string,
+  weightKg: number,
+  date?: string,
+  bodyFatPct?: number | null,
+  note?: string | null,
+): Promise<WeightLog | null> {
+  const supabase = createClient()
+  const d = date ?? new Date().toISOString().slice(0, 10)
+  await supabase.from('weight_logs').delete().eq('user_id', userId).eq('date', d)
+  const { data, error } = await supabase
+    .from('weight_logs')
+    .insert({
+      user_id: userId,
+      date: d,
+      weight_kg: weightKg,
+      body_fat_pct: bodyFatPct ?? null,
+      note: note ?? null,
+    })
+    .select('id, date, weight_kg, body_fat_pct, note')
+    .single()
+  if (error || !data) return null
+  const r = data as Record<string, unknown>
+  return {
+    id: r.id as string,
+    date: r.date as string,
+    weightKg: Number(r.weight_kg),
+    bodyFatPct: r.body_fat_pct != null ? Number(r.body_fat_pct) : undefined,
+    note: (r.note as string) ?? undefined,
+  }
+}
+
 export async function fetchWeightLogs(userId: string): Promise<WeightLog[]> {
   const supabase = createClient()
   const { data, error } = await supabase
@@ -142,17 +233,20 @@ export async function upsertProfile(userId: string, u: Partial<User>): Promise<b
   if (u.targetWeightKg !== undefined) row.target_weight = u.targetWeightKg
   if (u.activityLevel !== undefined) row.activity_level = u.activityLevel
 
-  // Auto-flip onboarding_completed to true when the MERGED profile (existing DB
-  // row + this payload) satisfies the completeness heuristic. We only flip
-  // false->true here; we never revert true->false (an admin-editable escape
-  // hatch would live in a separate function).
+  // Fetch the existing row once — we use it for two things:
+  //   1) The onboarding_completed flip heuristic (completes false->true only).
+  //   2) The weight-log sync check (only insert a log when current_weight
+  //      actually changed).
+  // If the fetch fails, `existingRow` stays null and both checks fall back to
+  // conservative defaults (no false flip, always write the log).
+  let existingRow: Record<string, unknown> | null = null
   try {
     const { data: existing } = await supabase
       .from('profiles')
       .select('name_en, phone, age, gender, height_cm, current_weight, goal, activity_level, onboarding_completed, role')
       .eq('id', userId)
       .single()
-    const existingRow = (existing as Record<string, unknown> | null) ?? {}
+    existingRow = (existing as Record<string, unknown> | null) ?? {}
     const alreadyDone = existingRow.onboarding_completed === true
     const merged = { ...existingRow, ...row } as Record<string, unknown>
     const passes =
@@ -177,7 +271,32 @@ export async function upsertProfile(userId: string, u: Partial<User>): Promise<b
   }
 
   const { error } = await supabase.from('profiles').upsert(row, { onConflict: 'id' })
-  return !error
+  if (error) return false
+
+  // Sync rule (Phase 2 PR 2): profiles.current_weight is the "latest snapshot"
+  // and weight_logs is the "historical timeline". Any successful change to
+  // current_weight from Profile Settings (or anywhere else that calls
+  // upsertProfile) must also produce/update the same-day weight_logs row so
+  // the Weight Tracker and Settings never diverge.
+  //
+  // We only write a log when the payload actually included a new current
+  // weight AND that weight differs from what was in the row before. If the
+  // pre-fetch failed (existingRow === null), we conservatively still write
+  // the log so an unsynced state cannot silently persist.
+  if (u.currentWeightKg !== undefined) {
+    const prev = existingRow ? existingRow.current_weight : undefined
+    const changed = prev === undefined || Number(prev) !== Number(u.currentWeightKg)
+    if (changed) {
+      try {
+        await upsertWeightLogForDate(userId, Number(u.currentWeightKg))
+      } catch {
+        // Non-fatal: the profile write already succeeded. The next
+        // Settings save or Weight Tracker save will reconcile.
+      }
+    }
+  }
+
+  return true
 }
 
 // Explicit setter used by the onboarding finalize step as a belt-and-suspenders

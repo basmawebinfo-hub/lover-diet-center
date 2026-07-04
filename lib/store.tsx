@@ -23,8 +23,19 @@ import type {
   WaterLog,
   WeightLog,
 } from "./types"
+
+// A patch that widens WeightLog to accept null for the two nullable columns
+// (bodyFatPct, note), so the Weight Tracker can send "clear this value" through
+// the same reducer/DB path used for regular edits.
+export type WeightLogPatch = {
+  date?: string
+  weightKg?: number
+  bodyFatPct?: number | null
+  note?: string | null
+}
+
 import { createClient } from "@/lib/supabase/client"
-import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, fetchProfile, fetchWaterLogs, fetchProducts, fetchMeals, fetchUserOrders, fetchUserPlan } from "@/lib/supabase/db"
+import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, updateWeightLog, deleteWeightLog, fetchProfile, fetchWaterLogs, fetchProducts, fetchMeals, fetchUserOrders, fetchUserPlan } from "@/lib/supabase/db"
 
 
 type AppState = {
@@ -47,6 +58,8 @@ type Action =
   | { type: "HYDRATE"; payload: Omit<AppState, "hydrated"> }
   | { type: "SET_USER"; payload: User | null }
   | { type: "LOG_WEIGHT"; payload: WeightLog }
+  | { type: "UPDATE_WEIGHT_LOG"; payload: { id: string; patch: WeightLogPatch } }
+  | { type: "DELETE_WEIGHT_LOG"; payload: string }
   | { type: "ADD_TO_CART"; payload: { productId: string; quantity?: number } }
   | { type: "REMOVE_FROM_CART"; payload: string }
   | { type: "UPDATE_CART_QTY"; payload: { productId: string; quantity: number } }
@@ -102,6 +115,57 @@ function reducer(state: AppState, action: Action): AppState {
             currentWeightKg: action.payload.weightKg,
           }
         : state.user
+      return { ...state, weightLogs: next, user }
+    }
+    case "UPDATE_WEIGHT_LOG": {
+      // Merge the patch into the matching log. If the date changed, drop any
+      // existing same-day log for another id so we preserve one-per-day.
+      // Nulls in bodyFatPct/note mean "clear the value"; we normalise them to
+      // undefined so the state shape stays inside WeightLog.
+      const { id, patch } = action.payload
+      const target = state.weightLogs.find((l) => l.id === id)
+      if (!target) return state
+      const merged: WeightLog = {
+        ...target,
+        ...(patch.date !== undefined ? { date: patch.date } : {}),
+        ...(patch.weightKg !== undefined ? { weightKg: patch.weightKg } : {}),
+        ...(patch.bodyFatPct !== undefined
+          ? { bodyFatPct: patch.bodyFatPct === null ? undefined : patch.bodyFatPct }
+          : {}),
+        ...(patch.note !== undefined
+          ? { note: patch.note === null ? undefined : patch.note }
+          : {}),
+      }
+      const newDate = patch.date
+      const dateChanged = typeof newDate === "string" && newDate !== target.date
+      const collidingByDate = dateChanged
+        ? state.weightLogs.filter((l) => l.date !== newDate || l.id === id)
+        : state.weightLogs
+      const next = collidingByDate
+        .map((l) => (l.id === id ? merged : l))
+        .sort((a, b) => (a.date < b.date ? 1 : -1))
+      // If the edited entry is now the newest, mirror its weight onto user.currentWeightKg.
+      const newest: WeightLog | undefined = next[0]
+      const user =
+        state.user && newest && newest.id === merged.id
+          ? { ...state.user, currentWeightKg: newest.weightKg }
+          : state.user
+      return { ...state, weightLogs: next, user }
+    }
+    case "DELETE_WEIGHT_LOG": {
+      const removedId = action.payload
+      const priorNewestId: string | undefined = state.weightLogs[0]?.id
+      const wasNewest = priorNewestId === removedId
+      const next = state.weightLogs.filter((l) => l.id !== removedId)
+      // If we removed the most-recent log, snap user.currentWeightKg back to
+      // whatever the new most-recent log says. If we removed the LAST log
+      // entirely, leave currentWeightKg as-is (that value is the profile
+      // snapshot, not tied to log existence).
+      const newest: WeightLog | undefined = next[0]
+      const user =
+        state.user && wasNewest && newest
+          ? { ...state.user, currentWeightKg: newest.weightKg }
+          : state.user
       return { ...state, weightLogs: next, user }
     }
     case "ADD_TO_CART": {
@@ -177,7 +241,9 @@ function reducer(state: AppState, action: Action): AppState {
 type AppContextValue = {
   state: AppState
   setUser: (u: User | null) => void
-  logWeight: (log: WeightLog) => void
+  logWeight: (log: WeightLog) => Promise<boolean>
+  editWeight: (id: string, patch: WeightLogPatch) => Promise<boolean>
+  removeWeight: (id: string) => Promise<boolean>
   addToCart: (productId: string, quantity?: number) => void
   removeFromCart: (productId: string) => void
   updateCartQty: (productId: string, quantity: number) => void
@@ -353,13 +419,66 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setUser = useCallback((u: User | null) => dispatch({ type: "SET_USER", payload: u }), [])
   const logWeight = useCallback(
-    (log: WeightLog) => {
-      dispatch({ type: "LOG_WEIGHT", payload: log })
-      // Sync to Supabase if signed in (non-blocking)
+    async (log: WeightLog): Promise<boolean> => {
+      // Persist to Supabase FIRST when signed in, then reflect in local state.
+      // If the DB write fails, we still mirror locally so the UI is not stuck,
+      // but we return false so the caller can surface the error.
       const supabase = createClient()
-      supabase.auth.getUser().then(({ data }) => {
-        if (data.user) insertWeightLog(data.user.id, log).catch(() => {})
-      })
+      const { data } = await supabase.auth.getUser()
+      let ok = true
+      if (data.user) {
+        try {
+          await insertWeightLog(data.user.id, log)
+        } catch {
+          ok = false
+        }
+      }
+      dispatch({ type: "LOG_WEIGHT", payload: log })
+      return ok
+    },
+    []
+  )
+  const editWeight = useCallback(
+    async (id: string, patch: WeightLogPatch): Promise<boolean> => {
+      const supabase = createClient()
+      const { data } = await supabase.auth.getUser()
+      let ok = true
+      if (data.user) {
+        try {
+          const dbPatch: {
+            weightKg?: number
+            bodyFatPct?: number | null
+            note?: string | null
+            date?: string
+          } = {}
+          if (patch.weightKg !== undefined) dbPatch.weightKg = patch.weightKg
+          if (patch.bodyFatPct !== undefined) dbPatch.bodyFatPct = patch.bodyFatPct ?? null
+          if (patch.note !== undefined) dbPatch.note = patch.note ?? null
+          if (patch.date !== undefined) dbPatch.date = patch.date
+          ok = await updateWeightLog(data.user.id, id, dbPatch)
+        } catch {
+          ok = false
+        }
+      }
+      if (ok) dispatch({ type: "UPDATE_WEIGHT_LOG", payload: { id, patch } })
+      return ok
+    },
+    []
+  )
+  const removeWeight = useCallback(
+    async (id: string): Promise<boolean> => {
+      const supabase = createClient()
+      const { data } = await supabase.auth.getUser()
+      let ok = true
+      if (data.user) {
+        try {
+          ok = await deleteWeightLog(data.user.id, id)
+        } catch {
+          ok = false
+        }
+      }
+      if (ok) dispatch({ type: "DELETE_WEIGHT_LOG", payload: id })
+      return ok
     },
     []
   )
@@ -460,6 +579,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       state,
       setUser,
       logWeight,
+      editWeight,
+      removeWeight,
       addToCart,
       removeFromCart,
       updateCartQty,
@@ -479,6 +600,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       state,
       setUser,
       logWeight,
+      editWeight,
+      removeWeight,
       addToCart,
       removeFromCart,
       updateCartQty,

@@ -65,6 +65,9 @@ export async function POST(request: NextRequest) {
 
   const result = await checkRateLimit(effectivePreset, identifier)
 
+  // If the request was allowed, still surface the mode so testers can see
+  // whether Redis was actually consulted (enforcing) or the helper fell
+  // through to fail-open. Never exposes secrets.
   if (result.limited) {
     // Admin-side hits get logged to the Vercel server console so the owner
     // can see abuse attempts. We deliberately do NOT write admin_audit_log
@@ -80,5 +83,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(shaped.body, { status: shaped.status, headers: shaped.headers })
   }
 
-  return NextResponse.json({ limited: false }, { status: 200 })
+  return NextResponse.json({ limited: false, mode: result.mode }, { status: 200 })
 }

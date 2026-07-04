@@ -135,7 +135,7 @@ export function paymobIframeUrl(paymentKey: string, iframeId: string | number): 
  * `payload` is the transaction object from the callback body / query params.
  * Paymob concatenates fields alphabetically (see Accept documentation).
  */
-export async function verifyPaymobHmac(payload: {
+export type PaymobHmacPayload = {
   amount_cents: string | number
   created_at: string
   currency: string
@@ -159,7 +159,9 @@ export async function verifyPaymobHmac(payload: {
   }
   success: boolean | string
   hmac: string
-}): Promise<boolean> {
+}
+
+export async function verifyPaymobHmac(payload: PaymobHmacPayload): Promise<boolean> {
   const secret = requireEnv("PAYMOB_HMAC_SECRET")
 
   const orderId =

@@ -258,6 +258,7 @@ type AppContextValue = {
   refreshPlan: () => Promise<void>
   addSession: (s: Session) => void
   refreshSessions: () => Promise<void>
+  refreshOrders: () => Promise<void>
   updateSession: (id: string, changes: Partial<Session>) => void
   placeOrderLocal: (order: Order) => void
   logWater: (date: string, liters: number) => void
@@ -546,6 +547,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const sessions = await fetchSessions(data.user.id)
     dispatch({ type: "SYNC_FROM_DB", payload: { sessions } })
   }, [])
+  const refreshOrders = useCallback(async () => {
+    // Pull the latest orders for the signed-in user straight from the DB.
+    // This catches new orders + status changes (e.g. admin flipped an order
+    // from pending -> shipped) that happened after the user's initial
+    // hydration. If there are no orders we push an empty array so the local
+    // state truly reflects "nothing on file" rather than a stale non-empty
+    // list from a prior session.
+    const supabase = createClient()
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) return
+    const orders = await fetchUserOrders(data.user.id)
+    dispatch({ type: "SYNC_FROM_DB", payload: { orders } })
+  }, [])
   const updateSession = useCallback(
     (id: string, changes: Partial<Session>) => {
       dispatch({ type: "UPDATE_SESSION", payload: { id, changes } })
@@ -611,6 +625,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refreshPlan,
       addSession,
       refreshSessions,
+      refreshOrders,
       updateSession,
       placeOrderLocal,
       logWater,
@@ -633,6 +648,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refreshPlan,
       addSession,
       refreshSessions,
+      refreshOrders,
       updateSession,
       placeOrderLocal,
       logWater,

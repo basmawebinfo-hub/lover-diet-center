@@ -16,6 +16,12 @@ import { useLocale, t } from "@/lib/locale"
 import { WHATSAPP_NUMBER } from "@/lib/site"
 import { useCurrency, CURRENCIES } from "@/lib/currency"
 
+// Flat-rate shipping in USD (the canonical currency across the app + DB).
+// The cart displays it via format() so users see it in their chosen currency.
+// If shipping ever becomes variable (weight-based, address-based, etc.), move
+// this to a helper that returns a USD number so the display path stays the same.
+const SHIPPING_USD = 15
+
 export default function CartPage() {
   const router = useRouter()
   const { locale } = useLocale()
@@ -50,7 +56,7 @@ export default function CartPage() {
     (s, item) => s + item.product.price * item.quantity,
     0
   )
-  const shipping = subtotal > 0 ? 15 : 0
+  const shipping = subtotal > 0 ? SHIPPING_USD : 0
   const total = subtotal + shipping
 
   async function checkout() {

@@ -87,16 +87,16 @@ export type OrderItem = {
   nameEn: string
   nameAr: string
   quantity: number
-  price: number
+  price: number // USD — snapshot of the product price at time of purchase (see lib/currency.tsx)
 }
 
 export type Order = {
   id: string
   date: string // ISO
   items: OrderItem[]
-  subtotal: number
-  shipping: number
-  total: number
+  subtotal: number // USD — sum of item.price * quantity
+  shipping: number // USD — see SHIPPING_USD in app/dashboard/cart/page.tsx
+  total: number // USD — subtotal + shipping
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled"
 }
 

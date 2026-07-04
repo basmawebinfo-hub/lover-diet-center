@@ -144,6 +144,12 @@ export type User = {
   avatarUrl?: string
   createdAt: string
   role?: "user" | "admin"
+  // Full Onboarding Fields (PR #35). All optional in v1.
+  city?: string
+  medicalConditions?: string[]
+  allergies?: string[]
+  foodPreferences?: string[]
+  termsAcceptedAt?: string
 }
 
 export type AvatarConfig = {
@@ -182,6 +188,13 @@ export type AdminClient = {
   status: "active" | "inactive" | "trial"
   joinedAt: string
   lastActive: string
+  // Full Onboarding Fields (PR #35). Populated when the user provides them,
+  // otherwise undefined. Admin-side detail view only in v1 (no filters/search).
+  city?: string
+  medicalConditions?: string[]
+  allergies?: string[]
+  foodPreferences?: string[]
+  termsAcceptedAt?: string
 }
 
 export type AdminOrder = {

@@ -13,8 +13,8 @@ import { createClient } from "@/lib/supabase/client"
 import { upsertProfile, setOnboardingCompleted } from "@/lib/supabase/db"
 import { COUNTRIES, DEFAULT_COUNTRY } from "@/lib/countries"
 
-// 9 steps: Name -> Phone -> Age -> Height -> Weight -> Goal -> Activity -> Review -> Finalize
-const TOTAL_STEPS = 9
+// 10 steps: Name -> Phone -> Age -> Height -> Weight -> Goal -> Activity -> Health Info -> Review -> Finalize
+const TOTAL_STEPS = 10
 
 const goalCopy: Record<GoalType, { en: string; ar: string; icon: string }> = {
   lose_weight: { en: "Lose Weight",  ar: "إنقاص الوزن",     icon: "🔥" },
@@ -41,6 +41,11 @@ type OnboardingData = {
   weightKg: number
   goal: GoalType
   activity: ActivityLevel
+  // Full Onboarding Fields (PR #35). All optional in v1.
+  city: string
+  medicalConditions: string[]
+  allergies: string[]
+  foodPreferences: string[]
 }
 
 export default function OnboardingPage() {
@@ -60,6 +65,10 @@ export default function OnboardingPage() {
     weightKg: 90,
     goal: "lose_weight",
     activity: "light",
+    city: "",
+    medicalConditions: [],
+    allergies: [],
+    foodPreferences: [],
   })
 
   // Hydrate from localStorage on first mount (SSR-safe).
@@ -157,8 +166,9 @@ export default function OnboardingPage() {
             {step === 5 && <WeightStep data={data} update={update} />}
             {step === 6 && <GoalStep data={data} update={update} />}
             {step === 7 && <ActivityStep data={data} update={update} />}
-            {step === 8 && <ReviewStep data={data} bmi={bmi} />}
-            {step === 9 && (
+            {step === 8 && <HealthInfoStep data={data} update={(k, v) => update(k, v as never)} />}
+            {step === 9 && <ReviewStep data={data} bmi={bmi} />}
+            {step === 10 && (
               <FinalizeStep
                 data={data}
                 onSuccess={() => { /* handled in FinalizeStep */ }}
@@ -271,6 +281,13 @@ function FinalizeStep({ data, onSuccess }: { data: OnboardingData; onSuccess: ()
           []
         ),
         createdAt: new Date().toISOString(),
+        // Full Onboarding Fields (PR #35). Only pass non-empty values —
+        // undefined values are skipped by upsertProfile so we don't overwrite
+        // existing rows with empty strings/arrays.
+        city: data.city.trim() ? data.city.trim() : undefined,
+        medicalConditions: data.medicalConditions.length > 0 ? data.medicalConditions : undefined,
+        allergies: data.allergies.length > 0 ? data.allergies : undefined,
+        foodPreferences: data.foodPreferences.length > 0 ? data.foodPreferences : undefined,
       }
 
       // Persist to Supabase. This is the critical call — do NOT swallow errors here.
@@ -692,6 +709,160 @@ function ActivityStep({
   )
 }
 
+
+// ============================================================================
+// HealthInfoStep — Full Onboarding Fields (PR #35)
+//
+// All four fields are OPTIONAL in v1. Users can Continue past this step
+// without entering anything. Values are persisted to profiles table:
+//   city:               text
+//   medical_conditions: text[]
+//   allergies:          text[]
+//   food_preferences:   text[]
+//
+// Free-form tag inputs. Curated dropdowns can be added later once Dr. Wael
+// reviews the observed vocabulary.
+// ============================================================================
+function HealthInfoStep({
+  data,
+  update,
+}: {
+  data: OnboardingData
+  update: <K extends keyof OnboardingData>(k: K, v: OnboardingData[K]) => void
+}) {
+  const { locale } = useLocale()
+  return (
+    <StepFrame
+      title={t(locale, "Health information", "المعلومات الصحية")}
+      subtitle={t(
+        locale,
+        "Optional. Share what helps Dr. Wael tailor your plan.",
+        "اختياري. شارك ما يساعد د. وائل على تخصيص خطتك.",
+      )}
+    >
+      <div className="space-y-5">
+        <div>
+          <label htmlFor="hi-city" className="mb-1.5 block text-sm font-semibold text-neutral-700">
+            {t(locale, "City", "المدينة")}
+          </label>
+          <input
+            id="hi-city"
+            type="text"
+            value={data.city}
+            onChange={(e) => update("city", e.target.value)}
+            placeholder={t(locale, "e.g. Dubai", "مثال: دبي")}
+            className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            maxLength={80}
+          />
+        </div>
+
+        <TagField
+          label={t(locale, "Medical conditions", "الحالات المرضية")}
+          placeholder={t(locale, "e.g. Diabetes, Hypertension", "مثال: السكري، ضغط الدم")}
+          values={data.medicalConditions}
+          onChange={(v) => update("medicalConditions", v)}
+          locale={locale}
+        />
+
+        <TagField
+          label={t(locale, "Allergies", "الحساسية")}
+          placeholder={t(locale, "e.g. Peanuts, Shellfish", "مثال: الفول السوداني، المأكولات البحرية")}
+          values={data.allergies}
+          onChange={(v) => update("allergies", v)}
+          locale={locale}
+        />
+
+        <TagField
+          label={t(locale, "Food preferences", "التفضيلات الغذائية")}
+          placeholder={t(locale, "e.g. Vegan, Halal, No dairy", "مثال: نباتي، حلال، بدون ألبان")}
+          values={data.foodPreferences}
+          onChange={(v) => update("foodPreferences", v)}
+          locale={locale}
+        />
+
+        <p className="pt-2 text-xs text-neutral-400">
+          {t(
+            locale,
+            "All fields are optional. You can skip this step or update it later from your profile.",
+            "جميع الحقول اختيارية. يمكنك تخطي هذه الخطوة أو تحديثها لاحقًا من ملفك.",
+          )}
+        </p>
+      </div>
+    </StepFrame>
+  )
+}
+
+function TagField({
+  label,
+  placeholder,
+  values,
+  onChange,
+  locale,
+}: {
+  label: string
+  placeholder: string
+  values: string[]
+  onChange: (v: string[]) => void
+  locale: "en" | "ar"
+}) {
+  const [draft, setDraft] = useState("")
+  const add = () => {
+    const trimmed = draft.trim()
+    if (!trimmed) return
+    if (trimmed.length > 60) return
+    if (values.includes(trimmed)) { setDraft(""); return }
+    onChange([...values, trimmed])
+    setDraft("")
+  }
+  const remove = (i: number) => onChange(values.filter((_, idx) => idx !== i))
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-semibold text-neutral-700">{label}</label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault()
+              add()
+            }
+          }}
+          placeholder={placeholder}
+          className="flex-1 rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+          maxLength={60}
+          aria-label={label}
+        />
+        <button
+          type="button"
+          onClick={add}
+          disabled={!draft.trim()}
+          className="rounded-2xl bg-[#34857b] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#1f5d54] disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {t(locale, "Add", "إضافة")}
+        </button>
+      </div>
+      {values.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {values.map((v, i) => (
+            <span key={`${v}-${i}`} className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
+              {v}
+              <button
+                type="button"
+                onClick={() => remove(i)}
+                aria-label={t(locale, `Remove ${v}`, `إزالة ${v}`)}
+                className="rounded-full p-0.5 text-emerald-700 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 function ReviewStep({
   data,
   bmi,

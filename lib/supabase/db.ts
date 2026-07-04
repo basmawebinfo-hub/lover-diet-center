@@ -232,6 +232,12 @@ export async function upsertProfile(userId: string, u: Partial<User>): Promise<b
   if (u.goal !== undefined) row.goal = u.goal
   if (u.targetWeightKg !== undefined) row.target_weight = u.targetWeightKg
   if (u.activityLevel !== undefined) row.activity_level = u.activityLevel
+  // Full Onboarding Fields (PR #35). All optional. Snake_case in DB.
+  if (u.city !== undefined) row.city = u.city
+  if (u.medicalConditions !== undefined) row.medical_conditions = u.medicalConditions
+  if (u.allergies !== undefined) row.allergies = u.allergies
+  if (u.foodPreferences !== undefined) row.food_preferences = u.foodPreferences
+  if (u.termsAcceptedAt !== undefined) row.terms_accepted_at = u.termsAcceptedAt
 
   // Fetch the existing row once — we use it for two things:
   //   1) The onboarding_completed flip heuristic (completes false->true only).
@@ -243,7 +249,7 @@ export async function upsertProfile(userId: string, u: Partial<User>): Promise<b
   try {
     const { data: existing } = await supabase
       .from('profiles')
-      .select('name_en, phone, age, gender, height_cm, current_weight, goal, activity_level, onboarding_completed, role')
+      .select('name_en, phone, age, gender, height_cm, current_weight, goal, activity_level, onboarding_completed, role, terms_accepted_at')
       .eq('id', userId)
       .single()
     existingRow = (existing as Record<string, unknown> | null) ?? {}
@@ -260,6 +266,13 @@ export async function upsertProfile(userId: string, u: Partial<User>): Promise<b
       typeof merged.activity_level === 'string' && (merged.activity_level as string).length > 0
     if (passes && !alreadyDone) {
       row.onboarding_completed = true
+      // On first-time completion for a non-admin, stamp terms_accepted_at
+      // if the caller didn't provide one and the row doesn't have one yet.
+      if (existingRow.role !== 'admin'
+          && row.terms_accepted_at === undefined
+          && existingRow.terms_accepted_at == null) {
+        row.terms_accepted_at = new Date().toISOString()
+      }
     }
     // Admins are exempt from the onboarding gate — keep them true regardless.
     if (existingRow.role === 'admin' && !alreadyDone) {

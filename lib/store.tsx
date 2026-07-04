@@ -22,6 +22,7 @@ import type {
   User,
   WaterLog,
   WeightLog,
+  UserNotification,
 } from "./types"
 
 // A patch that widens WeightLog to accept null for the two nullable columns
@@ -35,7 +36,7 @@ export type WeightLogPatch = {
 }
 
 import { createClient } from "@/lib/supabase/client"
-import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, updateWeightLog, deleteWeightLog, fetchProfile, fetchWaterLogs, fetchProducts, fetchMeals, fetchUserOrders, fetchUserPlan } from "@/lib/supabase/db"
+import { fetchSessions, fetchWeightLogs, insertSession, insertWeightLog, updateWeightLog, deleteWeightLog, fetchProfile, fetchWaterLogs, fetchProducts, fetchMeals, fetchUserOrders, fetchUserPlan, fetchNotifications, markNotificationRead as dbMarkNotificationRead, markAllNotificationsRead as dbMarkAllNotificationsRead } from "@/lib/supabase/db"
 
 
 type AppState = {
@@ -52,6 +53,7 @@ type AppState = {
   waterLogs: WaterLog[]
   locale: Locale
   hasSeenIntro: boolean
+  notifications: UserNotification[]
 }
 
 type Action =
@@ -76,6 +78,9 @@ type Action =
   | { type: "SYNC_FROM_DB"; payload: { sessions?: Session[]; weightLogs?: WeightLog[]; waterLogs?: WaterLog[]; orders?: Order[] } }
   | { type: "SET_CATALOG"; payload: { products?: Product[]; meals?: Meal[] } }
   | { type: "AUTH_CHECKED" }
+  | { type: "SET_NOTIFICATIONS"; payload: UserNotification[] }
+  | { type: "MARK_NOTIFICATION_READ"; payload: string }
+  | { type: "MARK_ALL_NOTIFICATIONS_READ" }
 
 const STORAGE_KEY = "loversdc:state:v1"
 
@@ -93,6 +98,7 @@ const initialState: AppState = {
   waterLogs: [],
   locale: "en",
   hasSeenIntro: false,
+  notifications: [],
 }
 
 function reducer(state: AppState, action: Action): AppState {
@@ -236,6 +242,26 @@ function reducer(state: AppState, action: Action): AppState {
         products: action.payload.products ?? state.products,
         meals: action.payload.meals ?? state.meals,
       }
+    case "SET_NOTIFICATIONS":
+      return { ...state, notifications: action.payload }
+    case "MARK_NOTIFICATION_READ": {
+      const now = new Date().toISOString()
+      return {
+        ...state,
+        notifications: state.notifications.map((n) =>
+          n.id === action.payload && !n.readAt ? { ...n, readAt: now } : n,
+        ),
+      }
+    }
+    case "MARK_ALL_NOTIFICATIONS_READ": {
+      const now = new Date().toISOString()
+      return {
+        ...state,
+        notifications: state.notifications.map((n) =>
+          n.readAt ? n : { ...n, readAt: now },
+        ),
+      }
+    }
     default:
       return state
   }
@@ -259,6 +285,9 @@ type AppContextValue = {
   addSession: (s: Session) => void
   refreshSessions: () => Promise<void>
   refreshOrders: () => Promise<void>
+  refreshNotifications: () => Promise<void>
+  markNotificationRead: (id: string) => Promise<void>
+  markAllNotificationsRead: () => Promise<void>
   updateSession: (id: string, changes: Partial<Session>) => void
   placeOrderLocal: (order: Order) => void
   logWater: (date: string, liters: number) => void
@@ -560,6 +589,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const orders = await fetchUserOrders(data.user.id)
     dispatch({ type: "SYNC_FROM_DB", payload: { orders } })
   }, [])
+  const refreshNotifications = useCallback(async () => {
+    // Pull the latest notifications for the signed-in user straight from the DB.
+    // The bell in the shell + the /dashboard/notifications page both read
+    // from state.notifications, so a single dispatch feeds all views.
+    const supabase = createClient()
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) return
+    const notifications = await fetchNotifications(data.user.id)
+    dispatch({ type: "SET_NOTIFICATIONS", payload: notifications })
+  }, [])
+  const markNotificationRead = useCallback(async (id: string) => {
+    // Optimistic: flip locally first, then persist. On DB failure we don't
+    // revert (a stale-read on the next refresh will fix it), but we do log.
+    dispatch({ type: "MARK_NOTIFICATION_READ", payload: id })
+    const supabase = createClient()
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) return
+    try {
+      await dbMarkNotificationRead(data.user.id, id)
+    } catch {
+      // Non-fatal — next refresh reconciles.
+    }
+  }, [])
+  const markAllNotificationsRead = useCallback(async () => {
+    dispatch({ type: "MARK_ALL_NOTIFICATIONS_READ" })
+    const supabase = createClient()
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) return
+    try {
+      await dbMarkAllNotificationsRead(data.user.id)
+    } catch {
+      // Non-fatal.
+    }
+  }, [])
   const updateSession = useCallback(
     (id: string, changes: Partial<Session>) => {
       dispatch({ type: "UPDATE_SESSION", payload: { id, changes } })
@@ -626,6 +689,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       addSession,
       refreshSessions,
       refreshOrders,
+      refreshNotifications,
+      markNotificationRead,
+      markAllNotificationsRead,
       updateSession,
       placeOrderLocal,
       logWater,
@@ -649,6 +715,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       addSession,
       refreshSessions,
       refreshOrders,
+      refreshNotifications,
+      markNotificationRead,
+      markAllNotificationsRead,
       updateSession,
       placeOrderLocal,
       logWater,

@@ -7,7 +7,6 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
-import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
 
 // Pages that hide the header completely
@@ -70,14 +69,35 @@ export function SegmentedHeader() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Track Supabase auth session for the dynamic Dashboard button
+  // Track Supabase auth session for the dynamic Dashboard button.
+  //
+  // We deliberately DO NOT import @supabase/ssr here (PR #36 Phase 4 · H-02).
+  // Doing so pulls the ~237 KB Supabase SDK into every landing bundle. Instead
+  // we read the presence of the session cookie directly. The Supabase SSR
+  // client stores its session under `sb-<project-ref>-auth-token` — we match
+  // that shape and consider the user "probably signed in" if the cookie is
+  // present.
+  //
+  // If the cookie is stale (expired session), the worst-case UX is: header
+  // shows "Dashboard", user clicks, middleware sends them to /sign-in with
+  // a redirect param. The full-page navigation then reconciles state.
+  //
+  // Cross-tab sign-out no longer flips the header live — same worst case.
   useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setIsAuthed(!!data.user))
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setIsAuthed(!!session?.user)
-    })
-    return () => sub.subscription.unsubscribe()
+    if (typeof document === 'undefined') return
+    const hasSbAuth = document.cookie
+      .split(';')
+      .some((c) => /^\s*sb-[^=]+-auth-token/.test(c))
+    setIsAuthed(hasSbAuth)
+    // Re-check on window focus (covers most real-world sign-out flows).
+    const onFocus = () => {
+      const now = document.cookie
+        .split(';')
+        .some((c) => /^\s*sb-[^=]+-auth-token/.test(c))
+      setIsAuthed(now)
+    }
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
   }, [])
 
   // Close dropdown on outside click

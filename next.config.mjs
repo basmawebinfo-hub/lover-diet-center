@@ -39,6 +39,14 @@ const nextConfig = {
 
   images: {
     formats: ['image/avif', 'image/webp'],
+    // 30 days. Optimized images were previously served with
+    //   Cache-Control: max-age=0, must-revalidate
+    // which caused every repeat visit to re-hit /_next/image?url=... and
+    // re-download the AVIF/WebP payload. 2592000s = 30 days of freshness.
+    // Source images can still change (Supabase Storage URL / signed URL /
+    // upload path) — the /_next/image cache key includes the source URL,
+    // so a legitimate source change invalidates the cached derivative.
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
       { protocol: 'https', hostname: '*.supabase.in' },

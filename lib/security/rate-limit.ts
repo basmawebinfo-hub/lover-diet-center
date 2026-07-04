@@ -1,5 +1,5 @@
 // ============================================================================
-// Reusable rate limiter — Phase 4 · PR #37
+// Reusable rate limiter — Phase 4 · PR #37 (extended in PR #39 with `mode`)
 //
 // Backed by Upstash Redis + @upstash/ratelimit's sliding-window algorithm.
 // Designed to be reused across every request-throttled surface in the app:
@@ -11,8 +11,13 @@
 //
 // The helper is fail-open: if UPSTASH_REDIS_REST_URL / _TOKEN aren't set
 // (preview builds without KV, local dev without a Redis instance),
-// `checkRateLimit` returns `{ limited: false }` so the app still functions.
-// Production must have the env vars set for the limits to actually apply.
+// `checkRateLimit` returns `{ limited: false, mode: "fail_open" }` so the
+// app still functions.
+//
+// Production must have both env vars set. The `mode` field on every
+// response tells you which path was taken — "enforcing" means Redis is
+// reachable and the limit was really consulted; "fail_open" / "error_open"
+// mean the request was allowed without a real check.
 //
 // Sliding window semantics: unlike a fixed window, a burst at the tail of one
 // window followed by another burst at the head of the next is correctly
@@ -49,11 +54,49 @@ const PRESETS: Record<
 // on every request. Node keeps them warm across invocations on Vercel.
 const _limiters: Partial<Record<RateLimitPreset, Ratelimit>> = {}
 
+/** Return true when both Upstash env vars are visible to the current runtime. */
+export function hasRedisConfig(): boolean {
+  return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+}
+
+/** Length-only diagnostic — never returns the actual values. */
+export function redisConfigShape(): { hasUrl: boolean; hasToken: boolean; urlLen: number; tokenLen: number } {
+  return {
+    hasUrl: !!process.env.UPSTASH_REDIS_REST_URL,
+    hasToken: !!process.env.UPSTASH_REDIS_REST_TOKEN,
+    urlLen: (process.env.UPSTASH_REDIS_REST_URL ?? "").length,
+    tokenLen: (process.env.UPSTASH_REDIS_REST_TOKEN ?? "").length,
+  }
+}
+
 function getRedis(): Redis | null {
   const url = process.env.UPSTASH_REDIS_REST_URL
   const token = process.env.UPSTASH_REDIS_REST_TOKEN
   if (!url || !token) return null
   return new Redis({ url, token })
+}
+
+/** Live end-to-end probe: SET, GET, DEL a throwaway key. Returns a sanitized
+ *  result the diagnostic endpoint can echo back safely. */
+export async function probeRedis(): Promise<{ ok: boolean; error?: string; roundtripMs?: number }> {
+  const redis = getRedis()
+  if (!redis) return { ok: false, error: "env_missing" }
+  const key = `ldc:rl:_probe:${Date.now()}`
+  const started = Date.now()
+  try {
+    await redis.set(key, "1", { ex: 10 })
+    const value = await redis.get<string>(key)
+    await redis.del(key)
+    if (value !== "1") return { ok: false, error: "value_mismatch", roundtripMs: Date.now() - started }
+    return { ok: true, roundtripMs: Date.now() - started }
+  } catch (err) {
+    // Sanitize the message. Never echo tokens/URLs.
+    const raw = err instanceof Error ? err.message : String(err)
+    // Trim to first 200 chars and strip anything that looks like a token
+    // (long base64-ish runs).
+    const clean = raw.replace(/[A-Za-z0-9+/=_-]{40,}/g, "[REDACTED]").slice(0, 200)
+    return { ok: false, error: clean, roundtripMs: Date.now() - started }
+  }
 }
 
 function getLimiter(preset: RateLimitPreset): Ratelimit | null {
@@ -73,6 +116,8 @@ function getLimiter(preset: RateLimitPreset): Ratelimit | null {
   return rl
 }
 
+export type RateLimitMode = "enforcing" | "fail_open" | "error_open"
+
 export type RateLimitResult = {
   limited: boolean
   /** Seconds until the caller can retry. 0 when not limited. */
@@ -81,6 +126,11 @@ export type RateLimitResult = {
   remaining: number
   /** Human-friendly message safe to show the end user. */
   message: string
+  /** Observability: which code path answered.
+   *   "enforcing"  = Redis reachable, real limit consulted.
+   *   "fail_open"  = env vars missing, allowed by default.
+   *   "error_open" = Redis ping threw at runtime, allowed by default. */
+  mode: RateLimitMode
 }
 
 /**
@@ -96,16 +146,14 @@ export async function checkRateLimit(
   identifier: string,
 ): Promise<RateLimitResult> {
   const id = (identifier || "").trim().toLowerCase() || "anonymous"
+  const rl = getLimiter(preset)
+  if (!rl) {
+    return { limited: false, retryAfterSec: 0, remaining: Infinity, message: "", mode: "fail_open" }
+  }
   try {
-    const rl = getLimiter(preset)
-    if (!rl) {
-      // Fail-open when Redis isn't configured. Every environment where the
-      // limit MUST apply should have the env vars set at deploy time.
-      return { limited: false, retryAfterSec: 0, remaining: Infinity, message: "" }
-    }
     const { success, reset, remaining } = await rl.limit(id)
     if (success) {
-      return { limited: false, retryAfterSec: 0, remaining, message: "" }
+      return { limited: false, retryAfterSec: 0, remaining, message: "", mode: "enforcing" }
     }
     const now = Date.now()
     const waitMs = Math.max(0, reset - now)
@@ -115,12 +163,13 @@ export async function checkRateLimit(
       retryAfterSec,
       remaining: 0,
       message: "Too many requests. Please wait a moment and try again.",
+      mode: "enforcing",
     }
   } catch (err) {
     // Fail-open on any Redis/network error. Log to server console so the
     // owner sees these in Vercel logs if it starts happening.
     console.warn("[rate-limit] check failed, allowing request", err)
-    return { limited: false, retryAfterSec: 0, remaining: Infinity, message: "" }
+    return { limited: false, retryAfterSec: 0, remaining: Infinity, message: "", mode: "error_open" }
   }
 }
 
@@ -143,12 +192,12 @@ export function getClientIp(headers: Headers): string {
  * checks for { limited: true } to render the friendly toast.
  */
 export function rateLimitJsonResponse(res: RateLimitResult): {
-  body: { limited: true; retryAfterSec: number; message: string }
+  body: { limited: true; retryAfterSec: number; message: string; mode: RateLimitMode }
   status: 429
   headers: HeadersInit
 } {
   return {
-    body: { limited: true, retryAfterSec: res.retryAfterSec, message: res.message },
+    body: { limited: true, retryAfterSec: res.retryAfterSec, message: res.message, mode: res.mode },
     status: 429,
     headers: {
       "Content-Type": "application/json",

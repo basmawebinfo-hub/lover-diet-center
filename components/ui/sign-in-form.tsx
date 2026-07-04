@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, LogIn } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
+import { checkRateLimitClient } from '@/lib/security/rate-limit-client'
 import { GoogleButton } from '@/components/ui/google-button'
 
 export function SignIn2() {
@@ -47,6 +48,21 @@ export function SignIn2() {
       }
       if (password.length < 8) {
         setError(t(locale, 'Password must be at least 8 characters.', 'يجب أن تكون كلمة المرور 8 أحرف على الأقل.'))
+        return
+      }
+
+      // Rate-limit pre-check (Phase 4 · M-01). Fails-open on network error.
+      // Admin sign-in is auto-upgraded to admin_auth server-side when the
+      // submitted email matches the known admin address.
+      const gate = await checkRateLimitClient('sign_in', email.toLowerCase().trim())
+      if (!gate.ok) {
+        setError(
+          t(
+            locale,
+            `${gate.message} (retry in ${gate.retryAfterSec}s)`,
+            `طلبات كثيرة. يرجى الانتظار قليلاً ثم إعادة المحاولة (${gate.retryAfterSec} ثانية).`,
+          ),
+        )
         return
       }
 

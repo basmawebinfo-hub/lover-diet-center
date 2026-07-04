@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { RECOVERY_COOKIE } from '@/lib/supabase/middleware'
+import { checkRateLimit, getClientIp } from '@/lib/security/rate-limit'
 
 // Email OTP callback (recovery / magic link / signup confirm / email change).
 //
@@ -25,6 +26,22 @@ export async function GET(request: NextRequest) {
   if (!token_hash || !type) {
     return NextResponse.redirect(
       new URL(`/sign-in?error=${encodeURIComponent('Invalid or expired confirmation link.')}`, url),
+    )
+  }
+
+  // Rate-limit pre-check (Phase 4 · M-01) — otp_verify: 10 / 15 min per IP.
+  // Fails-open on Redis errors so a broken KV link never locks users out
+  // of a legitimate recovery flow.
+  const ip = getClientIp(request.headers)
+  const gate = await checkRateLimit('otp_verify', ip)
+  if (gate.limited) {
+    return NextResponse.redirect(
+      new URL(
+        `/sign-in?error=${encodeURIComponent(
+          `Too many verification attempts. Please wait ${gate.retryAfterSec}s and try again.`,
+        )}`,
+        url,
+      ),
     )
   }
 

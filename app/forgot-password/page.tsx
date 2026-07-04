@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, Mail, Check, RefreshCw } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
+import { checkRateLimitClient } from '@/lib/security/rate-limit-client'
 
 const COOLDOWN_SECONDS = 60
 
@@ -40,6 +41,23 @@ export default function ForgotPasswordPage() {
     setResent(false)
     setLoading(true)
     const normalized = email.trim().toLowerCase()
+
+    // Rate-limit pre-check (Phase 4 · M-01). First-time sends use the
+    // forgot_password budget (3/hr per email); resend clicks use the
+    // email_resend budget (5/hr per email). Fails-open on network error.
+    const preset = opts.isResend ? 'email_resend' : 'forgot_password'
+    const gate = await checkRateLimitClient(preset, normalized)
+    if (!gate.ok) {
+      setError(
+        t(
+          locale,
+          `${gate.message} (retry in ${gate.retryAfterSec}s)`,
+          `طلبات كثيرة. يرجى الانتظار قليلاً ثم إعادة المحاولة (${gate.retryAfterSec} ثانية).`,
+        ),
+      )
+      setLoading(false)
+      return
+    }
 
     try {
       const supabase = createClient()

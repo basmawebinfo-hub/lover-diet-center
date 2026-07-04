@@ -171,9 +171,10 @@ export async function probeRedis(): Promise<{
     } catch (e) {
       setResult = `THROW: ${(e instanceof Error ? e.message : String(e)).slice(0, 100)}`
     }
+    let rawGet: unknown = undefined
     try {
-      const r = await redis.get<string>(key)
-      getResult = r === null || r === undefined ? String(r) : JSON.stringify(r).slice(0, 40)
+      rawGet = await redis.get<string>(key)
+      getResult = rawGet === null || rawGet === undefined ? String(rawGet) : JSON.stringify(rawGet).slice(0, 40)
     } catch (e) {
       getResult = `THROW: ${(e instanceof Error ? e.message : String(e)).slice(0, 100)}`
     }
@@ -184,8 +185,10 @@ export async function probeRedis(): Promise<{
       delResult = `THROW: ${(e instanceof Error ? e.message : String(e)).slice(0, 100)}`
     }
 
-    const value = getResult
-    if (value !== '"1"') {
+    // Coerce to string before comparing — the @upstash/redis SDK auto-parses
+    // numeric-looking strings into JS numbers, so we set the string "1" but
+    // read back the number 1. String(value) === "1" handles both cleanly.
+    if (String(rawGet) !== "1") {
       // Historical shape: probeRedis returned "value_mismatch" for anything
       // other than exact match. Preserve that for the diagnostic endpoint
       // but expand with per-step detail.

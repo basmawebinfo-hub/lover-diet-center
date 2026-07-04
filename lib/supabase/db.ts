@@ -1237,3 +1237,158 @@ export async function adminFetchAuditAdmins(): Promise<{ id: string; name: strin
   }
   return Array.from(seen.values())
 }
+
+// ─────────────────────────────────────────────────────────────
+// Payment helpers (Phase 5 · Payments)
+// ─────────────────────────────────────────────────────────────
+
+export type OrderRow = {
+  id: string
+  userId: string
+  status: string
+  paymentStatus: string | null
+  paymentProvider: string | null
+  paymentIntentId: string | null
+  paymentTransactionId: string | null
+  paidAmount: number | null
+  paidCurrency: string | null
+  paidAt: string | null
+  refundedAt: string | null
+  total: number
+  createdAt: string
+  updatedAt: string | null
+
+  shippingName: string | null
+  shippingPhone: string | null
+  shippingEmail: string | null
+  shippingLine1: string | null
+  shippingLine2: string | null
+  shippingCity: string | null
+  shippingRegion: string | null
+  shippingCountry: string | null
+  shippingPostalCode: string | null
+
+  items: Array<{
+    id: string
+    productId: string
+    quantity: number
+    price: number
+    productName?: string
+    imageUrl?: string
+  }>
+}
+
+/** Fetch a single order (with items) for a specific user. RLS-scoped. */
+export async function fetchOrderForUser(
+  userId: string,
+  orderId: string
+): Promise<OrderRow | null> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("orders")
+    .select(
+      `id, user_id, status, payment_status, payment_provider, payment_intent_id, payment_transaction_id, paid_amount, paid_currency, paid_at, refunded_at, total, created_at, updated_at, shipping_name, shipping_phone, shipping_email, shipping_line1, shipping_line2, shipping_city, shipping_region, shipping_country, shipping_postal_code, order_items(id, product_id, quantity, price_at_purchase, products(name_en, image_url))`
+    )
+    .eq("id", orderId)
+    .eq("user_id", userId)
+    .maybeSingle()
+  if (error || !data) return null
+  const r = data as Record<string, unknown>
+  const items = ((r.order_items as Array<Record<string, unknown>>) ?? []).map(
+    (it) => {
+      const p = (it.products as Record<string, unknown> | null) ?? null
+      return {
+        id: (it.id as string) ?? "",
+        productId: (it.product_id as string) ?? "",
+        quantity: (it.quantity as number) ?? 0,
+        price: Number(it.price_at_purchase ?? 0),
+        productName: (p?.name_en as string | undefined) ?? undefined,
+        imageUrl: (p?.image_url as string | undefined) ?? undefined,
+      }
+    }
+  )
+  return {
+    id: r.id as string,
+    userId: r.user_id as string,
+    status: (r.status as string) ?? "pending",
+    paymentStatus: (r.payment_status as string | null) ?? null,
+    paymentProvider: (r.payment_provider as string | null) ?? null,
+    paymentIntentId: (r.payment_intent_id as string | null) ?? null,
+    paymentTransactionId: (r.payment_transaction_id as string | null) ?? null,
+    paidAmount: r.paid_amount != null ? Number(r.paid_amount) : null,
+    paidCurrency: (r.paid_currency as string | null) ?? null,
+    paidAt: (r.paid_at as string | null) ?? null,
+    refundedAt: (r.refunded_at as string | null) ?? null,
+    total: Number(r.total ?? 0),
+    createdAt: (r.created_at as string) ?? "",
+    updatedAt: (r.updated_at as string | null) ?? null,
+    shippingName: (r.shipping_name as string | null) ?? null,
+    shippingPhone: (r.shipping_phone as string | null) ?? null,
+    shippingEmail: (r.shipping_email as string | null) ?? null,
+    shippingLine1: (r.shipping_line1 as string | null) ?? null,
+    shippingLine2: (r.shipping_line2 as string | null) ?? null,
+    shippingCity: (r.shipping_city as string | null) ?? null,
+    shippingRegion: (r.shipping_region as string | null) ?? null,
+    shippingCountry: (r.shipping_country as string | null) ?? null,
+    shippingPostalCode: (r.shipping_postal_code as string | null) ?? null,
+    items,
+  }
+}
+
+export type ShippingAddress = {
+  name: string
+  phone: string
+  email: string
+  line1: string
+  line2?: string
+  city: string
+  region?: string
+  country: string
+  postalCode?: string
+}
+
+/** Persist a shipping address on an order. RLS-scoped. */
+export async function saveOrderShippingAddress(
+  userId: string,
+  orderId: string,
+  addr: ShippingAddress
+): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      shipping_name: addr.name,
+      shipping_phone: addr.phone,
+      shipping_email: addr.email,
+      shipping_line1: addr.line1,
+      shipping_line2: addr.line2 ?? null,
+      shipping_city: addr.city,
+      shipping_region: addr.region ?? null,
+      shipping_country: addr.country,
+      shipping_postal_code: addr.postalCode ?? null,
+    })
+    .eq("id", orderId)
+    .eq("user_id", userId)
+  return !error
+}
+
+/** Mark that a payment attempt has been initiated. */
+export async function markOrderPaymentInitiated(
+  userId: string,
+  orderId: string,
+  provider: string,
+  paymentIntentId: string
+): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      payment_status: "initiated",
+      payment_provider: provider,
+      payment_intent_id: paymentIntentId,
+    })
+    .eq("id", orderId)
+    .eq("user_id", userId)
+    .eq("status", "pending")
+  return !error
+}

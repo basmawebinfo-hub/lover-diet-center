@@ -89,7 +89,7 @@ export default function CartPage() {
       setPlacing(false)
     }
 
-    if (persistFailed) {
+    if (persistFailed || !persistedOrderId) {
       notify(
         t(locale, "Could not place order. Please try again.", "تعذر تأكيد الطلب. حاول مرة أخرى."),
         "error",
@@ -97,10 +97,10 @@ export default function CartPage() {
       return
     }
 
-    // Build the local order first so /dashboard/orders reflects it immediately
+    // Build the local order for the store so /dashboard/orders reflects it
     // if the user navigates before the store's refreshOrders() runs.
     const order: Order = {
-      id: persistedOrderId ?? `o_${Date.now()}`,
+      id: persistedOrderId,
       date: new Date().toISOString(),
       items: cartItems.map((it) => ({
         productId: it.product.id,
@@ -116,10 +116,10 @@ export default function CartPage() {
       total,
       status: "pending",
     }
-    setLastOrder(order)
-    setCheckedOut(true)
     placeOrderLocal(order) // clears the cart in the reducer
-    notify(t(locale, "Order placed successfully", "تم تأكيد طلبك بنجاح"), "success")
+
+    // Phase 5 · Payments — proceed to checkout page for address + Paymob.
+    router.push(`/dashboard/checkout?orderId=${persistedOrderId}`)
   }
 
   if (!state.authChecked && !user) {

@@ -88,6 +88,8 @@ export type OrderItem = {
   nameAr: string
   quantity: number
   price: number // USD — snapshot of the product price at time of purchase (see lib/currency.tsx)
+  imageUrl?: string // Snapshot of the product image URL at fetch time (added PR #20 for Orders History).
+  inStock?: boolean // Whether the product is currently buyable (added PR #20 for Reorder).
 }
 
 export type Order = {

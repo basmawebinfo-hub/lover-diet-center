@@ -9,6 +9,7 @@ import { isAdmin } from "@/lib/supabase/db"
 import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
+import { NotificationBell } from "@/components/dashboard/notification-bell"
 import {
   Home,
   Scale,
@@ -44,7 +45,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const { locale } = useLocale()
-  const { state } = useApp()
+  const { state, refreshNotifications } = useApp()
   const user = state.user
   const cartCount = state.cart.reduce((s, c) => s + c.quantity, 0)
 
@@ -66,6 +67,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     return () => { active = false }
   }, [user, router])
 
+  // Pull the user's notifications on mount + whenever the auth user changes.
+  // Errors are silent (bell just stays at 0 unread) — this is a background
+  // freshness pull, not an interactive action.
+  useEffect(() => {
+    if (!user || user.role === "admin") return
+    refreshNotifications().catch(() => {
+      /* non-fatal */
+    })
+  }, [user, refreshNotifications])
+
   // While we confirm role (and during redirect), don't flash client UI to an admin.
   if (user?.role === "admin" || !adminChecked) return null
 
@@ -73,7 +84,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#f6faf8] lg:grid lg:grid-cols-[280px_1fr]">
       {/* Sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:border-r lg:border-neutral-100 lg:bg-white">
-        <div className="flex items-center gap-2.5 px-6 py-6">
+        <div className="flex items-center justify-between px-6 py-6">
           <Link href="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
             <Image
               src="/ldc-logo.png"
@@ -86,6 +97,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               lovers<span className="text-emerald-500">dc</span>
             </span>
           </Link>
+          <NotificationBell />
         </div>
 
         {user && (
@@ -154,6 +166,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           lovers<span className="text-emerald-500">dc</span>
         </Link>
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <button
             type="button"
             onClick={() => {

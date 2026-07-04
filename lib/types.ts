@@ -203,3 +203,33 @@ export type AdminSession = {
   time: string
   status: "scheduled" | "completed" | "cancelled"
 }
+
+// ============================================================================
+// Notifications (since PR #21)
+// ----------------------------------------------------------------------------
+// Rows come from the `notifications` DB table.
+// - kind is whitelisted in the DB CHECK constraint to
+//   'order' | 'plan' | 'session' | 'system' | 'payment' | 'reminder'.
+// - read_at is the DB flag: NULL = unread, timestamp = read.
+// - href is an optional deep-link the user can follow from the list.
+// ============================================================================
+
+export type NotificationKind =
+  | "order"
+  | "plan"
+  | "session"
+  | "system"
+  | "payment"
+  | "reminder"
+
+export type UserNotification = {
+  id: string
+  kind: NotificationKind
+  titleEn: string
+  titleAr: string
+  bodyEn: string
+  bodyAr: string
+  href?: string
+  readAt?: string
+  createdAt: string
+}

@@ -991,3 +991,59 @@ export async function adminToggleBlock(userId: string, blocked: boolean): Promis
   const { error } = await supabase.from('profiles').update({ blocked }).eq('id', userId)
   return !error
 }
+
+// ============================================================================
+// Notifications (PR #21)
+// ----------------------------------------------------------------------------
+// RLS-scoped by user_id = auth.uid(); we also scope our queries to the caller's
+// userId as a belt-and-suspenders guard. Ordered by created_at DESC.
+// ============================================================================
+
+export async function fetchNotifications(
+  userId: string,
+): Promise<import('@/lib/types').UserNotification[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('id, kind, title_en, title_ar, body_en, body_ar, href, read_at, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(100)
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => ({
+    id: r.id as string,
+    kind: (r.kind as import('@/lib/types').NotificationKind) ?? 'system',
+    titleEn: (r.title_en as string) ?? '',
+    titleAr: (r.title_ar as string) ?? '',
+    bodyEn: (r.body_en as string) ?? '',
+    bodyAr: (r.body_ar as string) ?? '',
+    href: (r.href as string) ?? undefined,
+    readAt: (r.read_at as string) ?? undefined,
+    createdAt: (r.created_at as string) ?? new Date().toISOString(),
+  }))
+}
+
+export async function markNotificationRead(
+  userId: string,
+  notificationId: string,
+): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', notificationId)
+    .eq('user_id', userId)
+    .is('read_at', null) // only flip unread -> read; keep the original timestamp otherwise
+  return !error
+}
+
+export async function markAllNotificationsRead(userId: string): Promise<boolean> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .is('read_at', null)
+  return !error
+}
+

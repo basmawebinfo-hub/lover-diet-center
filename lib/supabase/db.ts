@@ -390,7 +390,9 @@ export async function adminFetchOrders() {
 export async function adminUpdateOrderStatus(orderId: string, status: string): Promise<boolean> {
   const supabase = createClient()
   const { error } = await supabase.from('orders').update({ status }).eq('id', orderId)
-  return !error
+  if (error) return false
+  void logAdminAction('status_change', 'orders', orderId, { status })
+  return true
 }
 
 export async function adminFetchSessions() {
@@ -447,13 +449,17 @@ export async function adminUpsertProduct(p: Product): Promise<boolean> {
     in_stock: p.inStock,
   }
   const { error } = await supabase.from('products').upsert(row, { onConflict: 'id' })
-  return !error
+  if (error) return false
+  void logAdminAction('upsert', 'products', p.id, { after: row })
+  return true
 }
 
 export async function adminDeleteProduct(id: string): Promise<boolean> {
   const supabase = createClient()
   const { error } = await supabase.from('products').delete().eq('id', id)
-  return !error
+  if (error) return false
+  void logAdminAction('delete', 'products', id)
+  return true
 }
 
 // Upload a product image to Supabase Storage ('product-images' bucket) -> returns public URL
@@ -464,7 +470,9 @@ export async function uploadProductImage(file: File): Promise<string | null> {
   const { error } = await supabase.storage.from('product-images').upload(path, file, { upsert: true, cacheControl: '3600' })
   if (error) return null
   const { data } = supabase.storage.from('product-images').getPublicUrl(path)
-  return data.publicUrl ?? null
+  const url = data.publicUrl ?? null
+  if (url) void logAdminAction('upload', 'product-images', path)
+  return url
 }
 
 // Public product catalog read (RLS: products are world-readable)
@@ -536,6 +544,7 @@ export async function adminUpsertMeal(m: Meal): Promise<boolean> {
     console.error('adminUpsertMeal failed', error)
     return false
   }
+  void logAdminAction('upsert', 'meals', m.id, { after: row })
   return true
 }
 
@@ -546,6 +555,7 @@ export async function adminDeleteMeal(id: string): Promise<boolean> {
     console.error('adminDeleteMeal failed', error)
     return false
   }
+  void logAdminAction('delete', 'meals', id)
   return true
 }
 
@@ -568,7 +578,9 @@ export async function uploadMealImage(file: File): Promise<string | null> {
     return null
   }
   const { data } = supabase.storage.from('meal-images').getPublicUrl(path)
-  return data.publicUrl ?? null
+  const url = data.publicUrl ?? null
+  if (url) void logAdminAction('upload', 'meal-images', path)
+  return url
 }
 
 // ---- Admin: full detail for a single client ----
@@ -609,7 +621,9 @@ export async function adminFetchClientDetail(userId: string): Promise<ClientDeta
 export async function adminUpdateSessionStatus(sessionId: string, status: string): Promise<boolean> {
   const supabase = createClient()
   const { error } = await supabase.from('sessions').update({ status }).eq('id', sessionId)
-  return !error
+  if (error) return false
+  void logAdminAction(status === 'cancelled' ? 'cancel' : 'status_change', 'sessions', sessionId, { status })
+  return true
 }
 
 // ---- User's own orders (full Order shape) ----
@@ -884,7 +898,9 @@ export async function adminCreatePlan(userId: string, meta: PlanMeta): Promise<s
     console.error('adminCreatePlan failed', error)
     return null
   }
-  return (data as { id: string }).id
+  const newId = (data as { id: string }).id
+  void logAdminAction('create', 'meal_plans', newId, { user_id: userId, meta })
+  return newId
 }
 
 // Update the metadata columns on an existing plan (does NOT touch plan_items).
@@ -907,6 +923,7 @@ export async function adminUpdatePlanMeta(planId: string, meta: PlanMeta): Promi
     console.error('adminUpdatePlanMeta failed', error)
     return false
   }
+  void logAdminAction('update', 'meal_plans', planId, { meta })
   return true
 }
 
@@ -918,6 +935,7 @@ export async function adminDeletePlan(planId: string): Promise<boolean> {
     console.error('adminDeletePlan failed', error)
     return false
   }
+  void logAdminAction('delete', 'meal_plans', planId)
   return true
 }
 
@@ -935,12 +953,16 @@ export async function adminSetPlanItems(planId: string, items: PlanItemInput[]):
     day_of_week: Math.max(0, Math.min(6, Number(i.dayOfWeek))),
     meal_id: i.mealId,
   }))
-  if (rows.length === 0) return true
+  if (rows.length === 0) {
+    void logAdminAction('unassign', 'plan_items', planId, { item_count: 0 })
+    return true
+  }
   const { error: insErr } = await supabase.from('plan_items').insert(rows)
   if (insErr) {
     console.error('adminSetPlanItems insert failed', insErr)
     return false
   }
+  void logAdminAction('assign', 'plan_items', planId, { item_count: rows.length })
   return true
 }
 
@@ -951,7 +973,7 @@ export async function adminCreateSession(s: {
   durationMinutes: number; location: string; notes?: string;
 }): Promise<boolean> {
   const supabase = createClient()
-  const { error } = await supabase.from('sessions').insert({
+  const { data, error } = await supabase.from('sessions').insert({
     user_id: s.userId,
     type: s.type,
     doctor_name: s.doctorName,
@@ -961,8 +983,12 @@ export async function adminCreateSession(s: {
     status: 'scheduled',
     location: s.location,
     notes: s.notes ?? null,
+  }).select('id').single()
+  if (error || !data) return false
+  void logAdminAction('create', 'sessions', (data as { id: string }).id, {
+    user_id: s.userId, type: s.type, date: s.date,
   })
-  return !error
+  return true
 }
 
 // Upload a user avatar to Supabase Storage ('avatars' bucket) -> public URL
@@ -982,14 +1008,18 @@ export async function uploadUserAvatar(userId: string, file: File): Promise<stri
 export async function adminDeleteClient(userId: string): Promise<boolean> {
   const supabase = createClient()
   const { error } = await supabase.from('profiles').delete().eq('id', userId)
-  return !error
+  if (error) return false
+  void logAdminAction('delete', 'profiles', userId)
+  return true
 }
 
 // ---- Admin: block / unblock a client ----
 export async function adminToggleBlock(userId: string, blocked: boolean): Promise<boolean> {
   const supabase = createClient()
   const { error } = await supabase.from('profiles').update({ blocked }).eq('id', userId)
-  return !error
+  if (error) return false
+  void logAdminAction(blocked ? 'block' : 'unblock', 'profiles', userId)
+  return true
 }
 
 // ============================================================================
@@ -1047,3 +1077,150 @@ export async function markAllNotificationsRead(userId: string): Promise<boolean>
   return !error
 }
 
+
+// ============================================================
+// Admin audit log — writes + reads (since PR #34)
+// ============================================================
+
+export type AuditAction =
+  | 'create' | 'update' | 'delete' | 'upsert'
+  | 'assign' | 'unassign'
+  | 'block' | 'unblock'
+  | 'status_change'
+  | 'upload'
+
+export type AuditLogEntry = {
+  id: string
+  createdAt: string
+  adminId: string
+  adminName: string
+  action: string
+  targetTable: string
+  targetId: string
+  diff: Record<string, unknown> | null
+  ip: string | null
+  userAgent: string | null
+}
+
+export type AuditLogFilter = {
+  action?: string        // exact match on action
+  targetTable?: string   // exact match on target_table
+  adminId?: string       // exact match on admin_id
+  from?: string          // 'YYYY-MM-DD' inclusive
+  to?: string            // 'YYYY-MM-DD' inclusive
+  search?: string        // matches target_id or admin name (client-side + server-side)
+}
+
+/**
+ * Fire-and-forget write to admin_audit_log.
+ * Never throws; the underlying admin action is authoritative. If the audit
+ * write fails (RLS, network, etc.) the app still succeeds and the log entry
+ * is dropped. This is intentional: destructive admin actions must not be
+ * blocked by an audit-side failure.
+ */
+export async function logAdminAction(
+  action: string,
+  targetTable: string,
+  targetId: string,
+  diff?: Record<string, unknown> | null,
+): Promise<void> {
+  try {
+    const supabase = createClient()
+    const { data: userRes } = await supabase.auth.getUser()
+    const adminId = userRes?.user?.id
+    if (!adminId) return
+    const row: Record<string, unknown> = {
+      admin_id: adminId,
+      action,
+      target_table: targetTable,
+      target_id: targetId,
+      diff: diff ?? null,
+    }
+    await supabase.from('admin_audit_log').insert(row)
+  } catch {
+    // Deliberately silent; audit writes are best-effort.
+  }
+}
+
+/**
+ * List admin audit log entries with server-side pagination and filters.
+ * Returns page of entries (newest first) plus the resolved admin_name column
+ * fetched via the profiles join.
+ */
+export async function adminFetchAuditLog(
+  page: number,
+  pageSize: number,
+  filter: AuditLogFilter = {},
+): Promise<AuditLogEntry[]> {
+  const supabase = createClient()
+  const from = Math.max(0, page * pageSize)
+  const to = from + Math.max(1, pageSize) - 1
+  let q = supabase
+    .from('admin_audit_log')
+    .select('id, created_at, admin_id, action, target_table, target_id, diff, ip, user_agent, profiles(name_en, email)')
+    .order('created_at', { ascending: false })
+    .range(from, to)
+  if (filter.action)      q = q.eq('action', filter.action)
+  if (filter.targetTable) q = q.eq('target_table', filter.targetTable)
+  if (filter.adminId)     q = q.eq('admin_id', filter.adminId)
+  if (filter.from)        q = q.gte('created_at', `${filter.from}T00:00:00Z`)
+  if (filter.to)          q = q.lte('created_at', `${filter.to}T23:59:59Z`)
+  if (filter.search) {
+    const s = filter.search.trim()
+    if (s) q = q.ilike('target_id', `%${s}%`)
+  }
+  const { data, error } = await q
+  if (error || !data) return []
+  return data.map((r: Record<string, unknown>) => {
+    const prof = r.profiles as { name_en?: string; email?: string } | null
+    return {
+      id: r.id as string,
+      createdAt: (r.created_at as string) ?? '',
+      adminId: (r.admin_id as string) ?? '',
+      adminName: prof?.name_en || prof?.email || '',
+      action: (r.action as string) ?? '',
+      targetTable: (r.target_table as string) ?? '',
+      targetId: (r.target_id as string) ?? '',
+      diff: (r.diff as Record<string, unknown>) ?? null,
+      ip: (r.ip as string) ?? null,
+      userAgent: (r.user_agent as string) ?? null,
+    }
+  })
+}
+
+/** Count matching entries for pagination controls. */
+export async function adminFetchAuditLogCount(filter: AuditLogFilter = {}): Promise<number> {
+  const supabase = createClient()
+  let q = supabase.from('admin_audit_log').select('id', { count: 'exact', head: true })
+  if (filter.action)      q = q.eq('action', filter.action)
+  if (filter.targetTable) q = q.eq('target_table', filter.targetTable)
+  if (filter.adminId)     q = q.eq('admin_id', filter.adminId)
+  if (filter.from)        q = q.gte('created_at', `${filter.from}T00:00:00Z`)
+  if (filter.to)          q = q.lte('created_at', `${filter.to}T23:59:59Z`)
+  if (filter.search) {
+    const s = filter.search.trim()
+    if (s) q = q.ilike('target_id', `%${s}%`)
+  }
+  const { count, error } = await q
+  if (error) return 0
+  return count ?? 0
+}
+
+/** Fetch the distinct admins who have ever produced an audit entry (for filter dropdown). */
+export async function adminFetchAuditAdmins(): Promise<{ id: string; name: string }[]> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('admin_audit_log')
+    .select('admin_id, profiles(name_en, email)')
+    .order('created_at', { ascending: false })
+    .limit(500)
+  if (error || !data) return []
+  const seen = new Map<string, { id: string; name: string }>()
+  for (const r of data as Record<string, unknown>[]) {
+    const id = r.admin_id as string
+    if (!id || seen.has(id)) continue
+    const prof = r.profiles as { name_en?: string; email?: string } | null
+    seen.set(id, { id, name: prof?.name_en || prof?.email || id.slice(0, 8) })
+  }
+  return Array.from(seen.values())
+}

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, UserPlus, User, Mail, Lock, Phone } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
+import { checkRateLimitClient } from '@/lib/security/rate-limit-client'
 import { COUNTRIES, DEFAULT_COUNTRY } from '@/lib/countries'
 import { GoogleButton } from '@/components/ui/google-button'
 
@@ -60,6 +61,19 @@ export function SignUpForm() {
 
     setIsLoading(true)
     try {
+      // Rate-limit pre-check (Phase 4 · M-01). 5/min per IP. Fails-open.
+      const gate = await checkRateLimitClient('sign_up', form.email.toLowerCase().trim())
+      if (!gate.ok) {
+        setError(
+          t(
+            locale,
+            `${gate.message} (retry in ${gate.retryAfterSec}s)`,
+            `طلبات كثيرة. يرجى الانتظار قليلاً ثم إعادة المحاولة (${gate.retryAfterSec} ثانية).`,
+          ),
+        )
+        return
+      }
+
       const supabase = createClient()
       const dial = COUNTRIES.find((c) => c.code === country)?.dial ?? ''
       const fullPhone = `${dial}${form.phone.replace(/[^0-9]/g, '')}`

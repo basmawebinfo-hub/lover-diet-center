@@ -15,15 +15,19 @@ export const metadata: Metadata = {
   },
 }
 
+// /en is the Arabic-first mirror. Route-locked to `ar` regardless of the
+// user's saved cookie — the URL contract itself signals the language choice.
+// Server Component: no client JS beyond the widgets that need it (FAQ, header).
 export default function EnHomePage() {
+  const locale = 'ar' as const
   return (
     <>
-      <HeroSection />
-      <WhatWeOffer />
-      <Testimonials />
-      <FAQ />
-      <FinalCTA />
-      <FooterSimple />
+      <HeroSection locale={locale} />
+      <WhatWeOffer locale={locale} />
+      <Testimonials locale={locale} />
+      <FAQ locale={locale} />
+      <FinalCTA locale={locale} />
+      <FooterSimple locale={locale} />
     </>
   )
 }

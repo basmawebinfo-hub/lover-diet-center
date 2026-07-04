@@ -8,6 +8,7 @@ import { FinalCTA }      from '@/components/landing/final-cta'
 import { FooterSimple }  from '@/components/ui/footer'
 import { Reveal }        from '@/components/ui/reveal'
 import { canonical } from '@/lib/seo'
+import { getLocaleServer } from '@/lib/locale-server'
 
 // NOTE: do NOT redeclare `openGraph` here. The root layout already ships a
 // full openGraph object with images. If we override it here without redeclaring
@@ -19,16 +20,20 @@ export const metadata: Metadata = {
   alternates: { canonical: canonical('/') },
 }
 
-export default function HomePage() {
+// Server Component. Reads locale server-side and passes it down to each
+// landing block, so every child (except Reveal, FAQ, and the header shell)
+// stays a Server Component with zero client JS.
+export default async function HomePage() {
+  const locale = await getLocaleServer()
   return (
     <>
-      <HeroSection />
-      <Reveal><HowItWorks /></Reveal>
-      <Reveal><WhatWeOffer /></Reveal>
-      <Reveal><Testimonials /></Reveal>
-      <Reveal><FAQ /></Reveal>
-      <Reveal><FinalCTA /></Reveal>
-      <FooterSimple />
+      <HeroSection locale={locale} />
+      <Reveal><HowItWorks locale={locale} /></Reveal>
+      <Reveal><WhatWeOffer locale={locale} /></Reveal>
+      <Reveal><Testimonials locale={locale} /></Reveal>
+      <Reveal><FAQ locale={locale} /></Reveal>
+      <Reveal><FinalCTA locale={locale} /></Reveal>
+      <FooterSimple locale={locale} />
     </>
   )
 }

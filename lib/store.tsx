@@ -68,6 +68,7 @@ type Action =
   | { type: "MARK_INTRO_SEEN" }
   | { type: "UPDATE_AVATAR"; payload: User["avatarConfig"] }
   | { type: "UPDATE_PLAN"; payload: DoctorPlan }
+  | { type: "CLEAR_PLAN" }
   | { type: "ADD_SESSION"; payload: Session }
   | { type: "UPDATE_SESSION"; payload: { id: string; changes: Partial<Session> } }
   | { type: "PLACE_ORDER"; payload: Order }
@@ -204,6 +205,8 @@ function reducer(state: AppState, action: Action): AppState {
       return state.user ? { ...state, user: { ...state.user, avatarConfig: action.payload } } : state
     case "UPDATE_PLAN":
       return { ...state, doctorPlan: action.payload }
+    case "CLEAR_PLAN":
+      return { ...state, doctorPlan: null }
     case "ADD_SESSION":
       return { ...state, sessions: [action.payload, ...state.sessions] }
     case "UPDATE_SESSION":
@@ -252,6 +255,7 @@ type AppContextValue = {
   markIntroSeen: () => void
   updateAvatar: (cfg: User["avatarConfig"]) => void
   updatePlan: (plan: DoctorPlan) => void
+  refreshPlan: () => Promise<void>
   addSession: (s: Session) => void
   refreshSessions: () => Promise<void>
   updateSession: (id: string, changes: Partial<Session>) => void
@@ -507,6 +511,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     (plan: DoctorPlan) => dispatch({ type: "UPDATE_PLAN", payload: plan }),
     []
   )
+  const refreshPlan = useCallback(async () => {
+    // Pull the latest meal_plans + plan_items for the signed-in user straight
+    // from the DB. This catches plan edits an admin made after the user's
+    // initial hydration. If the fetch returns null we clear any stale local
+    // plan so the empty-state renders.
+    const supabase = createClient()
+    const { data } = await supabase.auth.getUser()
+    if (!data.user) return
+    const plan = await fetchUserPlan(data.user.id)
+    if (plan) {
+      dispatch({ type: "UPDATE_PLAN", payload: plan })
+    } else {
+      dispatch({ type: "CLEAR_PLAN" })
+    }
+  }, [])
   const addSession = useCallback(
     (s: Session) => {
       dispatch({ type: "ADD_SESSION", payload: s })
@@ -589,6 +608,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       markIntroSeen,
       updateAvatar,
       updatePlan,
+      refreshPlan,
       addSession,
       refreshSessions,
       updateSession,
@@ -610,6 +630,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       markIntroSeen,
       updateAvatar,
       updatePlan,
+      refreshPlan,
       addSession,
       refreshSessions,
       updateSession,

@@ -101,7 +101,7 @@ export function productJsonLd(p: {
     offers: {
       '@type': 'Offer',
       url: `${SITE_URL}/shop/${p.id}`,
-      priceCurrency: 'AED',
+      priceCurrency: 'USD',
       price: p.price,
       availability:
         p.inStock === false

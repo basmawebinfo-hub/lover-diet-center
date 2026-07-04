@@ -124,7 +124,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 disabled={!product.inStock}
                 className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-emerald-400 to-emerald-500 px-6 py-4 text-base font-bold text-emerald-950 shadow-lg shadow-emerald-500/40 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:from-neutral-200 disabled:to-neutral-200 disabled:text-neutral-400 disabled:shadow-none"
               >
-                {added ? (<><Check className="size-5" /> {t(locale,"Added!","تمت الإضافة!")}</>) : (<><ShoppingCart className="size-5" /> {t(locale,"Buy Now","اشترِ الآن")} · {product.price * qty} {t(locale,"AED","درهم")}</>)}
+                {added ? (<><Check className="size-5" /> {t(locale,"Added!","تمت الإضافة!")}</>) : (<><ShoppingCart className="size-5" /> {t(locale,"Buy Now","اشترِ الآن")} · {format(product.price * qty)}</>)}
               </button>
             </div>
 

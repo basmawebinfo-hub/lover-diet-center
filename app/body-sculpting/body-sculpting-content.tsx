@@ -16,6 +16,13 @@ export function BodySculptingContent() {
     t(locale, 'Combines with nutrition plan for best results', 'تتكامل مع خطة التغذية لأفضل النتائج'),
   ]
 
+  // Marketing pricing for the UAE market.
+  // These package prices are INTENTIONALLY fixed in AED — they are marketing
+  // copy for the UAE audience, not database-backed products. Do NOT connect
+  // them to the CurrencyProvider (useCurrency) or run them through format().
+  // This is a deliberate business decision (2026-07-04), not technical debt.
+  // If Body Sculpting later becomes a real bookable product, add it to the
+  // products table (USD) and wire it through format() like the shop uses.
   const sessions = [
     { name: t(locale, 'Starter Pack', 'باقة البداية'), sessions: 4, price: 799 },
     { name: t(locale, 'Transformation Pack', 'باقة التحوّل'), sessions: 8, price: 1399, popular: true },

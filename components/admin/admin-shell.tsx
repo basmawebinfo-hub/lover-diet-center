@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import {
   LayoutDashboard, Users, ShoppingBag, Package, Apple, Calendar,
-  BarChart3, LogOut, ShieldAlert, Menu, X, ChevronLeft, Home,
+  BarChart3, LogOut, ShieldAlert, Menu, X, ChevronLeft, Home, ClipboardList,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -36,6 +36,7 @@ const NAV_GROUPS: { titleEn: string; titleAr: string; items: NavItem[] }[] = [
     titleEn: "Insights", titleAr: "التحليل",
     items: [
       { href: "/admin/analytics", en: "Analytics", ar: "التحليلات", icon: BarChart3 },
+      { href: "/admin/audit", en: "Audit Log", ar: "سجل التدقيق", icon: ClipboardList },
     ],
   },
 ]

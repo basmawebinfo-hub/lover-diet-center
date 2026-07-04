@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { fetchProfile, fetchUserOrders } from "@/lib/supabase/db"
-import { useApp } from "@/lib/store"
 import { useCurrency } from "@/lib/currency"
 import { useLocale, t } from "@/lib/locale"
 import { useToast } from "@/components/ui/toast"
@@ -31,7 +30,6 @@ function CheckoutInner() {
   const orderId = searchParams.get("orderId") ?? ""
   const { locale } = useLocale()
   const { format } = useCurrency()
-  const { state } = useApp()
   const { notify } = useToast()
 
   const [ready, setReady] = useState(false)
@@ -81,7 +79,6 @@ function CheckoutInner() {
           phone: profile?.phone ?? "",
           email: data.user!.email ?? "",
           city: profile?.city ?? "",
-          country: profile?.country ?? DEFAULT_COUNTRY,
         }))
       }
       setReady(true)

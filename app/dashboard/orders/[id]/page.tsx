@@ -14,13 +14,13 @@ type PaymentStatusLocal = "paid" | "failed" | "pending" | null
 
 function OrderDetailInner() {
   const router = useRouter()
-  const params = useParams<{ id: string }>()
+  const params = useParams()
   const searchParams = useSearchParams()
   const success = searchParams.get("success") === "true"
   const { locale } = useLocale()
   const { format } = useCurrency()
 
-  const orderId = params?.id ?? ""
+  const orderId = String(params?.id ?? "")
 
   const [ready, setReady] = useState(false)
   const [order, setOrder] = useState<Order | null>(null)

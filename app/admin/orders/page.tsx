@@ -7,12 +7,14 @@ import { adminFetchOrders, adminUpdateOrderStatus } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 import { useCurrency } from "@/lib/currency"
+import { useToast } from "@/components/ui/toast"
 
 const FLOW: AdminOrder["status"][] = ["pending","processing","shipped","delivered","cancelled"]
 
 export default function AdminOrdersPage() {
   const { locale } = useLocale()
   const { format } = useCurrency()
+  const { notify } = useToast()
   const [orders, setOrders] = useState<AdminOrder[]>([])
   const [filter, setFilter] = useState<"all" | AdminOrder["status"]>("all")
 
@@ -26,9 +28,15 @@ export default function AdminOrdersPage() {
   const statusLbl: Record<string,{en:string;ar:string}> = { pending:{en:"Pending",ar:"قيد الانتظار"}, processing:{en:"Processing",ar:"قيد التجهيز"}, shipped:{en:"Shipped",ar:"تم الشحن"}, delivered:{en:"Delivered",ar:"تم التوصيل"}, cancelled:{en:"Cancelled",ar:"ملغي"} }
 
   const shown = filter==="all" ? orders : orders.filter(o=>o.status===filter)
-  const setStatus = (id:string, s:AdminOrder["status"]) => {
-    setOrders(prev=>prev.map(o=>o.id===id?{...o,status:s}:o))
-    adminUpdateOrderStatus(id, s).catch(()=>{})
+  const setStatus = async (id: string, s: AdminOrder["status"]) => {
+    const previous = orders
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, status: s } : o))
+    const ok = await adminUpdateOrderStatus(id, s)
+    if (!ok) {
+      // Roll back the optimistic update and surface the failure.
+      setOrders(previous)
+      notify(t(locale, "Could not update order status.", "تعذر تحديث حالة الطلب."), "error")
+    }
   }
 
   return (

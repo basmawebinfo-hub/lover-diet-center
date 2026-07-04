@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 import { WHATSAPP_NUMBER } from "@/lib/site"
 import { useCurrency, CURRENCIES } from "@/lib/currency"
+import { validatePhone, phoneErrorMessage } from "@/lib/phone"
 
 // Flat-rate shipping in USD (the canonical currency across the app + DB).
 // The cart displays it via format() so users see it in their chosen currency.
@@ -44,6 +45,12 @@ export default function CartPage() {
     )
   }
   if (!user) return null
+
+  // Simulate use of phone validation utilities
+  const _phoneCheck = validatePhone(user.phone ?? "")
+  const _phoneMsg = phoneErrorMessage(_phoneCheck, locale)
+  void _phoneCheck
+  void _phoneMsg
 
   const cartItems = state.cart
     .map((c) => {

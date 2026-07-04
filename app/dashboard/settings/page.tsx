@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { Save, User as UserIcon, Target, ShieldCheck, Camera, Loader2 } from "lucide-react"
+import { Save, User as UserIcon, Target, ShieldCheck, Camera, Loader2, KeyRound, Sliders, Eye, EyeOff } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { TransformationSlider } from "@/components/dashboard/transformation-slider"
 import { useApp } from "@/lib/store"
@@ -12,6 +12,7 @@ import type { ActivityLevel, Gender, GoalType, User } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
 import { useToast } from "@/components/ui/toast"
+import { useCurrency, CURRENCIES } from "@/lib/currency"
 import { createClient } from "@/lib/supabase/client"
 import { upsertProfile, uploadUserAvatar } from "@/lib/supabase/db"
 
@@ -34,14 +35,16 @@ type Tab = "profile" | "goal" | "account"
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { locale } = useLocale()
+  const { locale, setLocale } = useLocale()
   const { notify } = useToast()
+  const { currency, setCurrency } = useCurrency()
   const { state, setUser, resetOnboarding } = useApp()
   const user = state.user
 
   const [tab, setTab] = useState<Tab>("profile")
   const [draft, setDraft] = useState<User | null>(user)
   const [dirty, setDirty] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (state.authChecked && !user) router.replace("/onboarding")
@@ -64,21 +67,29 @@ export default function SettingsPage() {
 
   const targetWeight = idealWeightKg(draft.heightCm, draft.gender)
 
-  function save() {
+  async function save() {
     if (!draft) return
+    setSaving(true)
     const nextAvatar = buildAvatarConfig({
       gender: draft.gender, heightCm: draft.heightCm,
       currentWeightKg: draft.currentWeightKg, startWeightKg: draft.startWeightKg, goal: draft.goal,
     }, state.weightLogs)
     const updated = { ...draft, avatarConfig: nextAvatar }
+    // Persist to Supabase first; only mirror to local store on success.
+    const supabase = createClient()
+    const { data: authData } = await supabase.auth.getUser()
+    let ok = true
+    if (authData.user) {
+      ok = await upsertProfile(authData.user.id, updated)
+    }
+    setSaving(false)
+    if (!ok) {
+      notify(t(locale, "Save failed — please try again.", "فشل الحفظ — يرجى المحاولة مرة أخرى."), "error")
+      return
+    }
     setUser(updated)
     setDirty(false)
     notify(t(locale, "Changes saved", "تم حفظ التغييرات"), "success")
-    // Persist to Supabase if signed in
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) upsertProfile(data.user.id, updated).catch(() => {})
-    })
   }
 
   const initials = (draft.nameEn || "U").trim().charAt(0).toUpperCase()
@@ -88,6 +99,15 @@ export default function SettingsPage() {
   async function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    // Client-side guard mirroring the storage bucket policy (10 MB, image MIME).
+    if (!file.type.startsWith("image/")) {
+      notify(t(locale, "Only image files are allowed.", "يُسمح بملفات الصور فقط."), "error")
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      notify(t(locale, "Image must be under 10 MB.", "الصورة يجب أن تكون أقل من 10 ميغابايت."), "error")
+      return
+    }
     const supabase = createClient()
     const { data } = await supabase.auth.getUser()
     if (!data.user) { notify(t(locale, "Please sign in again.", "يرجى تسجيل الدخول مجدداً."), "error"); return }
@@ -99,7 +119,7 @@ export default function SettingsPage() {
       if (state.user) setUser({ ...state.user, avatarUrl: url })
       notify(t(locale, "Photo updated", "تم تحديث الصورة"), "success")
     } else {
-      notify(t(locale, "Upload failed (check the 'avatars' bucket).", "فشل الرفع (تحقق من bucket 'avatars')."), "error")
+      notify(t(locale, "Upload failed. Try a smaller image.", "فشل الرفع. جرّب صورة أصغر."), "error")
     }
   }
 
@@ -145,16 +165,16 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={save}
-            disabled={!dirty}
+            disabled={!dirty || saving}
             className={cn(
               "inline-flex items-center justify-center gap-1.5 rounded-xl px-5 py-3 text-sm font-bold transition",
-              dirty
+              dirty && !saving
                 ? "bg-lime-700 text-white shadow-sm hover:bg-lime-800"
                 : "cursor-not-allowed bg-neutral-100 text-neutral-400"
             )}
           >
-            <Save className="size-4" />
-            {dirty ? t(locale, "Save changes", "حفظ التغييرات") : t(locale, "Saved", "محفوظ")}
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+            {saving ? t(locale, "Saving...", "جارٍ الحفظ...") : dirty ? t(locale, "Save changes", "حفظ التغييرات") : t(locale, "Saved", "محفوظ")}
           </button>
         </section>
 
@@ -188,8 +208,10 @@ export default function SettingsPage() {
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
                 <FieldText label={t(locale, "Full name", "الاسم الكامل")} value={draft.nameEn} onChange={(v) => set("nameEn", v)} />
                 <FieldText label={t(locale, "Email", "البريد الإلكتروني")} value={draft.email} onChange={(v) => set("email", v)} type="email" />
+                <FieldText label={t(locale, "Phone", "رقم الهاتف")} value={draft.phone ?? ""} onChange={(v) => set("phone", v)} type="tel" />
                 <FieldNumber label={t(locale, "Age", "العمر")} value={draft.age} onChange={(v) => set("age", v)} suffix={t(locale, "years", "سنة")} />
                 <FieldNumber label={t(locale, "Height", "الطول")} value={draft.heightCm} onChange={(v) => set("heightCm", v)} suffix={t(locale, "cm", "سم")} />
+                <FieldNumber label={t(locale, "Current weight", "الوزن الحالي")} value={draft.currentWeightKg} onChange={(v) => set("currentWeightKg", v)} suffix={t(locale, "kg", "كجم")} />
               </div>
 
               {/* Gender selector */}
@@ -284,14 +306,38 @@ export default function SettingsPage() {
         {/* ACCOUNT TAB */}
         {tab === "account" && (
           <section className="space-y-4">
+            {/* Preferences */}
             <div className="rounded-3xl border border-neutral-100 bg-white p-6">
-              <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Account settings", "إعدادات الحساب")}</h2>
-              <div className="mt-5 space-y-3">
-                <RowAction label={t(locale, "Change password", "تغيير كلمة المرور")} hint={t(locale, "Coming soon", "قريباً")} onClick={() => notify(t(locale, "Password change coming soon", "تغيير كلمة المرور قريباً"))} />
-                <RowAction label={t(locale, "Notification preferences", "تفضيلات الإشعارات")} hint={t(locale, "Coming soon", "قريباً")} onClick={() => notify(t(locale, "Notifications coming soon", "الإشعارات قريباً"))} />
+              <div className="flex items-center gap-2">
+                <Sliders className="size-4 text-lime-700" />
+                <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Preferences", "التفضيلات")}</h2>
+              </div>
+              <p className="mt-1 text-sm text-neutral-500">{t(locale, "Language and display currency. Saved on this device.", "اللغة وعملة العرض. محفوظة على هذا الجهاز.")}</p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-neutral-700">{t(locale, "Language", "اللغة")}</label>
+                  <select value={locale} onChange={(e) => setLocale(e.target.value as "en" | "ar")}
+                    className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm font-semibold text-neutral-900 focus:border-lime-400 focus:outline-none focus:ring-2 focus:ring-lime-100">
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-neutral-700">{t(locale, "Display currency", "عملة العرض")}</label>
+                  <select value={currency} onChange={(e) => setCurrency(e.target.value as typeof currency)}
+                    className="w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm font-semibold text-neutral-900 focus:border-lime-400 focus:outline-none focus:ring-2 focus:ring-lime-100">
+                    {CURRENCIES.map((c) => (
+                      <option key={c.code} value={c.code}>{locale === "ar" ? c.ar : c.en} ({c.code})</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
 
+            {/* Password change */}
+            <ChangePasswordCard locale={locale} email={draft.email} />
+
+            {/* Danger zone */}
             <div className="rounded-3xl border border-red-100 bg-red-50/40 p-6">
               <h2 className="text-lg font-bold text-red-700">{t(locale, "Danger zone", "منطقة الخطر")}</h2>
               <p className="mt-1 text-sm text-neutral-500">{t(locale, "This resets your local profile and progress on this device.", "هذا يعيد ضبط ملفك وتقدّمك على هذا الجهاز.")}</p>
@@ -312,6 +358,170 @@ export default function SettingsPage() {
         )}
       </div>
     </DashboardShell>
+  )
+}
+
+// ============================================================================
+// Change Password card — extracted so the state for the mini-form is local.
+// ----------------------------------------------------------------------------
+// Flow:
+//   1. User enters current password + new password + confirm.
+//   2. Client-side validates: min 8 chars, new != current, confirm == new.
+//   3. Verify current password by calling signInWithPassword({ email, current }).
+//      Supabase has no dedicated "verify password" endpoint; a fresh sign-in
+//      returns the same session (or an error). The session cookie is refreshed
+//      but the auth state is unchanged from the user's perspective.
+//   4. If verified, call updateUser({ password: new }). Session stays.
+//   5. Toast success. Clear the form.
+// Error surface: any Supabase message is surfaced in a compact inline error.
+// ============================================================================
+function ChangePasswordCard({ locale, email }: { locale: "en" | "ar"; email: string }) {
+  const { notify } = useToast()
+  const [current, setCurrent] = useState("")
+  const [next, setNext] = useState("")
+  const [confirmVal, setConfirmVal] = useState("")
+  const [showCurrent, setShowCurrent] = useState(false)
+  const [showNext, setShowNext] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+
+  const minLen = 8
+  const nextValid = next.length >= minLen
+  const differs = next.length > 0 && next !== current
+  const matches = confirmVal.length > 0 && confirmVal === next
+  const canSubmit = !busy && current.length > 0 && nextValid && differs && matches
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!canSubmit) return
+    setErr(null)
+    setBusy(true)
+    const supabase = createClient()
+    // Step 1: verify current password by attempting a fresh sign-in.
+    // This does not disturb the existing session — signInWithPassword returns
+    // a session and Supabase silently updates the cookie to the same user.
+    const { error: verifyErr } = await supabase.auth.signInWithPassword({ email, password: current })
+    if (verifyErr) {
+      setBusy(false)
+      const msg = verifyErr.message?.toLowerCase() ?? ""
+      if (msg.includes("invalid login credentials") || msg.includes("invalid credentials")) {
+        setErr(t(locale, "Current password is incorrect.", "كلمة المرور الحالية غير صحيحة."))
+      } else {
+        setErr(verifyErr.message || t(locale, "Could not verify current password.", "تعذر التحقق من كلمة المرور الحالية."))
+      }
+      return
+    }
+    // Step 2: update the password. Session stays intact per Supabase docs.
+    const { error: updateErr } = await supabase.auth.updateUser({ password: next })
+    setBusy(false)
+    if (updateErr) {
+      setErr(updateErr.message || t(locale, "Could not update password. Please try again.", "تعذر تحديث كلمة المرور. يرجى المحاولة مرة أخرى."))
+      return
+    }
+    setCurrent("")
+    setNext("")
+    setConfirmVal("")
+    setShowCurrent(false)
+    setShowNext(false)
+    notify(t(locale, "Password updated", "تم تحديث كلمة المرور"), "success")
+  }
+
+  return (
+    <div className="rounded-3xl border border-neutral-100 bg-white p-6">
+      <div className="flex items-center gap-2">
+        <KeyRound className="size-4 text-lime-700" />
+        <h2 className="text-lg font-bold text-neutral-900">{t(locale, "Change password", "تغيير كلمة المرور")}</h2>
+      </div>
+      <p className="mt-1 text-sm text-neutral-500">
+        {t(locale, "Enter your current password, then choose a new one (minimum 8 characters).", "أدخل كلمة المرور الحالية، ثم اختر كلمة مرور جديدة (٨ أحرف على الأقل).")}
+      </p>
+      <form onSubmit={submit} className="mt-5 space-y-3" autoComplete="off">
+        <FieldPassword
+          label={t(locale, "Current password", "كلمة المرور الحالية")}
+          value={current}
+          onChange={setCurrent}
+          show={showCurrent}
+          onToggle={() => setShowCurrent((v) => !v)}
+          autoComplete="current-password"
+          testId="current-password"
+        />
+        <FieldPassword
+          label={t(locale, "New password", "كلمة المرور الجديدة")}
+          value={next}
+          onChange={setNext}
+          show={showNext}
+          onToggle={() => setShowNext((v) => !v)}
+          autoComplete="new-password"
+          testId="new-password"
+          hint={next.length > 0 && next.length < minLen ? t(locale, `At least ${minLen} characters.`, `على الأقل ${minLen} أحرف.`) : next.length > 0 && !differs ? t(locale, "New password must be different from current.", "كلمة المرور الجديدة يجب أن تختلف عن الحالية.") : undefined}
+        />
+        <FieldPassword
+          label={t(locale, "Confirm new password", "تأكيد كلمة المرور الجديدة")}
+          value={confirmVal}
+          onChange={setConfirmVal}
+          show={showNext}
+          onToggle={() => setShowNext((v) => !v)}
+          autoComplete="new-password"
+          testId="confirm-password"
+          hint={confirmVal.length > 0 && !matches ? t(locale, "Passwords do not match.", "كلمتا المرور غير متطابقتين.") : undefined}
+        />
+        {err && (
+          <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {err}
+          </div>
+        )}
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className={cn(
+            "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition",
+            canSubmit ? "bg-lime-700 text-white shadow-sm hover:bg-lime-800" : "cursor-not-allowed bg-neutral-100 text-neutral-400"
+          )}
+        >
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
+          {busy ? t(locale, "Updating...", "جارٍ التحديث...") : t(locale, "Update password", "تحديث كلمة المرور")}
+        </button>
+      </form>
+    </div>
+  )
+}
+
+function FieldPassword({
+  label, value, onChange, show, onToggle, autoComplete, hint, testId,
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  show: boolean
+  onToggle: () => void
+  autoComplete: string
+  hint?: string
+  testId?: string
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-semibold text-neutral-700">{label}</label>
+      <div className="relative flex items-center rounded-xl border border-neutral-200 bg-white focus-within:border-lime-400 focus-within:ring-2 focus-within:ring-lime-100">
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          autoComplete={autoComplete}
+          data-testid={testId}
+          className="w-full bg-transparent px-4 py-2.5 text-sm text-neutral-900 outline-none"
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          className="px-3 text-neutral-400 hover:text-neutral-600"
+          aria-label={show ? "Hide password" : "Show password"}
+          tabIndex={-1}
+        >
+          {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      </div>
+      {hint && <p className="mt-1 text-xs font-medium text-amber-600">{hint}</p>}
+    </div>
   )
 }
 
@@ -337,17 +547,6 @@ function FieldNumber({ label, value, onChange, suffix }: { label: string; value:
     </div>
   )
 }
-
-function RowAction({ label, hint, onClick }: { label: string; hint: string; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick}
-      className="flex w-full items-center justify-between rounded-xl border border-neutral-100 bg-neutral-50/50 px-4 py-3.5 text-start transition hover:border-lime-200 hover:bg-lime-50/40">
-      <span className="text-sm font-semibold text-neutral-800">{label}</span>
-      <span className="text-xs text-neutral-400">{hint}</span>
-    </button>
-  )
-}
-
 
 function Mini({ label, value }: { label: string; value: string }) {
   return (

@@ -525,7 +525,7 @@ function RevenueChart({
 }: {
   series: { unit: "day" | "month"; buckets: { key: string; label: string; full: string; value: number }[] }
   range: Range
-  locale: string
+  locale: "en" | "ar"
   formatCurrency: (n: number) => string
 }) {
   const values = series.buckets.map((b) => b.value)
@@ -585,7 +585,7 @@ function RevenueChart({
   )
 }
 
-function OrderStatusCard({ buckets, totalOrders, locale }: { buckets: { key: string; value: number; color: string }[]; totalOrders: number; locale: string }) {
+function OrderStatusCard({ buckets, totalOrders, locale }: { buckets: { key: string; value: number; color: string }[]; totalOrders: number; locale: "en" | "ar" }) {
   const withValues = buckets.filter((b) => b.value > 0)
   const total = buckets.reduce((s, b) => s + b.value, 0)
   return (
@@ -636,7 +636,7 @@ function SessionStatusCard({
 }: {
   buckets: { key: string; value: number; color: string }[]
   totalSessions: number
-  locale: string
+  locale: "en" | "ar"
 }) {
   const total = buckets.reduce((s, b) => s + b.value, 0)
   const size = 200
@@ -726,7 +726,7 @@ function SignupsCard({
   series: { unit: "day" | "month"; buckets: { key: string; label: string; full: string; value: number }[] }
   range: Range
   newClients: number
-  locale: string
+  locale: "en" | "ar"
 }) {
   const values = series.buckets.map((b) => b.value)
   const max = Math.max(...values, 1)
@@ -785,7 +785,7 @@ function SignupsCard({
   )
 }
 
-function GenderCard({ genderDist, locale }: { genderDist: { female: number; male: number; total: number }; locale: string }) {
+function GenderCard({ genderDist, locale }: { genderDist: { female: number; male: number; total: number }; locale: "en" | "ar" }) {
   const total = genderDist.total
   return (
     <ChartCard title={t(locale, "Clients by gender", "العملاء حسب الجنس")}>
@@ -825,7 +825,7 @@ function GoalDistributionCard({
 }: {
   title: string
   buckets: { key: string; value: number; color: string }[]
-  locale: string
+  locale: "en" | "ar"
 }) {
   const total = buckets.reduce((s, b) => s + b.value, 0)
   return (
@@ -884,7 +884,7 @@ function ProductCategoryCard({
 }: {
   categories: { key: string; value: number; color: string }[]
   stockHealth: { total: number; inStock: number; outOfStock: number }
-  locale: string
+  locale: "en" | "ar"
 }) {
   const total = categories.reduce((s, b) => s + b.value, 0)
   return (
@@ -949,7 +949,7 @@ function PlanCaloriesCard({
 }: {
   buckets: { key: string; value: number }[]
   totalPlans: number
-  locale: string
+  locale: "en" | "ar"
 }) {
   const total = buckets.reduce((s, b) => s + b.value, 0)
   const max = Math.max(1, ...buckets.map((b) => b.value))
@@ -990,7 +990,7 @@ function WeightProgressCard({
   locale,
 }: {
   stats: null | { withData: number; avgDelta: number; onTrack: number; progressing: number; stagnant: number; withTarget: number }
-  locale: string
+  locale: "en" | "ar"
 }) {
   return (
     <ChartCard title={t(locale, "Weight progress", "تقدم الوزن")}>

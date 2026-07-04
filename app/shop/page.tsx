@@ -24,40 +24,61 @@ export default function ShopPage() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]["id"]>("all")
   const [products, setProducts] = useState<Product[] | null>(null)
+  const [error, setError] = useState(false)
 
-  useEffect(() => { fetchProducts().then(setProducts) }, [])
+  useEffect(() => {
+    let active = true
+    fetchProducts()
+      .then((p) => {
+        if (active) setProducts(p)
+      })
+      .catch(() => {
+        if (active) setError(true)
+      })
+    return () => { active = false }
+  }, [])
 
   const filtered = useMemo(() => {
     return (products ?? []).filter((p) => {
       if (category !== "all" && p.category !== category) return false
       if (search) {
         const q = search.toLowerCase()
-        return p.nameEn.toLowerCase().includes(q) || p.nameAr.includes(search) || p.descriptionEn.toLowerCase().includes(q)
+        return (
+          p.nameEn.toLowerCase().includes(q) ||
+          p.nameAr.includes(search) ||
+          p.descriptionEn.toLowerCase().includes(q)
+        )
       }
       return true
     })
   }, [products, search, category])
 
-
   return (
     <main className="min-h-screen bg-[#f6faf8]">
       {/* Hero */}
       <section className="bg-gradient-to-br from-[#0D4F4A] via-[#15604f] to-[#10b981] px-4 pt-28 pb-16 text-center text-white">
-        <h1 className="text-4xl font-extrabold sm:text-5xl animate-fade-up">{t(locale, "Our Shop", "متجرنا")}</h1>
+        <h1 className="text-4xl font-extrabold sm:text-5xl animate-fade-up">
+          {t(locale, "Our Shop", "متجرنا")}
+        </h1>
         <p className="mx-auto mt-3 max-w-xl text-white/80 animate-fade-up delay-200">
-          {t(locale, "Healthy snacks, drinks and supplements — handpicked by our nutrition team.", "سناكس صحية، مشروبات، ومكمّلات — مختارة بعناية من فريق التغذية لدينا.")}
+          {t(
+            locale,
+            "Healthy snacks, drinks and supplements — handpicked by our nutrition team.",
+            "سناكس صحية، مشروبات، ومكمّلات — مختارة بعناية من فريق التغذية لدينا.",
+          )}
         </p>
       </section>
 
       <div className="mx-auto max-w-6xl px-4 py-10">
-        {/* Search + categories */}
+        {/* Search + filters */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2.5 sm:w-72">
-            <Search className="size-4 text-neutral-400" />
+            <Search className="size-4 text-neutral-400" aria-hidden />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t(locale, "Search products…", "ابحث عن منتج…")}
+              aria-label={t(locale, "Search products", "ابحث عن منتج")}
               className="w-full bg-transparent text-sm text-neutral-900 outline-none placeholder:text-neutral-400"
             />
           </div>
@@ -65,19 +86,24 @@ export default function ShopPage() {
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value as typeof currency)}
-              className="rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 focus:border-emerald-400 focus:outline-none"
+              className="rounded-full border border-neutral-200 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
               aria-label={t(locale, "Currency", "العملة")}
             >
-              {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
+              {CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code}>{c.code}</option>
+              ))}
             </select>
             {CATEGORIES.map((c) => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => setCategory(c.id)}
+                aria-pressed={category === c.id}
                 className={cn(
-                  "rounded-full px-4 py-2 text-sm font-semibold transition",
-                  category === c.id ? "bg-emerald-600 text-white" : "bg-white text-neutral-600 hover:bg-emerald-50"
+                  "rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-emerald-200",
+                  category === c.id
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white text-neutral-600 hover:bg-emerald-50",
                 )}
               >
                 {locale === "ar" ? c.labelAr : c.label}
@@ -87,30 +113,75 @@ export default function ShopPage() {
         </div>
 
         {/* Grid */}
-        {products === null ? (
-          <p className="py-16 text-center text-neutral-400">{t(locale, "Loading…", "جارٍ التحميل…")}</p>
+        {error ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+            <p className="text-sm font-semibold text-red-700">
+              {t(locale, "Could not load products.", "تعذّر تحميل المنتجات.")}
+            </p>
+            <button
+              type="button"
+              onClick={() => { setError(false); fetchProducts().then(setProducts).catch(() => setError(true)) }}
+              className="mt-3 rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+            >
+              {t(locale, "Try again", "إعادة المحاولة")}
+            </button>
+          </div>
+        ) : products === null ? (
+          <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+              <div key={i} className="h-72 animate-pulse rounded-3xl bg-neutral-100" />
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
-          <p className="py-16 text-center text-neutral-400">{t(locale, "No products yet. Check back soon!", "لا توجد منتجات بعد. تابعنا قريباً!")}</p>
+          <div className="rounded-2xl border-2 border-dashed border-neutral-200 bg-white p-10 text-center">
+            <p className="text-sm font-semibold text-neutral-500">
+              {products.length === 0
+                ? t(locale, "No products yet. Check back soon!", "لا توجد منتجات بعد. تابعنا قريباً!")
+                : t(locale, "No products match your search.", "لا توجد منتجات تطابق بحثك.")}
+            </p>
+            {(search || category !== "all") && products.length > 0 && (
+              <button
+                type="button"
+                onClick={() => { setSearch(""); setCategory("all") }}
+                className="mt-2 text-xs font-semibold text-emerald-700 hover:underline"
+              >
+                {t(locale, "Clear filters", "مسح الفلاتر")}
+              </button>
+            )}
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
             {filtered.map((p) => (
               <Link
                 key={p.id}
                 href={`/shop/${p.id}`}
-                className="group hover-lift overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm"
+                className="group hover-lift overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                aria-label={locale === "ar" ? p.nameAr : p.nameEn}
               >
                 <div className="relative h-44 overflow-hidden bg-emerald-50">
-                  <Image src={p.imageUrl} alt={locale === "ar" ? p.nameAr : p.nameEn} fill sizes="(max-width:640px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <Image
+                    src={p.imageUrl}
+                    alt={locale === "ar" ? p.nameAr : p.nameEn}
+                    fill
+                    sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                   {!p.inStock && (
-                    <span className="absolute right-3 top-3 rounded-full bg-neutral-900/70 px-2.5 py-1 text-xs font-bold text-white">{t(locale, "Out of stock", "نفد")}</span>
+                    <span className="absolute right-3 top-3 rounded-full bg-neutral-900/70 px-2.5 py-1 text-xs font-bold text-white">
+                      {t(locale, "Out of stock", "نفد")}
+                    </span>
                   )}
                 </div>
                 <div className="p-4">
                   <h3 className="font-bold text-neutral-900">{locale === "ar" ? p.nameAr : p.nameEn}</h3>
-                  <p className="mt-1 line-clamp-2 text-xs text-neutral-400">{locale === "ar" ? p.descriptionAr : p.descriptionEn}</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-neutral-400">
+                    {locale === "ar" ? p.descriptionAr : p.descriptionEn}
+                  </p>
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-lg font-extrabold text-emerald-700">{format(p.price)}</span>
-                    <span className="text-xs font-semibold text-emerald-600 group-hover:underline">{t(locale, "View", "عرض")}</span>
+                    <span className="text-xs font-semibold text-emerald-600 group-hover:underline">
+                      {t(locale, "View", "عرض")}
+                    </span>
                   </div>
                 </div>
               </Link>
@@ -119,8 +190,12 @@ export default function ShopPage() {
         )}
 
         <div className="mt-10 text-center">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-emerald-700">
-            <ArrowLeft className="size-4 rtl:rotate-180" /> {t(locale, "Back to home", "العودة للرئيسية")}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-neutral-500 hover:text-emerald-700 focus:outline-none focus:underline"
+          >
+            <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
+            {t(locale, "Back to home", "العودة للرئيسية")}
           </Link>
         </div>
       </div>

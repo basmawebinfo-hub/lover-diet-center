@@ -77,33 +77,154 @@ function getRedis(): Redis | null {
 }
 
 /** Live end-to-end probe: SET, GET, DEL a throwaway key. Returns a sanitized
- *  result the diagnostic endpoint can echo back safely. */
-export async function probeRedis(): Promise<{ ok: boolean; error?: string; roundtripMs?: number }> {
+ *  result the diagnostic endpoint can echo back safely.
+ *
+ *  Enhanced in PR #41 to report step-by-step outcomes and a raw-REST
+ *  parallel probe so we can distinguish SDK behavior from wire-level
+ *  auth/database issues without leaking secrets. */
+export async function probeRedis(): Promise<{
+  ok: boolean
+  error?: string
+  roundtripMs?: number
+  hostHint?: string
+  setResult?: string | null
+  getResult?: string | null
+  delResult?: string | null
+  rawPing?: { status: number; bodySample: string } | null
+  rawSet?: { status: number; bodySample: string } | null
+}> {
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+
+  // Host hint — first 30 chars of hostname (never token/query). Lets the
+  // caller verify which database we're talking to without leaking auth.
+  let hostHint: string | undefined
+  try {
+    if (url) hostHint = new URL(url).hostname.slice(0, 40)
+  } catch { /* invalid URL - hostHint stays undefined */ }
+
+  // Raw REST probe #1: /ping — simplest sanity check. Bypasses the SDK.
+  // Upstash REST API returns { "result": "PONG" } on success, 401 on auth failure.
+  let rawPing: { status: number; bodySample: string } | null = null
+  if (url && token) {
+    try {
+      const pingUrl = `${url.replace(/\/$/, "")}/ping`
+      const res = await fetch(pingUrl, {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}` },
+        cache: "no-store",
+      })
+      const text = await res.text()
+      // Sanitize any token-looking substring out of the body just in case.
+      const clean = text.replace(/[A-Za-z0-9+/=_-]{40,}/g, "[REDACTED]").slice(0, 200)
+      rawPing = { status: res.status, bodySample: clean }
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : String(err)
+      const clean = raw.replace(/[A-Za-z0-9+/=_-]{40,}/g, "[REDACTED]").slice(0, 200)
+      rawPing = { status: 0, bodySample: `fetch_error: ${clean}` }
+    }
+  }
+
+  // Raw REST probe #2: SET a diagnostic key via /set/<key>/<value>.
+  // Confirms write permission on the specific database the token belongs to.
+  let rawSet: { status: number; bodySample: string } | null = null
+  if (url && token) {
+    try {
+      const setUrl = `${url.replace(/\/$/, "")}/set/ldc%3Arl%3A_diag_raw/1/EX/10`
+      const res = await fetch(setUrl, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        cache: "no-store",
+      })
+      const text = await res.text()
+      const clean = text.replace(/[A-Za-z0-9+/=_-]{40,}/g, "[REDACTED]").slice(0, 200)
+      rawSet = { status: res.status, bodySample: clean }
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : String(err)
+      const clean = raw.replace(/[A-Za-z0-9+/=_-]{40,}/g, "[REDACTED]").slice(0, 200)
+      rawSet = { status: 0, bodySample: `fetch_error: ${clean}` }
+    }
+  }
+
+  // Now the SDK path (unchanged behavior).
   let redis: Redis | null = null
   try {
     redis = getRedis()
   } catch (err) {
-    // Redis client constructor can throw synchronously on malformed URL.
     const raw = err instanceof Error ? err.message : String(err)
     const clean = raw.replace(/[A-Za-z0-9+/=_-]{40,}/g, "[REDACTED]").slice(0, 200)
-    return { ok: false, error: `client_construct_failed: ${clean}` }
+    return { ok: false, error: `client_construct_failed: ${clean}`, hostHint, rawPing, rawSet }
   }
-  if (!redis) return { ok: false, error: "env_missing" }
+  if (!redis) return { ok: false, error: "env_missing", hostHint, rawPing, rawSet }
+
   const key = `ldc:rl:_probe:${Date.now()}`
   const started = Date.now()
+  let setResult: string | null = null
+  let getResult: string | null = null
+  let delResult: string | null = null
+
   try {
-    await redis.set(key, "1", { ex: 10 })
-    const value = await redis.get<string>(key)
-    await redis.del(key)
-    if (value !== "1") return { ok: false, error: "value_mismatch", roundtripMs: Date.now() - started }
-    return { ok: true, roundtripMs: Date.now() - started }
+    // Wrap each step so we can report EXACTLY where the flow diverged.
+    try {
+      const r = await redis.set(key, "1", { ex: 10 })
+      setResult = r === null || r === undefined ? String(r) : String(r)
+    } catch (e) {
+      setResult = `THROW: ${(e instanceof Error ? e.message : String(e)).slice(0, 100)}`
+    }
+    try {
+      const r = await redis.get<string>(key)
+      getResult = r === null || r === undefined ? String(r) : JSON.stringify(r).slice(0, 40)
+    } catch (e) {
+      getResult = `THROW: ${(e instanceof Error ? e.message : String(e)).slice(0, 100)}`
+    }
+    try {
+      const r = await redis.del(key)
+      delResult = String(r)
+    } catch (e) {
+      delResult = `THROW: ${(e instanceof Error ? e.message : String(e)).slice(0, 100)}`
+    }
+
+    const value = getResult
+    if (value !== '"1"') {
+      // Historical shape: probeRedis returned "value_mismatch" for anything
+      // other than exact match. Preserve that for the diagnostic endpoint
+      // but expand with per-step detail.
+      return {
+        ok: false,
+        error: "value_mismatch",
+        roundtripMs: Date.now() - started,
+        hostHint,
+        setResult,
+        getResult,
+        delResult,
+        rawPing,
+        rawSet,
+      }
+    }
+    return {
+      ok: true,
+      roundtripMs: Date.now() - started,
+      hostHint,
+      setResult,
+      getResult,
+      delResult,
+      rawPing,
+      rawSet,
+    }
   } catch (err) {
-    // Sanitize the message. Never echo tokens/URLs.
     const raw = err instanceof Error ? err.message : String(err)
-    // Trim to first 200 chars and strip anything that looks like a token
-    // (long base64-ish runs).
     const clean = raw.replace(/[A-Za-z0-9+/=_-]{40,}/g, "[REDACTED]").slice(0, 200)
-    return { ok: false, error: clean, roundtripMs: Date.now() - started }
+    return {
+      ok: false,
+      error: clean,
+      roundtripMs: Date.now() - started,
+      hostHint,
+      setResult,
+      getResult,
+      delResult,
+      rawPing,
+      rawSet,
+    }
   }
 }
 

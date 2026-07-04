@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { t, type Locale } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale-shared'
 
 export function HowItWorks({ locale }: { locale: Locale }) {
 

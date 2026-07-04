@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { socialLinks } from '@/lib/site'
-import { t, type Locale } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale-shared'
 
 const SOCIALS = [
   {

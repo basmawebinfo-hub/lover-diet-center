@@ -1,8 +1,12 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react"
+import type { Locale } from "@/lib/locale-shared"
 
-type Locale = "en" | "ar"
+// Re-export the isomorphic helpers so existing callers of
+//   `import { t } from '@/lib/locale'`
+// keep working unchanged.
+export { t, type Locale } from "@/lib/locale-shared"
 
 type LocaleContextValue = {
   locale: Locale
@@ -75,11 +79,3 @@ export function useLocale() {
   if (!ctx) throw new Error("useLocale must be used inside <LocaleProvider>")
   return ctx
 }
-
-/** Pick the right string for the current locale */
-export function t(locale: Locale, en: string, ar: string) {
-  return locale === "ar" ? ar : en
-}
-
-/** Also export the Locale type so components can accept it as a prop cleanly. */
-export type { Locale }

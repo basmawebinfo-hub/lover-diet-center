@@ -1,5 +1,5 @@
 import { Star, Quote } from 'lucide-react'
-import { t, type Locale } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale-shared'
 
 export function Testimonials({ locale }: { locale: Locale }) {
 

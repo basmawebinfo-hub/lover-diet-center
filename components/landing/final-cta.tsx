@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
-import { t, type Locale } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale-shared'
 
 export function FinalCTA({ locale }: { locale: Locale }) {
   return (

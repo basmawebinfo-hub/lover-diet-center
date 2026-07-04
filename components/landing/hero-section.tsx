@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Play, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
-import { t, type Locale } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale-shared'
 
 // Real Lover Diet Center stats
 const STATS = [

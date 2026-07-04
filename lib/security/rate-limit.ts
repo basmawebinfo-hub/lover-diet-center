@@ -79,7 +79,15 @@ function getRedis(): Redis | null {
 /** Live end-to-end probe: SET, GET, DEL a throwaway key. Returns a sanitized
  *  result the diagnostic endpoint can echo back safely. */
 export async function probeRedis(): Promise<{ ok: boolean; error?: string; roundtripMs?: number }> {
-  const redis = getRedis()
+  let redis: Redis | null = null
+  try {
+    redis = getRedis()
+  } catch (err) {
+    // Redis client constructor can throw synchronously on malformed URL.
+    const raw = err instanceof Error ? err.message : String(err)
+    const clean = raw.replace(/[A-Za-z0-9+/=_-]{40,}/g, "[REDACTED]").slice(0, 200)
+    return { ok: false, error: `client_construct_failed: ${clean}` }
+  }
   if (!redis) return { ok: false, error: "env_missing" }
   const key = `ldc:rl:_probe:${Date.now()}`
   const started = Date.now()
@@ -101,7 +109,13 @@ export async function probeRedis(): Promise<{ ok: boolean; error?: string; round
 
 function getLimiter(preset: RateLimitPreset): Ratelimit | null {
   if (_limiters[preset]) return _limiters[preset] as Ratelimit
-  const redis = getRedis()
+  let redis: Redis | null
+  try {
+    redis = getRedis()
+  } catch {
+    // Malformed URL/token — treat as env-missing for the limiter path.
+    return null
+  }
   if (!redis) return null
   const cfg = PRESETS[preset]
   const rl = new Ratelimit({
@@ -146,11 +160,11 @@ export async function checkRateLimit(
   identifier: string,
 ): Promise<RateLimitResult> {
   const id = (identifier || "").trim().toLowerCase() || "anonymous"
-  const rl = getLimiter(preset)
-  if (!rl) {
-    return { limited: false, retryAfterSec: 0, remaining: Infinity, message: "", mode: "fail_open" }
-  }
   try {
+    const rl = getLimiter(preset)
+    if (!rl) {
+      return { limited: false, retryAfterSec: 0, remaining: Infinity, message: "", mode: "fail_open" }
+    }
     const { success, reset, remaining } = await rl.limit(id)
     if (success) {
       return { limited: false, retryAfterSec: 0, remaining, message: "", mode: "enforcing" }

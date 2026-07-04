@@ -37,14 +37,8 @@ async function getServerClient() {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(list) {
-          try {
-            list.forEach(({ name, value, options }) => {
-              cookieStore.set({ name, value, ...options })
-            })
-          } catch {
-            // ignore — read-only during route handler in some contexts
-          }
+        setAll() {
+          // no-op — this route only needs to read auth
         },
       },
     }

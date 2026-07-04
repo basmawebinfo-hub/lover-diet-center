@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useCallback, useContext, useState } from "react"
-import { Check, AlertCircle, X } from "lucide-react"
+import { Check, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 type Toast = { id: number; message: string; tone: "success" | "error" }
@@ -21,10 +21,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <Ctx.Provider value={{ notify }}>
       {children}
-      <div className="fixed bottom-5 left-1/2 z-[9999] flex -translate-x-1/2 flex-col items-center gap-2">
+      {/* aria-live region — screen readers announce toast content on insertion. */}
+      <div
+        className="fixed bottom-5 left-1/2 z-[9999] flex -translate-x-1/2 flex-col items-center gap-2"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {toasts.map((t) => (
           <div
             key={t.id}
+            role={t.tone === "error" ? "alert" : "status"}
             className={cn(
               "flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur animate-in fade-in slide-in-from-bottom-2",
               t.tone === "success"
@@ -32,8 +38,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 : "bg-red-500 text-white"
             )}
           >
-            {t.tone === "success" ? <Check className="size-4" /> : <AlertCircle className="size-4" />}
-            {t.message}
+            {t.tone === "success" ? (
+              <Check className="size-4" aria-hidden="true" />
+            ) : (
+              <AlertCircle className="size-4" aria-hidden="true" />
+            )}
+            <span>{t.message}</span>
           </div>
         ))}
       </div>

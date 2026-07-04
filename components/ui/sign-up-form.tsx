@@ -145,6 +145,8 @@ export function SignUpForm() {
           <User className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
           <input
             type="text"
+            autoComplete="name"
+            aria-label={t(locale, 'Full name', 'الاسم الكامل')}
             placeholder={t(locale, 'Full name', 'الاسم الكامل')}
             value={form.name}
             onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
@@ -170,6 +172,8 @@ export function SignUpForm() {
             <input
               type="tel"
               inputMode="numeric"
+              autoComplete="tel-national"
+              aria-label={t(locale, 'Phone number', 'رقم الهاتف')}
               placeholder={t(locale, 'Phone number', 'رقم الهاتف')}
               value={form.phone}
               onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value.replace(/[^0-9]/g, '') }))}
@@ -184,6 +188,8 @@ export function SignUpForm() {
           <Mail className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
           <input
             type="email"
+            autoComplete="email"
+            aria-label={t(locale, 'Email address', 'البريد الإلكتروني')}
             placeholder={t(locale, 'Email address', 'البريد الإلكتروني')}
             value={form.email}
             onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
@@ -197,6 +203,8 @@ export function SignUpForm() {
           <Lock className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
           <input
             type="password"
+            autoComplete="new-password"
+            aria-label={t(locale, 'Password', 'كلمة المرور')}
             placeholder={t(locale, 'Password (min. 8 characters)', 'كلمة المرور (8 أحرف على الأقل)')}
             value={form.password}
             onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
@@ -210,6 +218,8 @@ export function SignUpForm() {
           <Lock className="absolute left-3.5 rtl:left-auto rtl:right-3.5 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
           <input
             type="password"
+            autoComplete="new-password"
+            aria-label={t(locale, 'Confirm password', 'تأكيد كلمة المرور')}
             placeholder={t(locale, 'Confirm password', 'تأكيد كلمة المرور')}
             value={form.confirmPassword}
             onChange={(e) => setForm((p) => ({ ...p, confirmPassword: e.target.value }))}

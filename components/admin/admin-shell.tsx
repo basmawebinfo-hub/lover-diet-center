@@ -104,8 +104,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
-                    "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                    "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300",
                     active ? "bg-emerald-50 text-emerald-700" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
                   )}
                 >
@@ -144,13 +145,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex-1 overflow-y-auto"><NavList /></div>
         <div className="border-t border-neutral-100 p-3">
-          <Link href="/" className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900">
+          <Link href="/" className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
             <span className="flex size-8 items-center justify-center rounded-lg bg-neutral-100 text-neutral-400"><Home className="size-4" /></span>
             {t(locale, "View site", "عرض الموقع")}
           </Link>
           <button
             onClick={() => { if (typeof window !== "undefined") localStorage.removeItem("ldc_admin"); router.push("/") }}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 hover:bg-red-50 hover:text-red-600"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
           >
             <span className="flex size-8 items-center justify-center rounded-lg bg-neutral-100 text-neutral-400"><LogOut className="size-4" /></span>
             {t(locale, "Exit admin", "خروج")}
@@ -164,7 +165,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <Image src="/ldc-logo.png" alt="Lover Diet Center" width={32} height={32} className="size-8 rounded-full object-cover" />
           <span className="font-extrabold text-neutral-900">{currentItem ? (locale === "ar" ? currentItem.ar : currentItem.en) : t(locale, "Admin", "الإدارة")}</span>
         </div>
-        <button onClick={() => setOpen(true)} className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-50"><Menu className="size-5" /></button>
+        <button onClick={() => setOpen(true)} aria-label={t(locale, "Open menu", "فتح القائمة")} className="rounded-lg p-2 text-neutral-600 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"><Menu className="size-5" aria-hidden="true" /></button>
       </div>
 
       {/* Mobile drawer */}
@@ -179,7 +180,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <Image src="/ldc-logo.png" alt="" width={30} height={30} className="size-7 rounded-full object-cover" />
               <span className="font-extrabold text-neutral-900">{t(locale, "Admin", "الإدارة")}</span>
             </div>
-            <button onClick={() => setOpen(false)} className="rounded-lg p-1 text-neutral-500 hover:bg-neutral-50"><X className="size-5" /></button>
+            <button onClick={() => setOpen(false)} aria-label={t(locale, "Close menu", "إغلاق القائمة")} className="rounded-lg p-1 text-neutral-500 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"><X className="size-5" aria-hidden="true" /></button>
           </div>
           <div className="flex-1 overflow-y-auto"><NavList /></div>
         </div>

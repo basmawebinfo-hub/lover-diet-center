@@ -120,8 +120,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={active ? "page" : undefined}
                 className={cn(
-                  "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+                  "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300",
                   active
                     ? "bg-emerald-50 text-emerald-700"
                     : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
@@ -152,7 +153,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 signOut(router)
               }
             }}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-red-50 hover:text-red-600"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
           >
             <LogOut className="size-4.5" />
             <span>{t(locale, "Sign Out", "تسجيل الخروج")}</span>
@@ -172,9 +173,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             onClick={() => {
               if (confirm(t(locale, "Sign out?", "تسجيل الخروج؟"))) signOut(router)
             }}
-            className="p-2 rounded-xl text-neutral-500 hover:bg-neutral-100"
+            aria-label={t(locale, "Sign out", "تسجيل الخروج")}
+            className="p-2 rounded-xl text-neutral-500 hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
           >
-            <LogOut className="size-4" />
+            <LogOut className="size-4" aria-hidden="true" />
           </button>
           <Link
             href="/dashboard/cart"
@@ -205,12 +207,13 @@ export function MobileNav() {
           <Link
             key={item.href}
             href={item.href}
+            aria-current={active ? "page" : undefined}
             className={cn(
-              "flex flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 text-[10px] font-semibold",
+              "flex flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 text-[10px] font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300",
               active ? "text-emerald-700" : "text-neutral-500"
             )}
           >
-            <Icon className="size-4" />
+            <Icon className="size-4" aria-hidden="true" />
             <span>{locale === "ar" ? item.labelAr : item.label}</span>
           </Link>
         )

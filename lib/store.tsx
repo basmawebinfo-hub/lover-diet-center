@@ -562,7 +562,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // Sync to Supabase if signed in (non-blocking)
       const supabase = createClient()
       supabase.auth.getUser().then(({ data }) => {
-        if (data.user) insertSession(data.user.id, s).catch(() => {})
+        if (data.user) insertSession(data.user.id, s).catch((e) => console.error('insertSession failed:', e))
       })
     },
     []
@@ -649,7 +649,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: "LOG_WATER", payload: { date, liters } })
       const supabase = createClient()
       supabase.auth.getUser().then(({ data }) => {
-        if (data.user) import("@/lib/supabase/db").then((m) => m.upsertWaterLog(data.user!.id, date, liters).catch(() => {}))
+        if (data.user) import("@/lib/supabase/db").then((m) => m.upsertWaterLog(data.user!.id, date, liters).catch((e) => console.error('upsertWaterLog failed:', e)))
       })
     },
     []

@@ -174,7 +174,9 @@ export default function ResetPasswordPage() {
                   {t(locale, 'New password', 'كلمة المرور الجديدة')}
                 </label>
                 <input
-                  type="password" required minLength={8}
+                  type="password"
+                  autoComplete="new-password"
+                  required minLength={8}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -186,7 +188,9 @@ export default function ResetPasswordPage() {
                   {t(locale, 'Confirm password', 'تأكيد كلمة المرور')}
                 </label>
                 <input
-                  type="password" required minLength={8}
+                  type="password"
+                  autoComplete="new-password"
+                  required minLength={8}
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   placeholder="••••••••"

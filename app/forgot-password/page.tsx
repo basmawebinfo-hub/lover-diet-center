@@ -178,7 +178,9 @@ export default function ForgotPasswordPage() {
               <div>
                 <label className="block text-sm font-semibold text-neutral-700">{t(locale, 'Email', 'البريد الإلكتروني')}</label>
                 <input
-                  type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  autoComplete="email"
+                  required value={email} onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="mt-1.5 w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-100"
                 />

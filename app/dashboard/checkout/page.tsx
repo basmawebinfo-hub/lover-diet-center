@@ -45,7 +45,7 @@ function CheckoutInner() {
     line2: "",
     city: "",
     region: "",
-    country: DEFAULT_COUNTRY,
+    country: DEFAULT_COUNTRY.code,
     postalCode: "",
   })
 

@@ -1,10 +1,8 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import { Play, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
-import { useLocale, t } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale'
 
 // Real Lover Diet Center stats
 const STATS = [
@@ -23,8 +21,7 @@ const SERVICES = [
   { icon: GraduationCap,   en: 'Courses',       ar: 'دورات',       href: '/training-courses' },
 ]
 
-export function HeroSection() {
-  const { locale } = useLocale()
+export function HeroSection({ locale }: { locale: Locale }) {
   return (
     <section className="relative overflow-hidden pt-16">
       {/* Fresh lime → light gradient background (reference style) */}

@@ -1,10 +1,7 @@
-'use client'
-
 import { Star, Quote } from 'lucide-react'
-import { useLocale, t } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale'
 
-export function Testimonials() {
-  const { locale } = useLocale()
+export function Testimonials({ locale }: { locale: Locale }) {
 
   const testimonials = [
     {

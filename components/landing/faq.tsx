@@ -3,10 +3,9 @@
 import { useState } from 'react'
 import { Plus, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useLocale, t } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale'
 
-export function FAQ() {
-  const { locale } = useLocale()
+export function FAQ({ locale }: { locale: Locale }) {
   const [open, setOpen] = useState<number | null>(0)
 
   const faqs = [

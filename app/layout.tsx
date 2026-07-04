@@ -4,6 +4,7 @@ import { Host_Grotesk, Rubik } from 'next/font/google'
 import { ConditionalShell } from '@/components/conditional-shell'
 import { AppProvider } from '@/lib/store'
 import { LocaleProvider } from '@/lib/locale'
+import { getLocaleServer, localeDir } from '@/lib/locale-server'
 import { CurrencyProvider } from '@/lib/currency'
 import { ToastProvider } from '@/components/ui/toast'
 import { JsonLd } from '@/components/seo/json-ld'
@@ -89,15 +90,21 @@ export const viewport: Viewport = {
   themeColor: '#f5f8f7',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  // Server-side locale detection (Phase 5 · Arabic SSR). Reads the
+  // `ldc_locale` cookie first, falls back to Accept-Language, defaults
+  // to English. The <html lang>/<dir> attributes are set from this
+  // value so the initial paint is in the correct language — no flash
+  // of English before hydration for Arabic-first visitors.
+  const locale = await getLocaleServer()
   return (
     <html
-      lang="en"
-      dir="ltr"
+      lang={locale}
+      dir={localeDir(locale)}
       suppressHydrationWarning
       className={`light-mode ${hostGrotesk.variable} ${rubik.variable}`}
     >
@@ -113,7 +120,7 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <LocaleProvider>
+        <LocaleProvider initialLocale={locale}>
           <AppProvider>
             <CurrencyProvider>
               <ToastProvider>

@@ -25,6 +25,7 @@ const ABSOLUTE_MAX_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 export const RECOVERY_COOKIE = 'ldc_recovery_session'
 const LAST_ACTIVITY_COOKIE = 'ldc_last_activity'
 const SESSION_START_COOKIE = 'ldc_session_start'
+const LOCALE_COOKIE = 'ldc_locale'
 
 const cookieBase = (maxAgeSec: number) => ({
   httpOnly: false,
@@ -63,6 +64,32 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
   const now = Date.now()
+
+  // Locale routing (Phase 5 · Arabic SSR).
+  //
+  // Route contract:
+  //   /en   -> Arabic-first mirror. Force ldc_locale=ar for this request +
+  //            persist the cookie so subsequent hits stay in Arabic without
+  //            a per-request URL prefix. The user can still toggle back via
+  //            the header language switcher (which rewrites the cookie).
+  //   /     -> Cookie-driven. Leave whatever the user has.
+  //
+  // We set the cookie on BOTH the incoming request (so RootLayout's
+  // getLocaleServer() sees it on this hit) AND the outgoing response
+  // (so the browser stores it for future requests).
+  if (pathname === '/en' || pathname.startsWith('/en/')) {
+    const current = request.cookies.get(LOCALE_COOKIE)?.value
+    if (current !== 'ar') {
+      request.cookies.set(LOCALE_COOKIE, 'ar')
+      response.cookies.set(LOCALE_COOKIE, 'ar', {
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 365 * 24 * 60 * 60,
+      })
+    }
+  }
 
   const inRecovery = request.cookies.get(RECOVERY_COOKIE)?.value === '1'
 

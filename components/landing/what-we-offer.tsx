@@ -1,12 +1,9 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } from 'lucide-react'
-import { useLocale, t } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale'
 
-export function WhatWeOffer() {
-  const { locale } = useLocale()
+export function WhatWeOffer({ locale }: { locale: Locale }) {
 
   const SERVICES = [
     {

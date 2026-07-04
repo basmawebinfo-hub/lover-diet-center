@@ -1,9 +1,7 @@
-'use client'
-
 import Image from 'next/image'
 import Link from 'next/link'
 import { socialLinks } from '@/lib/site'
-import { useLocale, t } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale'
 
 const SOCIALS = [
   {
@@ -53,8 +51,7 @@ const SOCIALS = [
   },
 ]
 
-export function FooterSimple() {
-  const { locale } = useLocale()
+export function FooterSimple({ locale }: { locale: Locale }) {
 
   const NAV_COLS = [
     {

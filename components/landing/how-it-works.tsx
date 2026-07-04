@@ -1,11 +1,8 @@
-'use client'
-
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { useLocale, t } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale'
 
-export function HowItWorks() {
-  const { locale } = useLocale()
+export function HowItWorks({ locale }: { locale: Locale }) {
 
   const STEPS = [
     {

@@ -1,12 +1,9 @@
-'use client'
-
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
-import { useLocale, t } from '@/lib/locale'
+import { t, type Locale } from '@/lib/locale'
 
-export function FinalCTA() {
-  const { locale } = useLocale()
+export function FinalCTA({ locale }: { locale: Locale }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-lime-800 via-lime-900 to-lime-950 py-20 sm:py-28">
       {/* Cross-hatch pattern */}

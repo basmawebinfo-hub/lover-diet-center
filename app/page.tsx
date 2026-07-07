@@ -1,14 +1,6 @@
 import type { Metadata } from 'next'
-import { HeroSection }   from '@/components/landing/hero-section'
-import { HowItWorks }    from '@/components/landing/how-it-works'
-import { WhatWeOffer }   from '@/components/landing/what-we-offer'
-import { Testimonials }  from '@/components/landing/testimonials'
-import { FAQ }           from '@/components/landing/faq'
-import { FinalCTA }      from '@/components/landing/final-cta'
-import { FooterSimple }  from '@/components/ui/footer'
-import { Reveal }        from '@/components/ui/reveal'
 import { canonical } from '@/lib/seo'
-import { getLocaleServer } from '@/lib/locale-server'
+import { LandingPage } from '@/components/landing/landing-page'
 
 // NOTE: do NOT redeclare `openGraph` here. The root layout already ships a
 // full openGraph object with images. If we override it here without redeclaring
@@ -20,20 +12,9 @@ export const metadata: Metadata = {
   alternates: { canonical: canonical('/') },
 }
 
-// Server Component. Reads locale server-side and passes it down to each
-// landing block, so every child (except Reveal, FAQ, and the header shell)
-// stays a Server Component with zero client JS.
-export default async function HomePage() {
-  const locale = await getLocaleServer()
-  return (
-    <>
-      <HeroSection locale={locale} />
-      <Reveal><HowItWorks locale={locale} /></Reveal>
-      <Reveal><WhatWeOffer locale={locale} /></Reveal>
-      <Reveal><Testimonials locale={locale} /></Reveal>
-      <Reveal><FAQ locale={locale} /></Reveal>
-      <Reveal><FinalCTA locale={locale} /></Reveal>
-      <FooterSimple locale={locale} />
-    </>
-  )
+// LandingPage is a Client Component that reads `locale` from LocaleProvider
+// context, so all sections update instantly when the language toggle is clicked
+// — no page reload required.
+export default function HomePage() {
+  return <LandingPage />
 }

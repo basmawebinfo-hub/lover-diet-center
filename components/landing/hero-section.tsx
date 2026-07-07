@@ -11,7 +11,13 @@ const STATS = [
   { value: '96%',     label: 'Success Rate',       labelAr: 'معدل النجاح' },
 ]
 
-const TRUST_TAGS = ['Nutrition', 'Meals', 'Snacks', 'Sculpting', 'Courses']
+const TRUST_TAGS: { en: string; ar: string }[] = [
+  { en: 'Nutrition', ar: 'تغذية' },
+  { en: 'Meals',     ar: 'وجبات' },
+  { en: 'Snacks',    ar: 'سناكس' },
+  { en: 'Sculpting', ar: 'نحت الجسم' },
+  { en: 'Courses',   ar: 'دورات' },
+]
 
 const SERVICES = [
   { icon: Stethoscope,     en: 'Consultations', ar: 'استشارات',    href: '/nutrition-consultations' },
@@ -79,7 +85,7 @@ export function HeroSection({ locale }: { locale: Locale }) {
               {STATS.map((s) => (
                 <div key={s.label}>
                   <div className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-[1.7rem]">{s.value}</div>
-                  <div className="mt-0.5 text-sm text-neutral-500">{s.label}</div>
+                  <div className="mt-0.5 text-sm text-neutral-500">{locale === "ar" ? s.labelAr : s.label}</div>
                 </div>
               ))}
             </div>
@@ -143,14 +149,14 @@ export function HeroSection({ locale }: { locale: Locale }) {
         {/* ── Trust strip ── */}
         <div className="border-t border-neutral-100 py-7 text-center">
           <p className="text-sm text-neutral-500">
-            Trusted by 3,000+ clients across the UAE for science-backed nutrition.
+            {t(locale, "Trusted by 3,000+ clients across the UAE for science-backed nutrition.", "أكثر من 3,000 عميل في الإمارات يثقون بنا في التغذية العلمية.")}
           </p>
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-bold text-neutral-400">
-            {TRUST_TAGS.map((t, i) => (
-              <span key={t} className="flex items-center gap-2">
+            {TRUST_TAGS.map((tag, i) => (
+              <span key={tag.en} className="flex items-center gap-2">
                 <span className="flex items-center gap-1.5">
                   <span className="size-2.5 rounded-full bg-lime-300" />
-                  {t}
+                  {locale === "ar" ? tag.ar : tag.en}
                 </span>
                 {i < TRUST_TAGS.length - 1 && <span className="text-neutral-200">|</span>}
               </span>

@@ -64,6 +64,45 @@ export function LocaleProvider({
     writeCookie(locale)
   }, [locale])
 
+  // Sync Server Components (HomePage, landing pages) with client-side locale changes.
+  // When the user toggles the language, the cookie updates but Server Components
+  // don't automatically re-fetch. This listener detects the cookie change and
+  // reloads the page so getLocaleServer() runs with the new locale.
+  //
+  // This fires after hydration is complete and locale has been set from localStorage/cookie.
+  useEffect(() => {
+    let lastCookie = locale
+    let checkCount = 0
+    const maxChecks = 50 // Stop after ~5 seconds (50 × 100ms)
+
+    const checkCookieSync = () => {
+      if (typeof document === "undefined") return
+
+      // Parse the ldc_locale cookie value
+      const cookieValue = document.cookie
+        .split(";")
+        .find((c) => c.trim().startsWith(COOKIE_NAME + "="))
+        ?.split("=")[1]
+
+      if (cookieValue && cookieValue !== lastCookie) {
+        // Cookie changed (user toggled language or another tab did)
+        // Reload page so Server Components see the new cookie value
+        console.log("[v0] Locale cookie changed, reloading page...")
+        window.location.reload()
+        return
+      }
+
+      checkCount++
+      if (checkCount < maxChecks) {
+        setTimeout(checkCookieSync, 100)
+      }
+    }
+
+    // Start polling after hydration settles (~500ms)
+    const timeoutId = setTimeout(checkCookieSync, 500)
+    return () => clearTimeout(timeoutId)
+  }, [])
+
   const setLocale = useCallback((l: Locale) => setLocaleState(l), [])
   const toggleLocale = useCallback(() => setLocaleState((p) => (p === "en" ? "ar" : "en")), [])
 

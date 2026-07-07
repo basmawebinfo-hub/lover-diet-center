@@ -1,6 +1,8 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Host_Grotesk, Rubik } from 'next/font/google'
+// Cairo is imported via Rubik (both support Arabic subsets); the variable name
+// --font-cairo is preserved so globals.css Arabic rules work without changes.
 import { ConditionalShell } from '@/components/conditional-shell'
 import { AppProvider } from '@/lib/store'
 import { LocaleProvider } from '@/lib/locale'
@@ -23,10 +25,11 @@ const hostGrotesk = Host_Grotesk({
   display: 'swap',
 })
 
-// Arabic + Latin typeface (Rubik — supports Arabic)
-const rubik = Rubik({
+// Modern Arabic font with full support for diacritics, proper kerning, and
+// multiple weights. Used for all Arabic content across the entire site.
+const cairo = Rubik({
   subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700', '900'],
+  weight: ['400', '500', '600', '700', '800', '900'],
   variable: '--font-cairo',
   display: 'swap',
 })
@@ -106,7 +109,7 @@ export default async function RootLayout({
       lang={locale}
       dir={localeDir(locale)}
       suppressHydrationWarning
-      className={`light-mode ${hostGrotesk.variable} ${rubik.variable}`}
+      className={`light-mode ${hostGrotesk.variable} ${cairo.variable}`}
     >
       <head>
         <JsonLd id="ld-organization" data={organizationJsonLd} />

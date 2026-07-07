@@ -15,6 +15,10 @@ const CATEGORIES: Product["category"][] = ["snack", "drink", "supplement", "meal
 const emptyProduct = (): Product => ({
   id: `p_${Date.now()}`, nameEn: "", nameAr: "", descriptionEn: "", descriptionAr: "",
   imageUrl: "", price: 0, category: "snack", inStock: true,
+  // Expanded fields — start null, admin fills in optionally
+  discountPrice: null, ingredients: null,
+  calories: null, proteinG: null, carbsG: null, fatG: null,
+  weightG: null, sku: null, stockQty: null,
 })
 
 export default function AdminProductsPage() {
@@ -153,6 +157,122 @@ export default function AdminProductsPage() {
               <input type="checkbox" checked={editing.inStock} onChange={(e) => setEditing({ ...editing, inStock: e.target.checked })} className="size-4 rounded accent-emerald-600" />
               {t(locale, "In stock", "متوفر")}
             </label>
+
+            {/* ============================================================ */}
+            {/* Expanded fields — nutrition + inventory                        */}
+            {/* All fields are optional. Numbers default to null when blank.   */}
+            {/* ============================================================ */}
+            <details className="mt-6 rounded-xl border border-neutral-200 bg-neutral-50/50 p-4" open>
+              <summary className="cursor-pointer text-sm font-semibold text-neutral-800">
+                {t(locale, "Nutrition & Inventory (optional)", "القيم الغذائية والمخزون (اختياري)")}
+              </summary>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <Field label={t(locale, "Discount price (USD)", "السعر بعد الخصم")}>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={editing.discountPrice ?? ""}
+                    onChange={(e) => setEditing({ ...editing, discountPrice: e.target.value === "" ? null : Number(e.target.value) })}
+                    className={inputCls}
+                    placeholder={t(locale, "e.g. 19.99", "مثال: 19.99")}
+                  />
+                </Field>
+                <Field label={t(locale, "SKU", "رقم SKU")}>
+                  <input
+                    type="text"
+                    value={editing.sku ?? ""}
+                    onChange={(e) => setEditing({ ...editing, sku: e.target.value.trim() || null })}
+                    className={inputCls}
+                    placeholder={t(locale, "e.g. SNK-001", "مثال: SNK-001")}
+                  />
+                </Field>
+                <Field label={t(locale, "Weight (grams)", "الوزن (جرام)")}>
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    value={editing.weightG ?? ""}
+                    onChange={(e) => setEditing({ ...editing, weightG: e.target.value === "" ? null : Number(e.target.value) })}
+                    className={inputCls}
+                    placeholder={t(locale, "e.g. 60", "مثال: 60")}
+                  />
+                </Field>
+                <Field label={t(locale, "Stock quantity", "كمية المخزون")}>
+                  <input
+                    type="number"
+                    step="1"
+                    min="0"
+                    value={editing.stockQty ?? ""}
+                    onChange={(e) => setEditing({ ...editing, stockQty: e.target.value === "" ? null : Number(e.target.value) })}
+                    className={inputCls}
+                    placeholder={t(locale, "e.g. 100", "مثال: 100")}
+                  />
+                </Field>
+              </div>
+
+              <div className="mt-4">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  {t(locale, "Nutrition per serving", "القيم الغذائية لكل حصة")}
+                </p>
+                <div className="grid grid-cols-4 gap-2">
+                  <Field label={t(locale, "Calories", "سعرات")}>
+                    <input
+                      type="number"
+                      step="1"
+                      min="0"
+                      value={editing.calories ?? ""}
+                      onChange={(e) => setEditing({ ...editing, calories: e.target.value === "" ? null : Number(e.target.value) })}
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field label={t(locale, "Protein (g)", "بروتين")}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={editing.proteinG ?? ""}
+                      onChange={(e) => setEditing({ ...editing, proteinG: e.target.value === "" ? null : Number(e.target.value) })}
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field label={t(locale, "Carbs (g)", "كارب")}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={editing.carbsG ?? ""}
+                      onChange={(e) => setEditing({ ...editing, carbsG: e.target.value === "" ? null : Number(e.target.value) })}
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field label={t(locale, "Fat (g)", "دهون")}>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      value={editing.fatG ?? ""}
+                      onChange={(e) => setEditing({ ...editing, fatG: e.target.value === "" ? null : Number(e.target.value) })}
+                      className={inputCls}
+                    />
+                  </Field>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                  {t(locale, "Ingredients", "المكونات")}
+                </label>
+                <textarea
+                  rows={2}
+                  value={editing.ingredients ?? ""}
+                  onChange={(e) => setEditing({ ...editing, ingredients: e.target.value.trim() || null })}
+                  className={cn(inputCls, "mt-1 resize-y")}
+                  placeholder={t(locale, "e.g. whey protein, cocoa, stevia", "مثال: بروتين، كاكاو، ستيفيا")}
+                />
+              </div>
+            </details>
 
             <div className="mt-6 flex gap-3">
               <button onClick={() => setEditing(null)} className="flex-1 rounded-xl border border-neutral-200 py-3 text-sm font-semibold text-neutral-600 hover:bg-neutral-50">{t(locale, "Cancel", "إلغاء")}</button>

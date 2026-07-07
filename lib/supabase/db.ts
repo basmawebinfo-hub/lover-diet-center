@@ -435,17 +435,7 @@ export async function adminFetchProducts(): Promise<Product[]> {
   const supabase = createClient()
   const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false })
   if (error || !data) return []
-  return data.map((r: Record<string, unknown>) => ({
-    id: r.id as string,
-    nameEn: (r.name_en as string) ?? '',
-    nameAr: (r.name_ar as string) ?? '',
-    descriptionEn: (r.description_en as string) ?? '',
-    descriptionAr: (r.description_ar as string) ?? '',
-    imageUrl: (r.image_url as string) ?? '',
-    price: Number(r.price) || 0,
-    category: (r.category as Product['category']) ?? 'snack',
-    inStock: (r.in_stock as boolean) ?? true,
-  }))
+  return data.map((r: Record<string, unknown>) => mapProductRow(r))
 }
 
 export async function adminUpsertProduct(p: Product): Promise<boolean> {
@@ -460,6 +450,16 @@ export async function adminUpsertProduct(p: Product): Promise<boolean> {
     price: p.price,
     category: p.category,
     in_stock: p.inStock,
+    // Expanded fields — undefined skipped, null explicitly clears
+    discount_price: p.discountPrice ?? null,
+    ingredients: p.ingredients ?? null,
+    calories: p.calories ?? null,
+    protein_g: p.proteinG ?? null,
+    carbs_g: p.carbsG ?? null,
+    fat_g: p.fatG ?? null,
+    weight_g: p.weightG ?? null,
+    sku: p.sku ?? null,
+    stock_qty: p.stockQty ?? null,
   }
   const { error } = await supabase.from('products').upsert(row, { onConflict: 'id' })
   if (error) return false
@@ -493,7 +493,17 @@ export async function fetchProducts(): Promise<Product[]> {
   const supabase = createClient()
   const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: true })
   if (error || !data) return []
-  return data.map((r: Record<string, unknown>) => ({
+  return data.map((r: Record<string, unknown>) => mapProductRow(r))
+}
+
+// Shared row → Product mapper (used by fetchProducts + adminFetchProducts)
+function mapProductRow(r: Record<string, unknown>): Product {
+  const numOrNull = (v: unknown): number | null => {
+    if (v === null || v === undefined || v === '') return null
+    const n = Number(v)
+    return isNaN(n) ? null : n
+  }
+  return {
     id: r.id as string,
     nameEn: (r.name_en as string) ?? '',
     nameAr: (r.name_ar as string) ?? '',
@@ -503,7 +513,17 @@ export async function fetchProducts(): Promise<Product[]> {
     price: Number(r.price) || 0,
     category: (r.category as Product['category']) ?? 'snack',
     inStock: (r.in_stock as boolean) ?? true,
-  }))
+    // Expanded fields (all nullable)
+    discountPrice: numOrNull(r.discount_price),
+    ingredients: (r.ingredients as string | null) ?? null,
+    calories: numOrNull(r.calories),
+    proteinG: numOrNull(r.protein_g),
+    carbsG: numOrNull(r.carbs_g),
+    fatG: numOrNull(r.fat_g),
+    weightG: numOrNull(r.weight_g),
+    sku: (r.sku as string | null) ?? null,
+    stockQty: numOrNull(r.stock_qty),
+  }
 }
 
 // Public meals catalog read (full Meal)

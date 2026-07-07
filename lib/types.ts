@@ -42,6 +42,16 @@ export type Product = {
   price: number // stored in the canonical currency configured in lib/currency.tsx (USD base)
   category: "snack" | "supplement" | "meal" | "drink"
   inStock: boolean
+  // Product Catalog Expansion (2026-07-07). All optional in v1.
+  discountPrice?: number | null    // price after discount (USD)
+  ingredients?: string | null      // free-form list; comma-separated
+  calories?: number | null         // kcal per serving
+  proteinG?: number | null         // grams protein per serving
+  carbsG?: number | null           // grams carbs per serving
+  fatG?: number | null             // grams fat per serving
+  weightG?: number | null          // grams weight per serving
+  sku?: string | null              // stock keeping unit (unique when set)
+  stockQty?: number | null         // stock quantity (nullable; when null, in_stock bool controls)
 }
 
 export type Session = {

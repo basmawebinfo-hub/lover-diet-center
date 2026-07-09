@@ -13,6 +13,7 @@ import { useLocale, t } from "@/lib/locale"
 import { useApp } from "@/lib/store"
 import { createClient } from "@/lib/supabase/client"
 import { isAdmin } from "@/lib/supabase/db"
+import { signOutCompletely } from "@/lib/sign-out"
 
 type NavItem = { href: string; en: string; ar: string; icon: typeof Home }
 const NAV_GROUPS: { titleEn: string; titleAr: string; items: NavItem[] }[] = [
@@ -150,7 +151,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             {t(locale, "View site", "عرض الموقع")}
           </Link>
           <button
-            onClick={() => { if (typeof window !== "undefined") localStorage.removeItem("ldc_admin"); router.push("/") }}
+            onClick={() => {
+              if (confirm(t(locale, "Sign out of the admin panel?", "تسجيل الخروج من لوحة الإدارة؟"))) {
+                signOutCompletely()
+              }
+            }}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
           >
             <span className="flex size-8 items-center justify-center rounded-lg bg-neutral-100 text-neutral-400"><LogOut className="size-4" /></span>

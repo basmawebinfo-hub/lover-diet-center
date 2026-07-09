@@ -1,5 +1,6 @@
 import { Star, Quote } from 'lucide-react'
 import { t, type Locale } from '@/lib/locale-shared'
+import { Reveal } from '@/components/ui/reveal'
 
 // Premium testimonials — real customer reviews.
 // Mobile: horizontal snap slider. Desktop: 3-column grid.
@@ -87,8 +88,9 @@ export function Testimonials({ locale }: { locale: Locale }) {
           </p>
         </div>
 
-        {/* Mobile: snap slider · Desktop: 3-col grid */}
-        <div
+        {/* Mobile: snap slider · Desktop: 3-col grid — staggered entrance */}
+        <Reveal
+          variant="stagger"
           className="mt-14 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:pb-0 [-webkit-overflow-scrolling:touch]"
           role="list"
           aria-label={t(locale, 'Customer testimonials', 'آراء العملاء')}
@@ -138,7 +140,7 @@ export function Testimonials({ locale }: { locale: Locale }) {
               </figcaption>
             </figure>
           ))}
-        </div>
+        </Reveal>
 
         {/* Trust strip */}
         <div className="mx-auto mt-12 flex max-w-3xl flex-col items-center gap-3 rounded-2xl border border-lime-100 bg-white px-6 py-5 text-center shadow-sm sm:flex-row sm:gap-6 sm:text-start">

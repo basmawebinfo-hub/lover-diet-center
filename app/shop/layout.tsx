@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { canonical } from '@/lib/seo'
+import { FloatingCart } from '@/components/shop/floating-cart'
 
 export const metadata: Metadata = {
   title: 'Shop | المتجر',
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 }
 
 export default function ShopLayout({ children }: { children: React.ReactNode }) {
-  return children
+  return (
+    <>
+      {children}
+      <FloatingCart />
+    </>
+  )
 }

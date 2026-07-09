@@ -258,9 +258,102 @@
   .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); will-change: opacity, transform; }
   .reveal.is-visible { opacity: 1; transform: translateY(0); }
 
+  /* Reveal variants — direction & scale aware */
+  .reveal-left  { opacity: 0; transform: translateX(-36px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-right { opacity: 0; transform: translateX(36px);  transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-scale { opacity: 0; transform: scale(0.92);       transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+  .reveal-left.is-visible, .reveal-right.is-visible { opacity: 1; transform: translateX(0); }
+  .reveal-scale.is-visible { opacity: 1; transform: scale(1); }
+
+  /* Staggered children reveal: parent gets .reveal-stagger + .is-visible */
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.65s cubic-bezier(0.16,1,0.3,1), transform 0.65s cubic-bezier(0.16,1,0.3,1);
+  }
+  .reveal-stagger.is-visible > * { opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-visible > *:nth-child(1) { transition-delay: 0.05s; }
+  .reveal-stagger.is-visible > *:nth-child(2) { transition-delay: 0.15s; }
+  .reveal-stagger.is-visible > *:nth-child(3) { transition-delay: 0.25s; }
+  .reveal-stagger.is-visible > *:nth-child(4) { transition-delay: 0.35s; }
+  .reveal-stagger.is-visible > *:nth-child(5) { transition-delay: 0.45s; }
+  .reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 0.55s; }
+  .reveal-stagger.is-visible > *:nth-child(7) { transition-delay: 0.65s; }
+  .reveal-stagger.is-visible > *:nth-child(8) { transition-delay: 0.75s; }
+
   /* Lift on hover for cards/links */
   .hover-lift { transition: transform 0.25s ease, box-shadow 0.25s ease; }
   .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(16,185,129,0.12); }
+
+  /* ===== Premium motion utilities ===== */
+
+  /* Slow continuous spin — decorative rings */
+  @keyframes ldc-spin-slow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .animate-spin-slow { animation: ldc-spin-slow 40s linear infinite; }
+
+  /* Gentle floating for hero imagery */
+  @keyframes ldc-float-soft {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  .animate-float-soft { animation: ldc-float-soft 5s ease-in-out infinite; }
+
+  /* Breathing glow pulse for backdrop blobs */
+  @keyframes ldc-pulse-glow {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50%      { opacity: 1;   transform: scale(1.06); }
+  }
+  .animate-pulse-glow { animation: ldc-pulse-glow 6s ease-in-out infinite; }
+
+  /* Infinite horizontal marquee (direction-aware via dir attribute) */
+  @keyframes ldc-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  @keyframes ldc-marquee-rtl {
+    from { transform: translateX(0); }
+    to   { transform: translateX(50%); }
+  }
+  .animate-marquee { animation: ldc-marquee 30s linear infinite; }
+  [dir='rtl'] .animate-marquee { animation-name: ldc-marquee-rtl; }
+  .marquee-paused:hover .animate-marquee { animation-play-state: paused; }
+
+  /* Button shine sweep on hover */
+  .btn-shine { position: relative; overflow: hidden; }
+  .btn-shine::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%);
+    transform: translateX(-120%);
+    transition: transform 0.6s ease;
+    pointer-events: none;
+  }
+  .btn-shine:hover::after { transform: translateX(120%); }
+  [dir='rtl'] .btn-shine::after { transform: translateX(120%); }
+  [dir='rtl'] .btn-shine:hover::after { transform: translateX(-120%); }
+
+  /* Card glow border on hover */
+  .card-glow { transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s ease, border-color 0.3s ease; }
+  .card-glow:hover { transform: translateY(-6px); box-shadow: 0 20px 48px -12px rgba(101,163,13,0.25); }
+
+  /* Underline grow for nav links */
+  .link-underline { position: relative; }
+  .link-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    inset-inline-start: 0;
+    height: 2px;
+    width: 0;
+    border-radius: 2px;
+    background: currentColor;
+    transition: width 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .link-underline:hover::after { width: 100%; }
 
   /* Shimmer skeleton background */
   .shimmer {

@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Play, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
 import { t, type Locale } from '@/lib/locale-shared'
+import { CountUp } from '@/components/ui/count-up'
 
 export function HeroSection({ locale }: { locale: Locale }) {
   // These arrays must live inside the component so they re-evaluate on every
@@ -61,10 +62,10 @@ export function HeroSection({ locale }: { locale: Locale }) {
             </p>
 
             {/* CTAs */}
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center animate-fade-up delay-300">
               <Link
                 href="/sign-up"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-8 py-4 text-base font-bold text-lime-950 shadow-lg shadow-lime-500/40 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-lime-500/50 active:translate-y-0"
+                className="btn-shine inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-8 py-4 text-base font-bold text-lime-950 shadow-lg shadow-lime-500/40 transition-all hover:-translate-y-0.5 hover:shadow-xl hover:shadow-lime-500/50 active:translate-y-0"
               >
                 {t(locale, 'Get Started Free', 'ابدأ مجانًا')}
               </Link>
@@ -81,11 +82,13 @@ export function HeroSection({ locale }: { locale: Locale }) {
               </a>
             </div>
 
-            {/* Stats */}
-            <div className="mt-9 flex flex-wrap gap-10">
+            {/* Stats — count up when scrolled into view */}
+            <div className="mt-9 flex flex-wrap gap-10 animate-fade-up delay-400">
               {STATS.map((s) => (
                 <div key={s.label}>
-                  <div className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-[1.7rem]">{s.value}</div>
+                  <div className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-[1.7rem]">
+                    <CountUp value={s.value} />
+                  </div>
                   <div className="mt-0.5 text-sm text-neutral-500">{locale === "ar" ? s.labelAr : s.label}</div>
                 </div>
               ))}
@@ -93,17 +96,17 @@ export function HeroSection({ locale }: { locale: Locale }) {
           </div>
 
           {/* ── RIGHT: Hero meal with green accents ── */}
-          <div className="relative flex items-center justify-center lg:justify-end">
+          <div className="relative flex items-center justify-center lg:justify-end animate-scale-in delay-200">
             <div className="group relative aspect-square w-full max-w-[540px]">
               {/* Professional backdrop circle */}
               <div className="absolute inset-0 -z-10 flex items-center justify-center" aria-hidden="true">
-                <div className="size-[88%] rounded-full bg-gradient-to-br from-lime-100 via-lime-50 to-white" />
+                <div className="size-[88%] rounded-full bg-gradient-to-br from-lime-100 via-lime-50 to-white animate-pulse-glow" />
                 <div className="absolute size-[88%] rounded-full ring-1 ring-lime-200/70" />
-                <div className="absolute size-[100%] rounded-full border border-dashed border-lime-300/50" />
+                <div className="absolute size-[100%] rounded-full border border-dashed border-lime-300/50 animate-spin-slow" />
               </div>
 
-              {/* Meal image */}
-              <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 group-hover:scale-[0.92]">
+              {/* Meal image — gentle float, pauses into scale on hover */}
+              <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 animate-float-soft group-hover:scale-[0.92] group-hover:[animation-play-state:paused]">
                 <Image
                   src="/hero-meal.png"
                   alt="Fresh healthy meal from Lover Diet Center"
@@ -147,22 +150,28 @@ export function HeroSection({ locale }: { locale: Locale }) {
           </div>
         </div>
 
-        {/* ── Trust strip ── */}
+        {/* ── Trust strip — infinite marquee ── */}
         <div className="border-t border-neutral-100 py-7 text-center">
           <p className="text-sm text-neutral-500">
             {t(locale, "Trusted by 3,000+ clients across the UAE for science-backed nutrition.", "أكثر من 3,000 عميل في الإمارات يثقون بنا في التغذية العلمية.")}
           </p>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm font-bold text-neutral-400">
-            {TRUST_TAGS.map((tag, i) => (
-              <span key={tag.en} className="flex items-center gap-2">
-                <span className="flex items-center gap-1.5">
+          <div
+            className="marquee-paused relative mt-4 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]"
+            aria-hidden="true"
+          >
+            <div className="animate-marquee flex w-max items-center gap-10 text-sm font-bold text-neutral-400">
+              {[...TRUST_TAGS, ...TRUST_TAGS, ...TRUST_TAGS, ...TRUST_TAGS].map((tag, i) => (
+                <span key={`${tag.en}-${i}`} className="flex shrink-0 items-center gap-1.5">
                   <span className="size-2.5 rounded-full bg-lime-300" />
                   {locale === "ar" ? tag.ar : tag.en}
                 </span>
-                {i < TRUST_TAGS.length - 1 && <span className="text-neutral-200">|</span>}
-              </span>
-            ))}
+              ))}
+            </div>
           </div>
+          {/* Screen-reader friendly static list */}
+          <span className="sr-only">
+            {TRUST_TAGS.map((tag) => (locale === "ar" ? tag.ar : tag.en)).join(", ")}
+          </span>
         </div>
       </div>
     </section>

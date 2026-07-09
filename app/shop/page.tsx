@@ -151,11 +151,12 @@ export default function ShopPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-            {filtered.map((p) => (
+            {filtered.map((p, i) => (
               <Link
                 key={p.id}
                 href={`/shop/${p.id}`}
-                className="group hover-lift overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                style={{ animationDelay: `${Math.min(i, 7) * 70}ms` }}
+                className="group card-glow animate-fade-up overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-200"
                 aria-label={locale === "ar" ? p.nameAr : p.nameEn}
               >
                 <div className="relative h-44 overflow-hidden bg-emerald-50">
@@ -164,7 +165,7 @@ export default function ShopPage() {
                     alt={locale === "ar" ? p.nameAr : p.nameEn}
                     fill
                     sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
                   {!p.inStock && (
                     <span className="absolute right-3 top-3 rounded-full bg-neutral-900/70 px-2.5 py-1 text-xs font-bold text-white">

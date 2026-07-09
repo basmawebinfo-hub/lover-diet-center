@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { t, type Locale } from '@/lib/locale-shared'
+import { Reveal } from '@/components/ui/reveal'
 
 export function HowItWorks({ locale }: { locale: Locale }) {
 
@@ -59,12 +60,12 @@ export function HowItWorks({ locale }: { locale: Locale }) {
           </p>
         </div>
 
-        {/* Steps */}
-        <div className="mt-16 grid gap-6 sm:grid-cols-3">
+        {/* Steps — staggered entrance */}
+        <Reveal variant="stagger" className="mt-16 grid gap-6 sm:grid-cols-3">
           {STEPS.map((step, i) => (
             <div
               key={step.number}
-              className="group relative flex flex-col rounded-3xl border border-white/8 bg-white/4 p-8 transition-all hover:border-lime-500/30 hover:bg-white/6"
+              className="group relative flex flex-col rounded-3xl border border-white/8 bg-white/4 p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-lime-500/30 hover:bg-white/6 hover:shadow-[0_16px_48px_-16px_rgba(132,204,22,0.25)]"
             >
               {/* Connector line (desktop) */}
               {i < STEPS.length - 1 && (
@@ -83,16 +84,16 @@ export function HowItWorks({ locale }: { locale: Locale }) {
               <p className="mt-3 leading-relaxed text-neutral-400">{step.desc}</p>
             </div>
           ))}
-        </div>
+        </Reveal>
 
         {/* CTA */}
         <div className="mt-12 text-center">
           <Link
             href="/sign-up"
-            className="inline-flex items-center gap-2 rounded-2xl bg-lime-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-lime-500/25 transition-all hover:-translate-y-0.5 hover:bg-lime-400"
+            className="btn-shine inline-flex items-center gap-2 rounded-2xl bg-lime-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-lime-500/25 transition-all hover:-translate-y-0.5 hover:bg-lime-400"
           >
             {t(locale, 'Start My Plan Now', 'ابدأ خطتي الآن')}
-            <ArrowRight className="size-4 rtl:rotate-180" />
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
           </Link>
           <p className="mt-3 text-sm text-neutral-500">
             {t(locale, 'Free to start · No credit card needed', 'البدء مجاني · لا حاجة لبطاقة ائتمان')}

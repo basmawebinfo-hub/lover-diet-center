@@ -16,7 +16,7 @@ export function FinalCTA({ locale }: { locale: Locale }) {
         aria-hidden="true"
       />
       <div
-        className="absolute -top-32 end-[-10%] size-[40rem] rounded-full bg-orange-500/10 blur-3xl"
+        className="absolute -top-32 end-[-10%] size-[40rem] rounded-full bg-orange-500/10 blur-3xl animate-pulse-glow"
         aria-hidden="true"
       />
 
@@ -57,7 +57,7 @@ export function FinalCTA({ locale }: { locale: Locale }) {
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
             href="/sign-in?redirect=/onboarding"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange-500 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-orange-900/20 transition-all hover:bg-orange-400 sm:w-auto"
+            className="btn-shine inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange-500 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-orange-900/20 transition-all hover:-translate-y-0.5 hover:bg-orange-400 hover:shadow-xl sm:w-auto"
           >
             {t(locale, 'Build my plan', 'ابنِ خطتي')}
             <ArrowRight className="size-4 rtl:rotate-180" />

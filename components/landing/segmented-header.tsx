@@ -229,7 +229,7 @@ export function SegmentedHeader() {
           {isAuthed ? (
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+              className="btn-shine inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
             >
               {t(locale, 'Dashboard', 'لوحة التحكم')}
               <ArrowRight className="size-3.5 rtl:rotate-180" />
@@ -237,7 +237,7 @@ export function SegmentedHeader() {
           ) : (
             <Link
               href="/sign-in"
-              className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+              className="btn-shine inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
             >
               {t(locale, 'Sign in', 'تسجيل الدخول')}
               <ArrowRight className="size-3.5 rtl:rotate-180" />

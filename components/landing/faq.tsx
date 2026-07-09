@@ -109,9 +109,9 @@ export function FAQ({ locale }: { locale: Locale }) {
                   </span>
                   <span
                     className={cn(
-                      'flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors',
+                      'flex size-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300',
                       isOpen
-                        ? 'border-lime-200 bg-lime-50 text-lime-700'
+                        ? 'rotate-180 border-lime-200 bg-lime-50 text-lime-700'
                         : 'border-neutral-200 text-neutral-500',
                     )}
                     aria-hidden="true"

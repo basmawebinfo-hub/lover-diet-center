@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } from 'lucide-react'
 import { t, type Locale } from '@/lib/locale-shared'
+import { Reveal } from '@/components/ui/reveal'
 
 export function WhatWeOffer({ locale }: { locale: Locale }) {
 
@@ -89,15 +90,15 @@ export function WhatWeOffer({ locale }: { locale: Locale }) {
           </p>
         </div>
 
-        {/* Services grid */}
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        {/* Services grid — staggered entrance */}
+        <Reveal variant="stagger" className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {SERVICES.map((service) => {
             const Icon = service.icon
             return (
               <Link
                 key={service.href}
                 href={service.href}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-lime-200 hover:shadow-xl hover:shadow-lime-900/8"
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-lime-200 hover:shadow-xl hover:shadow-lime-900/8"
               >
                 {/* Image */}
                 <div className="relative h-40 overflow-hidden bg-lime-50">
@@ -141,7 +142,7 @@ export function WhatWeOffer({ locale }: { locale: Locale }) {
               </Link>
             )
           })}
-        </div>
+        </Reveal>
       </div>
     </section>
   )

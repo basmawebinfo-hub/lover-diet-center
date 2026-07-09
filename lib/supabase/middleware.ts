@@ -41,6 +41,41 @@ function matches(path: string, prefixes: readonly string[]): boolean {
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request })
+  const { pathname: earlyPath } = request.nextUrl
+
+  // ---------------------------------------------------------------------
+  // Locale routing (runs BEFORE any Supabase work so it still functions in
+  // preview environments without Supabase credentials).
+  //
+  // Route contract:
+  //   /en -> English mirror. Force ldc_locale=en for this request + persist
+  //          the cookie so subsequent hits stay in English. The user can
+  //          still toggle via the header switcher (which rewrites the cookie).
+  //   /   -> Cookie-driven. Leave whatever the user has.
+  // ---------------------------------------------------------------------
+  if (earlyPath === '/en' || earlyPath.startsWith('/en/')) {
+    const current = request.cookies.get(LOCALE_COOKIE)?.value
+    if (current !== 'en') {
+      request.cookies.set(LOCALE_COOKIE, 'en')
+      response.cookies.set(LOCALE_COOKIE, 'en', {
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 365 * 24 * 60 * 60,
+      })
+    }
+  }
+
+  // Preview/dev environments may not have Supabase configured. In that case
+  // skip all auth/session logic instead of crashing every request. Public
+  // pages render normally; protected routes simply won't gate (dev only).
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  ) {
+    return response
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -64,32 +99,6 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
   const now = Date.now()
-
-  // Locale routing (Phase 5 · Arabic SSR).
-  //
-  // Route contract:
-  //   /en   -> Arabic-first mirror. Force ldc_locale=ar for this request +
-  //            persist the cookie so subsequent hits stay in Arabic without
-  //            a per-request URL prefix. The user can still toggle back via
-  //            the header language switcher (which rewrites the cookie).
-  //   /     -> Cookie-driven. Leave whatever the user has.
-  //
-  // We set the cookie on BOTH the incoming request (so RootLayout's
-  // getLocaleServer() sees it on this hit) AND the outgoing response
-  // (so the browser stores it for future requests).
-  if (pathname === '/en' || pathname.startsWith('/en/')) {
-    const current = request.cookies.get(LOCALE_COOKIE)?.value
-    if (current !== 'ar') {
-      request.cookies.set(LOCALE_COOKIE, 'ar')
-      response.cookies.set(LOCALE_COOKIE, 'ar', {
-        httpOnly: false,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
-        maxAge: 365 * 24 * 60 * 60,
-      })
-    }
-  }
 
   const inRecovery = request.cookies.get(RECOVERY_COOKIE)?.value === '1'
 

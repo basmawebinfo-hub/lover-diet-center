@@ -39,14 +39,31 @@ export function LocaleProvider({
   // matches the SSR-rendered HTML exactly (no hydration mismatch, no flash).
   const [locale, setLocaleState] = useState<Locale>(initialLocale)
 
-  // Re-hydrate from client-side storage if it disagrees with the server
-  // value. This only fires on the very first mount and only if the user
-  // has an older localStorage value from before the cookie migration.
+  // Re-hydrate from client-side storage on first mount.
+  //
+  // Priority: cookie (already reflected in `initialLocale` from the server) >
+  // localStorage. We ONLY update state from localStorage when the cookie is
+  // absent — i.e. the user has never visited since the cookie migration.
+  // If the cookie is present, `initialLocale` already reflects the user's
+  // choice and we must NOT let a stale localStorage value overwrite it.
   useEffect(() => {
     if (typeof window === "undefined") return
+
+    // Check whether our locale cookie is already set on the client.
+    const cookiePresent = document.cookie
+      .split(";")
+      .some((c) => c.trim().startsWith(COOKIE_NAME + "="))
+
+    // Cookie wins — trust the server-derived initialLocale, sync localStorage.
+    if (cookiePresent) {
+      try { window.localStorage.setItem(STORAGE_KEY, initialLocale) } catch { /* quota */ }
+      return
+    }
+
+    // No cookie yet — fall back to localStorage (legacy visitors).
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY) as Locale | null
-      if ((saved === "ar" || saved === "en") && saved !== initialLocale) {
+      if (saved === "ar" || saved === "en") {
         setLocaleState(saved)
         writeCookie(saved)
       }

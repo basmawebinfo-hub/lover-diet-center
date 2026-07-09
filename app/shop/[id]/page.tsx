@@ -96,27 +96,15 @@ export default function ShopProductPage() {
   const name = locale === "ar" ? product.nameAr : product.nameEn
   const desc = locale === "ar" ? product.descriptionAr : product.descriptionEn
 
+  // Guest checkout: no account required. Signed-in users go through the
+  // dashboard cart (existing flow); guests go straight to /shop/checkout.
   function buyNow() {
-    if (!isSignedIn()) {
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("pendingCart", JSON.stringify({ productId: product!.id, quantity: qty }))
-      }
-      router.push("/sign-up?redirect=/dashboard/cart")
-      return
-    }
     addToCart(product!.id, qty)
     notify(t(locale, "Added to cart", "تمت الإضافة للسلة"), "success")
-    router.push("/dashboard/cart")
+    router.push(isSignedIn() ? "/dashboard/cart" : "/shop/checkout")
   }
 
   function addOnly() {
-    if (!isSignedIn()) {
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem("pendingCart", JSON.stringify({ productId: product!.id, quantity: qty }))
-      }
-      router.push("/sign-up?redirect=/dashboard/products")
-      return
-    }
     addToCart(product!.id, qty)
     notify(t(locale, "Added to cart", "تمت الإضافة للسلة"), "success")
   }
@@ -222,8 +210,8 @@ export default function ShopProductPage() {
               <p className="mt-3 text-center text-xs text-neutral-400 sm:text-start">
                 {t(
                   locale,
-                  "You'll be asked to create an account to complete your order.",
-                  "سيُطلب منك إنشاء حساب لإتمام طلبك.",
+                  "No account needed — check out as a guest with cash on delivery.",
+                  "لا حاجة لحساب — أتمم الشراء كضيف مع الدفع عند الاستلام.",
                 )}
               </p>
             )}

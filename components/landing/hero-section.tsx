@@ -4,35 +4,36 @@ import { Play, Stethoscope, UtensilsCrossed, Cookie, Activity, GraduationCap } f
 import { WHATSAPP_NUMBER } from '@/lib/site'
 import { t, type Locale } from '@/lib/locale-shared'
 
-// Real Lover Diet Center stats
-const STATS = [
-  { value: '3,000+', label: 'Happy Clients',     labelAr: 'عميل سعيد' },
-  { value: '150+',    label: 'Certified Experts',  labelAr: 'خبير معتمد' },
-  { value: '96%',     label: 'Success Rate',       labelAr: 'معدل النجاح' },
-]
-
-const TRUST_TAGS: { en: string; ar: string }[] = [
-  { en: 'Nutrition', ar: 'تغذية' },
-  { en: 'Meals',     ar: 'وجبات' },
-  { en: 'Snacks',    ar: 'سناكس' },
-  { en: 'Sculpting', ar: 'نحت الجسم' },
-  { en: 'Courses',   ar: 'دورات' },
-]
-
-const SERVICES = [
-  { icon: Stethoscope,     en: 'Consultations', ar: 'استشارات',    href: '/nutrition-consultations' },
-  { icon: UtensilsCrossed, en: 'Healthy Meals', ar: 'وجبات صحية',  href: '/healthy-meals' },
-  { icon: Cookie,          en: 'Snacks',        ar: 'سناكس',       href: '/healthy-snacks' },
-  { icon: Activity,        en: 'Sculpting',     ar: 'نحت الجسم',   href: '/body-sculpting' },
-  { icon: GraduationCap,   en: 'Courses',       ar: 'دورات',       href: '/training-courses' },
-]
-
 export function HeroSection({ locale }: { locale: Locale }) {
+  // These arrays must live inside the component so they re-evaluate on every
+  // render when `locale` prop changes — not once at module load time.
+  const STATS = [
+    { value: '3,000+', label: 'Happy Clients',    labelAr: 'عميل سعيد' },
+    { value: '150+',   label: 'Certified Experts', labelAr: 'خبير معتمد' },
+    { value: '96%',    label: 'Success Rate',      labelAr: 'معدل النجاح' },
+  ]
+
+  const TRUST_TAGS: { en: string; ar: string }[] = [
+    { en: 'Nutrition', ar: 'تغذية' },
+    { en: 'Meals',     ar: 'وجبات' },
+    { en: 'Snacks',    ar: 'سناكس' },
+    { en: 'Sculpting', ar: 'نحت الجسم' },
+    { en: 'Courses',   ar: 'دورات' },
+  ]
+
+  const SERVICES = [
+    { icon: Stethoscope,     en: 'Consultations', ar: 'استشارات',   href: '/nutrition-consultations' },
+    { icon: UtensilsCrossed, en: 'Healthy Meals', ar: 'وجبات صحية', href: '/healthy-meals' },
+    { icon: Cookie,          en: 'Snacks',        ar: 'سناكس',      href: '/healthy-snacks' },
+    { icon: Activity,        en: 'Sculpting',     ar: 'نحت الجسم',  href: '/body-sculpting' },
+    { icon: GraduationCap,   en: 'Courses',       ar: 'دورات',      href: '/training-courses' },
+  ]
+
   return (
     <section className="relative overflow-hidden pt-16">
       {/* Fresh lime → light gradient background (reference style) */}
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(160deg,#fbfcf7_0%,#f1f7e2_40%,#fdfdf8_72%)]" />
-      <div className="absolute -top-24 right-16 -z-10 size-[620px] rounded-full bg-[radial-gradient(circle,rgba(168,219,46,0.45),rgba(234,255,176,0)_70%)] blur-md" />
+      <div className="absolute -top-24 end-16 -z-10 size-[620px] rounded-full bg-[radial-gradient(circle,rgba(168,219,46,0.45),rgba(234,255,176,0)_70%)] blur-md" />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid grid-cols-1 items-center gap-10 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-16">

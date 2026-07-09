@@ -33,12 +33,12 @@ const NAV_ITEMS = [
   { href: "/dashboard/orders", label: "My Orders", labelAr: "طلباتي", icon: Package },
 ] as const
 
-async function signOut(router: ReturnType<typeof useRouter>) {
-  const { createClient } = await import("@/lib/supabase/client")
-  const supabase = createClient()
-  await supabase.auth.signOut()
-  router.push("/sign-in")
-  router.refresh()
+async function signOut(_router: ReturnType<typeof useRouter>) {
+  // Full sign-out: revokes the Supabase session, clears the persisted user
+  // from localStorage, and hard-navigates to /sign-in so no stale in-memory
+  // state can resurrect the session on the next click/refresh.
+  const { signOutCompletely } = await import("@/lib/sign-out")
+  await signOutCompletely()
 }
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {

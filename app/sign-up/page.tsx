@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import Image from 'next/image'
 import { SignUpForm } from '@/components/ui/sign-up-form'
+import { BackToHome } from '@/components/ui/back-to-home'
 import { Check } from 'lucide-react'
 import { useLocale, t } from '@/lib/locale'
 
@@ -24,6 +25,7 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen flex">
+      <BackToHome />
       {/* LEFT HALF - Decorative health-themed panel (hidden on mobile) */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0D4F4A] to-[#4d7c0f]">
         {/* Subtle background pattern */}

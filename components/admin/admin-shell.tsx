@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import {
   LayoutDashboard, Users, ShoppingBag, Package, Apple, Calendar,
   BarChart3, LogOut, ShieldAlert, Menu, X, ChevronLeft, Home, ClipboardList,
+  Sparkles, Tags, CalendarCheck, Star, Images,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -31,6 +32,17 @@ const NAV_GROUPS: { titleEn: string; titleAr: string; items: NavItem[] }[] = [
       { href: "/admin/products", en: "Products", ar: "المنتجات", icon: Package },
       { href: "/admin/plans", en: "Meals & Plans", ar: "الوجبات والخطط", icon: Apple },
       { href: "/admin/sessions", en: "Sessions", ar: "الجلسات", icon: Calendar },
+    ],
+  },
+  {
+    titleEn: "Body Care", titleAr: "خدمات العناية",
+    items: [
+      { href: "/admin/services", en: "Services", ar: "الخدمات", icon: Sparkles },
+      { href: "/admin/service-categories", en: "Categories", ar: "التصنيفات", icon: Tags },
+      { href: "/admin/service-bookings", en: "Bookings", ar: "الحجوزات", icon: CalendarCheck },
+      { href: "/admin/service-reviews", en: "Reviews", ar: "التقييمات", icon: Star },
+      { href: "/admin/service-gallery", en: "Gallery", ar: "المعرض", icon: Images },
+      { href: "/admin/service-analytics", en: "Service analytics", ar: "تحليلات الخدمات", icon: BarChart3 },
     ],
   },
   {

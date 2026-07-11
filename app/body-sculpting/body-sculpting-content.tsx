@@ -1,109 +1,36 @@
 "use client"
 
-import { InAppActionButton } from '@/components/in-app-action-button'
-import { Activity, CheckCircle } from 'lucide-react'
-import { useLocale, t } from '@/lib/locale'
+import Image from "next/image"
+import Link from "next/link"
+import { useMemo, useState } from "react"
+import { ArrowRight, Clock3, ShieldCheck, Sparkles, Star } from "lucide-react"
+import { useLocale } from "@/lib/locale"
+import { fallbackBodyServices, fallbackGallery, fallbackReviews, serviceCategories } from "@/lib/body-services"
+import { Reveal } from "@/components/ui/reveal"
 
 export function BodySculptingContent() {
   const { locale } = useLocale()
-
-  const benefits = [
-    t(locale, 'Non-invasive fat reduction technology', 'تقنية تكسير دهون غير جراحية'),
-    t(locale, 'Visible results from the first session', 'نتائج مرئية من الجلسة الأولى'),
-    t(locale, 'Reshape body measurements', 'إعادة تشكيل قياسات الجسم'),
-    t(locale, 'Certified body sculpting specialists', 'متخصصون معتمدون في نحت الجسم'),
-    t(locale, 'Customized session plans', 'خطط جلسات مخصصة'),
-    t(locale, 'Combines with nutrition plan for best results', 'تتكامل مع خطة التغذية لأفضل النتائج'),
-  ]
-
-  // Marketing pricing for the UAE market.
-  // These package prices are INTENTIONALLY fixed in AED — they are marketing
-  // copy for the UAE audience, not database-backed products. Do NOT connect
-  // them to the CurrencyProvider (useCurrency) or run them through format().
-  // This is a deliberate business decision (2026-07-04), not technical debt.
-  // If Body Sculpting later becomes a real bookable product, add it to the
-  // products table (USD) and wire it through format() like the shop uses.
-  const sessions = [
-    { name: t(locale, 'Starter Pack', 'باقة البداية'), sessions: 4, price: 799 },
-    { name: t(locale, 'Transformation Pack', 'باقة التحوّل'), sessions: 8, price: 1399, popular: true },
-    { name: t(locale, 'Elite Pack', 'الباقة المميزة'), sessions: 16, price: 2499 },
-  ]
-
-  const aed = t(locale, 'AED', 'درهم')
-  const sessionsLabel = (n: number) => locale === 'ar' ? `${n} جلسات` : `${n} sessions`
-
-  return (
-    <main className="min-h-screen bg-white">
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-[#f0faf7] to-white py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-[#4d7c0f]/10 text-[#4d7c0f] text-sm font-semibold px-4 py-2 rounded-full mb-6">
-            <Activity className="w-4 h-4" />
-            {t(locale, 'Body Sculpting Sessions', 'جلسات نحت الجسم')}
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight">
-            {locale === 'ar' ? (
-              <>أعد تشكيل جسمك،{' '}<span className="text-[#4d7c0f]">بدون جراحة</span></>
-            ) : (
-              <>Reshape Your Body,{' '}<span className="text-[#4d7c0f]">Without Surgery</span></>
-            )}
-          </h1>
-          <p className="text-lg text-neutral-600 mb-8 max-w-2xl mx-auto">
-            {t(
-              locale,
-              'Advanced non-invasive fat-breaking technology combined with expert nutrition guidance. See real changes in your body measurements from the very first session.',
-              'تقنية متقدّمة لتكسير الدهون غير الجراحية مع إرشاد غذائي متخصص. شاهد تغيّرات حقيقية في قياسات جسمك من الجلسة الأولى.'
-            )}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <InAppActionButton mode="session" sessionType="body_sculpting" label={t(locale, 'Book a Session', 'احجز جلسة')} />
-          </div>
+  const ar = locale === "ar"
+  const [category, setCategory] = useState("all")
+  const services = useMemo(() => fallbackBodyServices.filter((s) => s.isActive && (category === "all" || s.categoryId === category)), [category])
+  return <div dir={ar ? "rtl" : "ltr"} className="min-h-screen bg-[#f7f6ef] text-neutral-950">
+    <div>
+      <section className="relative overflow-hidden bg-[#123f35] text-white">
+        <div className="absolute inset-0 opacity-10 [background-image:radial-gradient(circle_at_1px_1px,currentColor_1px,transparent_0)] [background-size:24px_24px]" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 md:px-8 lg:grid-cols-2 lg:py-24">
+          <div className="animate-fade-up"><span className="inline-flex items-center gap-2 rounded-full border border-[#d7b56d]/40 px-4 py-2 text-sm font-bold text-[#f2d38f]"><Sparkles className="size-4" />{ar ? "خدمات VIP في أم القيوين" : "VIP care in Umm Al Quwain"}</span><h1 className="mt-6 text-balance text-4xl font-black leading-tight sm:text-6xl">{ar ? "جسم أكثر تناسقًا، وبشرة أكثر إشراقًا" : "Feel sculpted, restored and radiant"}</h1><p className="mt-5 max-w-2xl text-lg leading-8 text-white/75">{ar ? "جلسات متخصصة لنحت القوام والعناية بالبشرة والاسترخاء، بخطة تناسب احتياجاتك." : "Specialist body shaping, skin care and wellness sessions tailored to your goals."}</p><div className="mt-8 flex flex-wrap gap-3"><a href="#services" className="btn-shine rounded-full bg-[#d7b56d] px-6 py-3.5 font-bold text-[#123f35]">{ar ? "استكشفي الخدمات" : "Explore services"}</a><a href="tel:+971529033110" className="rounded-full border border-white/25 px-6 py-3.5 font-bold">052 903 3110</a></div></div>
+          <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2.5rem] border border-white/15 p-3 shadow-2xl"><Image src="/images/body-sculpting/maderotherapy-vip.jpeg" alt={ar ? "جلسة وود ثيرابي" : "Wood therapy session"} fill priority sizes="420px" className="rounded-[2rem] object-cover" /></div>
         </div>
       </section>
-
-      {/* Benefits */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-neutral-900 text-center mb-10">{t(locale, 'Why Choose Our Sessions?', 'لماذا تختار جلساتنا؟')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {benefits.map((b, i) => (
-              <div key={i} className="flex items-start gap-3 p-4 bg-[#f0faf7] rounded-2xl">
-                <CheckCircle className="w-5 h-5 text-[#4d7c0f] mt-0.5 shrink-0" />
-                <div>
-                  <p className="font-semibold text-neutral-800">{b}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <section id="services" className="mx-auto max-w-7xl px-5 py-16 md:px-8 lg:py-24">
+        <Reveal><p className="font-bold tracking-widest text-emerald-800">{ar ? "اختاري جلستك" : "CHOOSE YOUR SESSION"}</p><h2 className="mt-3 text-3xl font-black sm:text-4xl">{ar ? "عروض مصممة لاحتياجاتك" : "Care designed around your goals"}</h2></Reveal>
+        <div className="mt-8 flex flex-wrap gap-2"><Filter active={category === "all"} onClick={() => setCategory("all")}>{ar ? "الكل" : "All"}</Filter>{serviceCategories.map(c => <Filter key={c.id} active={category === c.id} onClick={() => setCategory(c.id)}>{ar ? c.nameAr : c.nameEn}</Filter>)}</div>
+        <Reveal variant="stagger" className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">{services.map(service => <article key={service.id} className="group card-glow overflow-hidden rounded-[2rem] border border-[#dedacb] bg-white"><Link href={`/body-sculpting/${service.slug}`}><div className="relative aspect-[4/5] overflow-hidden"><Image src={service.imageUrl} alt={ar ? service.nameAr : service.nameEn} fill sizes="(max-width:768px) 100vw,33vw" className="object-cover transition duration-700 group-hover:scale-105" />{service.badgeEn && <span className="absolute start-4 top-4 rounded-full bg-[#123f35] px-4 py-2 text-xs font-bold text-white">{ar ? service.badgeAr : service.badgeEn}</span>}</div><div className="p-6"><div className="flex justify-between gap-3"><h3 className="text-xl font-black">{ar ? service.nameAr : service.nameEn}</h3><span className="shrink-0 text-xs font-bold text-neutral-500"><Clock3 className="me-1 inline size-4" />{service.durationMinutes} {ar ? "د" : "min"}</span></div><p className="mt-3 line-clamp-2 leading-7 text-neutral-600">{ar ? service.shortDescriptionAr : service.shortDescriptionEn}</p><div className="mt-5 flex items-end justify-between border-t pt-5"><div><b className="text-2xl text-emerald-900">{service.price} {ar ? "د.إ" : "AED"}</b>{service.compareAtPrice && <del className="ms-2 text-sm text-neutral-400">{service.compareAtPrice}</del>}</div><ArrowRight className="size-5 text-emerald-800 rtl:rotate-180" /></div></div></Link></article>)}</Reveal>
       </section>
-
-      {/* Pricing */}
-      <section className="py-16 px-4 bg-neutral-50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-neutral-900 text-center mb-10">{t(locale, 'Session Packages', 'باقات الجلسات')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {sessions.map((pkg, i) => (
-              <div
-                key={i}
-                className={`relative bg-white rounded-3xl p-6 shadow-sm border-2 transition-shadow hover:shadow-md ${
-                  pkg.popular ? 'border-[#4d7c0f]' : 'border-neutral-100'
-                }`}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#4d7c0f] text-white text-xs font-bold px-4 py-1 rounded-full">
-                    {t(locale, 'Most Popular', 'الأكثر طلباً')}
-                  </div>
-                )}
-                <h3 className="text-xl font-bold text-neutral-900">{pkg.name}</h3>
-                <p className="text-3xl font-bold text-[#4d7c0f] mb-1 mt-3">{pkg.price} <span className="text-base font-normal">{aed}</span></p>
-                <p className="text-sm text-neutral-500 mb-6">{sessionsLabel(pkg.sessions)}</p>
-                <div className="mt-2"><InAppActionButton mode="session" sessionType="body_sculpting" label={t(locale, 'Book Now', 'احجز الآن')} className="w-full px-4 py-3 text-sm" /></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </main>
-  )
+      <section className="bg-white py-16"><div className="mx-auto max-w-7xl px-5 md:px-8"><Reveal className="text-center"><ShieldCheck className="mx-auto size-10 text-emerald-800" /><h2 className="mt-4 text-3xl font-black">{ar ? "رعاية واضحة من أول خطوة" : "Confident care from the first step"}</h2></Reveal><div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4">{fallbackGallery.slice(0,7).map((g,i)=><figure key={g.id} className={`relative overflow-hidden rounded-3xl ${i===0?"col-span-2 row-span-2 aspect-square":"aspect-[4/5]"}`}><Image src={g.imageUrl} alt={ar?g.titleAr:g.titleEn} fill sizes="25vw" className="object-cover transition duration-700 hover:scale-105" /></figure>)}</div></div></section>
+      <section className="bg-[#ece8d9] py-16"><div className="mx-auto max-w-7xl px-5 md:px-8"><h2 className="text-center text-3xl font-black">{ar ? "ماذا يقول عملاؤنا؟" : "What our clients say"}</h2><Reveal variant="stagger" className="mt-10 grid gap-5 md:grid-cols-3">{fallbackReviews.map(r=><blockquote key={r.id} className="rounded-3xl bg-white p-7"><div className="flex gap-1 text-[#b8862d]">{Array.from({length:r.rating}).map((_,i)=><Star key={i} className="size-4 fill-current" />)}</div><p className="mt-5 text-lg leading-8">“{ar?r.commentAr:r.commentEn}”</p><footer className="mt-5 font-bold text-emerald-900">{r.customerName}</footer></blockquote>)}</Reveal></div></section>
+      <section className="bg-[#123f35] px-5 py-16 text-center text-white"><h2 className="text-3xl font-black">{ar ? "مش متأكدة أي جلسة تناسبك؟" : "Not sure which session fits you?"}</h2><a href="https://wa.me/971529033110" className="btn-shine mt-7 inline-block rounded-full bg-[#d7b56d] px-7 py-3.5 font-bold text-[#123f35]">{ar ? "اسألي عبر واتساب" : "Ask on WhatsApp"}</a></section>
+    </div>
+  </div>
 }
+function Filter({active,children,onClick}:{active:boolean;children:React.ReactNode;onClick:()=>void}){return <button type="button" onClick={onClick} aria-pressed={active} className={`rounded-full border px-5 py-2.5 text-sm font-bold ${active?"border-emerald-900 bg-emerald-900 text-white":"border-[#d3cebb] bg-white"}`}>{children}</button>}

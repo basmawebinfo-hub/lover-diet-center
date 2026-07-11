@@ -117,8 +117,9 @@ export function HealthyMealsContent() {
               {(catalogMeals ?? []).map((meal) => {
                 const typeLabel = MEAL_TYPE_LABELS[meal.mealType] ?? MEAL_TYPE_LABELS.snack
                 return (
-                  <div
+                  <Link
                     key={meal.id}
+                    href={`/healthy-meals/${meal.id}`}
                     className="group flex flex-col bg-white border border-neutral-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg hover:border-lime-300 transition-all"
                   >
                     <div className="relative h-44 overflow-hidden bg-[#f3fae6]">
@@ -160,8 +161,12 @@ export function HealthyMealsContent() {
                           {t(locale, `${meal.fat}g fat`, `${meal.fat}g دهون`)}
                         </span>
                       </div>
+                      <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-lime-700 group-hover:gap-1.5 transition-all">
+                        {t(locale, 'View details', 'التفاصيل')}
+                        <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5 rtl:rotate-180" />
+                      </span>
                     </div>
-                  </div>
+                  </Link>
                 )
               })}
             </div>

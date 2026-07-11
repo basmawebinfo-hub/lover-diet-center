@@ -315,8 +315,9 @@ export default function ShopPage() {
             {filteredMeals.map((m, i) => {
               const typeLabel = MEAL_TYPE_LABELS[m.mealType] ?? MEAL_TYPE_LABELS.snack
               return (
-                <div
+                <Link
                   key={m.id}
+                  href={`/healthy-meals/${m.id}`}
                   style={{ animationDelay: `${Math.min(filteredProducts.length + i, 7) * 70}ms` }}
                   className="group card-glow animate-fade-up flex flex-col overflow-hidden rounded-3xl border border-lime-100 bg-white shadow-sm transition-shadow hover:shadow-xl"
                 >
@@ -359,15 +360,12 @@ export default function ShopPage() {
                       <span className="text-xs font-bold text-[#4d7c0f]">
                         {t(locale, "Nutrition meal", "وجبة غذائية")}
                       </span>
-                      <Link
-                        href="/healthy-meals"
-                        className="rounded-full bg-lime-50 px-3 py-1 text-xs font-bold text-[#4d7c0f] transition hover:bg-[#4d7c0f] hover:text-white focus:outline-none focus:ring-2 focus:ring-lime-200"
-                      >
+                      <span className="rounded-full bg-lime-50 px-3 py-1 text-xs font-bold text-[#4d7c0f] transition group-hover:bg-[#4d7c0f] group-hover:text-white">
                         {t(locale, "Details", "التفاصيل")}
-                      </Link>
+                      </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               )
             })}
           </div>

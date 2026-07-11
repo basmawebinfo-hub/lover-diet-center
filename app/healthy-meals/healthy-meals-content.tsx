@@ -4,19 +4,28 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { InAppActionButton } from '@/components/in-app-action-button'
-import { ArrowRight, ChefHat } from 'lucide-react'
+import { ArrowRight, ChefHat, Flame, Clock } from 'lucide-react'
 import { useLocale, t } from '@/lib/locale'
 import { useCurrency } from '@/lib/currency'
-import { fetchProducts } from '@/lib/supabase/db'
-import type { Product } from '@/lib/types'
+import { fetchProducts, fetchMeals } from '@/lib/supabase/db'
+import type { Product, Meal } from '@/lib/types'
+
+const MEAL_TYPE_LABELS: Record<string, { en: string; ar: string }> = {
+  breakfast: { en: 'Breakfast', ar: 'إفطار' },
+  lunch: { en: 'Lunch', ar: 'غداء' },
+  dinner: { en: 'Dinner', ar: 'عشاء' },
+  snack: { en: 'Light meal', ar: 'وجبة خفيفة' },
+}
 
 export function HealthyMealsContent() {
   const { locale } = useLocale()
   const { format } = useCurrency()
   const [meals, setMeals] = useState<Product[] | null>(null)
+  const [catalogMeals, setCatalogMeals] = useState<Meal[] | null>(null)
 
   useEffect(() => {
     fetchProducts().then((all) => setMeals(all.filter((p) => p.category === 'meal')))
+    fetchMeals().then(setCatalogMeals)
   }, [])
 
   return (
@@ -54,12 +63,14 @@ export function HealthyMealsContent() {
           {meals === null ? (
             <p className="py-10 text-center text-neutral-400">{t(locale, 'Loading…', 'جارٍ التحميل…')}</p>
           ) : meals.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-neutral-200 bg-white p-12 text-center">
-              <p className="text-neutral-500">{t(locale, 'Our meal menu is being updated — browse the full shop in the meantime.', 'قائمة وجباتنا قيد التحديث — تصفّح المتجر بالكامل في هذه الأثناء.')}</p>
-              <div className="mt-5">
-                <InAppActionButton mode="shop" label={t(locale, 'Browse the shop', 'تصفّح المتجر')} variant="light" />
+            (catalogMeals?.length ?? 0) === 0 ? (
+              <div className="rounded-3xl border border-dashed border-neutral-200 bg-white p-12 text-center">
+                <p className="text-neutral-500">{t(locale, 'Our meal menu is being updated — browse the full shop in the meantime.', 'قائمة وجباتنا قيد التحديث — تصفّح المتجر بالكامل في هذه الأثناء.')}</p>
+                <div className="mt-5">
+                  <InAppActionButton mode="shop" label={t(locale, 'Browse the shop', 'تصفّح المتجر')} variant="light" />
+                </div>
               </div>
-            </div>
+            ) : null
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {meals.map((meal) => (
@@ -91,6 +102,72 @@ export function HealthyMealsContent() {
           )}
         </div>
       </section>
+
+      {/* Nutrition catalog meals (managed from admin "Meals & Plans") */}
+      {(catalogMeals?.length ?? 0) > 0 && (
+        <section className="bg-[#f7fbf4] py-16 px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl font-bold text-neutral-900">{t(locale, 'Nutrition Menu', 'قائمة الوجبات الغذائية')}</h2>
+              <p className="mt-2 text-neutral-600">
+                {t(locale, 'Macro-counted meals designed by our nutritionists.', 'وجبات محسوبة السعرات والعناصر من تصميم أخصائيي التغذية لدينا.')}
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {(catalogMeals ?? []).map((meal) => {
+                const typeLabel = MEAL_TYPE_LABELS[meal.mealType] ?? MEAL_TYPE_LABELS.snack
+                return (
+                  <div
+                    key={meal.id}
+                    className="group flex flex-col bg-white border border-neutral-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg hover:border-lime-300 transition-all"
+                  >
+                    <div className="relative h-44 overflow-hidden bg-[#f3fae6]">
+                      {meal.imageUrl ? (
+                        <Image
+                          src={meal.imageUrl}
+                          alt={locale === 'ar' ? meal.nameAr || meal.nameEn : meal.nameEn}
+                          fill
+                          sizes="(max-width:640px) 100vw, 25vw"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <span className="flex size-full items-center justify-center text-4xl" aria-hidden="true">🥗</span>
+                      )}
+                      <span className="absolute top-3 start-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-[#4d7c0f] shadow-sm">
+                        <Clock className="size-3" />
+                        {t(locale, typeLabel.en, typeLabel.ar)}
+                      </span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-4">
+                      <h3 className="font-bold text-neutral-900 line-clamp-1">
+                        {locale === 'ar' ? meal.nameAr || meal.nameEn : meal.nameEn}
+                      </h3>
+                      <p className="mt-2 line-clamp-2 text-sm text-neutral-600">
+                        {locale === 'ar' ? meal.descriptionAr || meal.descriptionEn : meal.descriptionEn}
+                      </p>
+                      <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-4">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-semibold text-orange-700">
+                          <Flame className="size-3" />
+                          {meal.calories} kcal
+                        </span>
+                        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                          {t(locale, `${meal.protein}g protein`, `${meal.protein}g بروتين`)}
+                        </span>
+                        <span className="rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700">
+                          {t(locale, `${meal.carbs}g carbs`, `${meal.carbs}g كارب`)}
+                        </span>
+                        <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                          {t(locale, `${meal.fat}g fat`, `${meal.fat}g دهون`)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="bg-[#4d7c0f] py-16 px-4 text-center">

@@ -60,6 +60,7 @@ export function SegmentedHeader() {
   const toggleRef  = useRef<HTMLButtonElement>(null)
   const dropRef    = useRef<HTMLDivElement>(null)
   const [isAuthed, setIsAuthed] = useState(false)
+  const [userName, setUserName] = useState<{ en: string; ar: string } | null>(null)
   const { locale, toggleLocale } = useLocale()
 
   useEffect(() => {
@@ -99,6 +100,35 @@ export function SegmentedHeader() {
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
   }, [])
+
+  // When the session cookie is present, resolve the user's display name.
+  // Cached in sessionStorage so we only hit /api/auth/me once per tab.
+  useEffect(() => {
+    if (!isAuthed) {
+      setUserName(null)
+      try { sessionStorage.removeItem('ldc_header_name') } catch { /* ignore */ }
+      return
+    }
+    try {
+      const cached = sessionStorage.getItem('ldc_header_name')
+      if (cached) {
+        setUserName(JSON.parse(cached))
+        return
+      }
+    } catch { /* ignore */ }
+
+    let cancelled = false
+    fetch('/api/auth/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { nameEn?: string; nameAr?: string } | null) => {
+        if (cancelled || !data?.nameEn) return
+        const name = { en: data.nameEn, ar: data.nameAr || data.nameEn }
+        setUserName(name)
+        try { sessionStorage.setItem('ldc_header_name', JSON.stringify(name)) } catch { /* ignore */ }
+      })
+      .catch(() => { /* signed-out or offline — keep default label */ })
+    return () => { cancelled = true }
+  }, [isAuthed])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -229,9 +259,21 @@ export function SegmentedHeader() {
           {isAuthed ? (
             <Link
               href="/dashboard"
-              className="btn-shine inline-flex items-center gap-1.5 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-6 py-2.5 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
+              className="btn-shine inline-flex items-center gap-2 rounded-full bg-gradient-to-b from-lime-400 to-lime-500 px-5 py-2 text-sm font-bold text-lime-950 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:translate-y-0"
             >
-              {t(locale, 'Dashboard', 'لوحة التحكم')}
+              {userName ? (
+                <>
+                  <span className="flex size-7 items-center justify-center rounded-full bg-white/60 text-xs font-bold text-lime-800" aria-hidden="true">
+                    {(locale === 'ar' ? userName.ar : userName.en).trim().charAt(0).toUpperCase()}
+                  </span>
+                  <span className="max-w-32 truncate">
+                    {t(locale, 'Hi, ', 'أهلاً، ')}
+                    {(locale === 'ar' ? userName.ar : userName.en).trim().split(/\s+/)[0]}
+                  </span>
+                </>
+              ) : (
+                t(locale, 'Dashboard', 'لوحة التحكم')
+              )}
               <ArrowRight className="size-3.5 rtl:rotate-180" />
             </Link>
           ) : (
@@ -304,7 +346,11 @@ export function SegmentedHeader() {
               onClick={closeMenu}
               className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-lime-400 to-lime-500 py-3.5 text-base font-bold text-lime-950 shadow-sm"
             >
-              {isAuthed ? t(locale, 'Go to Dashboard', 'الذهاب إلى لوحة التحكم') : t(locale, 'Sign in', 'تسجيل الدخول')}
+              {isAuthed
+                ? userName
+                  ? `${t(locale, 'Hi, ', 'أهلاً، ')}${(locale === 'ar' ? userName.ar : userName.en).trim().split(/\s+/)[0]} — ${t(locale, 'Dashboard', 'لوحة التحكم')}`
+                  : t(locale, 'Go to Dashboard', 'الذهاب إلى لوحة التحكم')
+                : t(locale, 'Sign in', 'تسجيل الدخول')}
               <ArrowRight className="size-4 rtl:rotate-180" />
             </Link>
             <a

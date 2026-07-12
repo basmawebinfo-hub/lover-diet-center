@@ -25,7 +25,7 @@ import {
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", labelAr: "الرئيسية", icon: Home },
   { href: "/dashboard/settings", label: "Profile & Goal", labelAr: "الملف والهدف", icon: UserIcon },
-  { href: "/dashboard/weight", label: "Daily Weight", labelAr: "الوزن اليومي", icon: Scale },
+  { href: "/dashboard/weight", label: "Weekly Weight", labelAr: "الوزن الأسبوعي", icon: Scale },
   { href: "/dashboard/plan", label: "My Plan", labelAr: "الخطة", icon: Apple },
   { href: "/dashboard/products", label: "Products", labelAr: "المنتجات", icon: ShoppingBag },
   { href: "/dashboard/sessions", label: "Sessions", labelAr: "الجلسات", icon: Calendar },

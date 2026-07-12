@@ -109,6 +109,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <p className="mt-1 text-xs text-neutral-500">
               {user.currentWeightKg.toFixed(1)} {t(locale,"kg","كجم")} · {t(locale,"Target","الهدف")} {user.targetWeightKg.toFixed(1)} {t(locale,"kg","كجم")}
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm(t(locale, "Sign out of your account?", "تسجيل الخروج من حسابك؟"))) {
+                  signOut(router)
+                }
+              }}
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-xs font-bold text-red-600 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
+            >
+              <LogOut className="size-3.5" aria-hidden="true" />
+              {t(locale, "Sign out", "تسجيل الخروج")}
+            </button>
           </div>
         )}
 
@@ -145,20 +157,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="border-t border-neutral-100 p-3 space-y-1">
-          <button
-            type="button"
-            onClick={() => {
-              if (confirm(t(locale, "Sign out of your account?", "تسجيل الخروج من حسابك؟"))) {
-                signOut(router)
-              }
-            }}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 transition-colors hover:bg-red-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
-          >
-            <LogOut className="size-4.5" />
-            <span>{t(locale, "Sign Out", "تسجيل الخروج")}</span>
-          </button>
-        </div>
       </aside>
 
       {/* Mobile top bar */}

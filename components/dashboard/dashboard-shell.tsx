@@ -173,10 +173,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             onClick={() => {
               if (confirm(t(locale, "Sign out?", "تسجيل الخروج؟"))) signOut(router)
             }}
-            aria-label={t(locale, "Sign out", "تسجيل الخروج")}
-            className="p-2 rounded-xl text-neutral-500 hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-red-100 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
           >
-            <LogOut className="size-4" aria-hidden="true" />
+            <LogOut className="size-3.5" aria-hidden="true" />
+            {t(locale, "Sign out", "خروج")}
           </button>
           <Link
             href="/dashboard/cart"

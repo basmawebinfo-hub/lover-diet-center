@@ -6,7 +6,7 @@ import Link from "next/link"
 import Image from "next/image"
 import {
   Scale, Apple, Calendar, ShoppingBag, Target, Flame, Droplets,
-  Plus, Minus, Search, ArrowUpRight,
+  Plus, Minus, Search, ArrowUpRight, LogOut,
 } from "lucide-react"
 import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
 import { BodyAvatar } from "@/components/body-avatar"
@@ -99,6 +99,19 @@ export default function DashboardOverviewPage() {
             <span className="relative flex size-10 items-center justify-center overflow-hidden rounded-full bg-emerald-100 text-base font-bold text-emerald-700">
               {user.avatarUrl ? <Image src={user.avatarUrl} alt={firstName} fill sizes="40px" className="object-cover" /> : initial}
             </span>
+            <button
+              type="button"
+              onClick={async () => {
+                if (confirm(t(locale, "Sign out of your account?", "تسجيل الخروج من حسابك؟"))) {
+                  const { signOutCompletely } = await import("@/lib/sign-out")
+                  await signOutCompletely()
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600 transition-colors hover:bg-red-600 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
+            >
+              <LogOut className="size-4" aria-hidden="true" />
+              {t(locale, "Sign out", "تسجيل الخروج")}
+            </button>
           </div>
         </div>
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, ArrowLeft, Flame, Leaf, ShieldCheck, Truck, Sparkles, X } from "lucide-react"
+import { Search, ArrowLeft, Flame, Leaf, ShieldCheck, Truck, Sparkles, X, Sunrise, Sun, Moon, Cookie } from "lucide-react"
 import { fetchProducts, fetchMeals } from "@/lib/supabase/db"
 import type { Product, Meal } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -25,6 +25,13 @@ const MEAL_TYPE_LABELS: Record<Meal["mealType"], { en: string; ar: string }> = {
   snack: { en: "Light meal", ar: "وجبة خفيفة" },
 }
 
+const MEAL_TYPE_TABS = [
+  { key: "breakfast", icon: Sunrise, activeCls: "bg-amber-500 text-white shadow-md", idleCls: "border border-amber-200 bg-amber-50 text-amber-700 hover:scale-105" },
+  { key: "lunch", icon: Sun, activeCls: "bg-orange-500 text-white shadow-md", idleCls: "border border-orange-200 bg-orange-50 text-orange-700 hover:scale-105" },
+  { key: "dinner", icon: Moon, activeCls: "bg-indigo-500 text-white shadow-md", idleCls: "border border-indigo-200 bg-indigo-50 text-indigo-700 hover:scale-105" },
+  { key: "snack", icon: Cookie, activeCls: "bg-emerald-600 text-white shadow-md", idleCls: "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:scale-105" },
+] as const
+
 const TRUST_BADGES = [
   { icon: Leaf, en: "100% natural ingredients", ar: "مكونات طبيعية 100%" },
   { icon: ShieldCheck, en: "Nutritionist approved", ar: "معتمد من أخصائيي التغذية" },
@@ -36,6 +43,7 @@ export default function ShopPage() {
   const { format, currency, setCurrency } = useCurrency()
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<(typeof CATEGORIES)[number]["id"]>("all")
+  const [mealType, setMealType] = useState<"all" | Meal["mealType"]>("all")
   const [products, setProducts] = useState<Product[] | null>(null)
   const [meals, setMeals] = useState<Meal[] | null>(null)
   const [error, setError] = useState(false)
@@ -74,6 +82,7 @@ export default function ShopPage() {
   const filteredMeals = useMemo(() => {
     if (category !== "all" && category !== "meal") return []
     return (meals ?? []).filter((m) => {
+      if (category === "meal" && mealType !== "all" && (m.mealType ?? "snack") !== mealType) return false
       if (!search) return true
       const q = search.toLowerCase()
       return (
@@ -83,7 +92,7 @@ export default function ShopPage() {
         m.tags.some((tag) => tag.toLowerCase().includes(q))
       )
     })
-  }, [meals, search, category])
+  }, [meals, search, category, mealType])
 
   const loading = products === null || meals === null
   const totalResults = filteredProducts.length + filteredMeals.length
@@ -177,7 +186,7 @@ export default function ShopPage() {
                 <button
                   key={c.id}
                   type="button"
-                  onClick={() => setCategory(c.id)}
+                  onClick={() => { setCategory(c.id); setMealType("all") }}
                   aria-pressed={category === c.id}
                   className={cn(
                     "rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition focus:outline-none focus:ring-2 focus:ring-emerald-200",
@@ -191,6 +200,57 @@ export default function ShopPage() {
               ))}
             </div>
           </div>
+          {/* Meal type sub-filters — visible when "Meals" category is selected */}
+          {category === "meal" && !loading && !error && (
+            <div
+              role="tablist"
+              aria-label={t(locale, "Filter meals by type", "تصفية الوجبات حسب النوع")}
+              className="mt-4 flex flex-wrap items-center gap-2"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mealType === "all"}
+                onClick={() => setMealType("all")}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-emerald-200",
+                  mealType === "all"
+                    ? "bg-[#4d7c0f] text-white shadow-md"
+                    : "border border-neutral-200 bg-white text-neutral-600 hover:border-lime-300 hover:text-[#4d7c0f]",
+                )}
+              >
+                {t(locale, "All meals", "كل الوجبات")}
+                <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-bold", mealType === "all" ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-500")}>
+                  {(meals ?? []).length}
+                </span>
+              </button>
+              {MEAL_TYPE_TABS.map((tab) => {
+                const count = (meals ?? []).filter((m) => (m.mealType ?? "snack") === tab.key).length
+                if (count === 0) return null
+                const TabIcon = tab.icon
+                const active = mealType === tab.key
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setMealType(tab.key)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-emerald-200",
+                      active ? tab.activeCls : tab.idleCls,
+                    )}
+                  >
+                    <TabIcon className="size-3.5" aria-hidden />
+                    {t(locale, MEAL_TYPE_LABELS[tab.key].en, MEAL_TYPE_LABELS[tab.key].ar)}
+                    <span className={cn("rounded-full px-1.5 py-0.5 text-[10px] font-bold", active ? "bg-white/20 text-white" : "bg-white")}>
+                      {count}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
           {/* Result count */}
           {!loading && !error && totalItems > 0 && (
             <p className="mt-3 text-xs font-semibold text-neutral-400">
@@ -236,7 +296,7 @@ export default function ShopPage() {
             {(search || category !== "all") && totalItems > 0 && (
               <button
                 type="button"
-                onClick={() => { setSearch(""); setCategory("all") }}
+                onClick={() => { setSearch(""); setCategory("all"); setMealType("all") }}
                 className="mt-2 text-xs font-semibold text-emerald-700 hover:underline"
               >
                 {t(locale, "Clear filters", "مسح الفلاتر")}

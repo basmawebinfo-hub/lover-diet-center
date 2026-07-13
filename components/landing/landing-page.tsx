@@ -4,6 +4,7 @@ import { useLocale } from '@/lib/locale'
 import { HeroSection }   from '@/components/landing/hero-section'
 import { HowItWorks }    from '@/components/landing/how-it-works'
 import { WhatWeOffer }   from '@/components/landing/what-we-offer'
+import { MeetDrWael }    from '@/components/landing/meet-dr-wael'
 import { Testimonials }  from '@/components/landing/testimonials'
 import { FAQ }           from '@/components/landing/faq'
 import { FinalCTA }      from '@/components/landing/final-cta'
@@ -29,6 +30,7 @@ export function LandingPage() {
       <HeroSection locale={locale} />
       <Reveal><HowItWorks locale={locale} /></Reveal>
       <Reveal><WhatWeOffer locale={locale} /></Reveal>
+      <Reveal><MeetDrWael locale={locale} /></Reveal>
       <Reveal><Testimonials locale={locale} /></Reveal>
       <Reveal><FAQ locale={locale} /></Reveal>
       <Reveal><FinalCTA locale={locale} /></Reveal>

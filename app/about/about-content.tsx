@@ -357,6 +357,46 @@ export function AboutContent() {
           <h2 className="text-2xl font-bold text-neutral-900 mb-10 text-center">
             {t(locale, 'Awards & Recognition', 'الجوائز والتكريمات')}
           </h2>
+
+          {/* Featured award — Ajman Youth Council crystal trophy */}
+          <figure className="mb-8 overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50/60 via-white to-[#f0faf7] shadow-sm">
+            <div className="grid items-center gap-6 sm:grid-cols-[auto_1fr]">
+              <div className="relative mx-auto flex h-64 w-52 items-center justify-center p-4 sm:h-72 sm:w-60">
+                <div aria-hidden className="absolute left-1/2 top-1/2 size-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-200/40 blur-2xl" />
+                <Image
+                  src="/images/awards/ajman-youth-council-award.png"
+                  alt={t(
+                    locale,
+                    'Crystal award from Ajman Youth Council honoring Dr. Wael Mousa for the 30-Day Challenge',
+                    'درع تكريم كريستالي من مجلس شباب عجمان للدكتور وائل موسى عن تحدي الـ30 يوم',
+                  )}
+                  fill
+                  sizes="(max-width: 640px) 208px, 240px"
+                  className="object-contain mix-blend-multiply drop-shadow-lg"
+                />
+              </div>
+              <figcaption className="px-6 pb-8 text-center sm:px-8 sm:py-8 sm:text-start">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                  <Award className="size-3.5" aria-hidden="true" />
+                  {t(locale, 'Featured Recognition', 'تكريم مميز')}
+                </span>
+                <h3 className="mt-3 text-xl font-bold text-neutral-900 text-balance">
+                  {t(locale, '30-Day Challenge Award', 'درع تحدي الـ30 يوم')}
+                </h3>
+                <p className="mt-1 text-sm font-semibold text-[#4d7c0f]">
+                  {t(locale, 'Ajman Youth Council — Youth Councils, UAE', 'مجلس شباب عجمان — مجالس الشباب، الإمارات')}
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-600 text-pretty">
+                  {t(
+                    locale,
+                    'Presented to Dr. Wael Mousa in appreciation of his contribution to the 30-Day Challenge community health initiative, promoting healthy nutrition and sustainable lifestyle change among youth.',
+                    'مُنح للدكتور وائل موسى تقديراً لمساهمته في مبادرة تحدي الـ30 يوم الصحية المجتمعية، ودوره في نشر ثقافة التغذية الصحية وتغيير نمط الحياة بين الشباب.',
+                  )}
+                </p>
+              </figcaption>
+            </div>
+          </figure>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {awards.map((item, i) => {
               const Icon = item.icon

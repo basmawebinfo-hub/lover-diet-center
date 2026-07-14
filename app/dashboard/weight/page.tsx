@@ -16,15 +16,11 @@ import { WeightChart } from "@/components/dashboard/weight-chart"
 
 // Business rules from PROJECT_MEMORY.md CHECK constraints:
 //   weight_logs.weight_kg: 25 <= x <= 400
-//   weight_logs.body_fat_pct: 0 <= x <= 70
 const MIN_WEIGHT = 25
 const MAX_WEIGHT = 400
-const MIN_BODY_FAT = 0
-const MAX_BODY_FAT = 70
 
 type FormState = {
   weight: string
-  bodyFat: string
   date: string // YYYY-MM-DD
   editingId: string | null
 }
@@ -34,7 +30,7 @@ function todayISO(): string {
 }
 
 function emptyForm(): FormState {
-  return { weight: "", bodyFat: "", date: todayISO(), editingId: null }
+  return { weight: "", date: todayISO(), editingId: null }
 }
 
 function bmiLabel(bmi: number, locale: "en" | "ar"): string {
@@ -69,7 +65,6 @@ export default function WeightPage() {
     const todayLog = state.weightLogs.find((l) => l.date === today)
     setForm({
       weight: todayLog ? String(todayLog.weightKg) : "",
-      bodyFat: todayLog?.bodyFatPct != null ? String(todayLog.bodyFatPct) : "",
       date: today,
       editingId: null, // "today" is edited via upsert-per-day, not editingId
     })
@@ -128,16 +123,6 @@ export default function WeightPage() {
         `الوزن يجب أن يكون بين ${MIN_WEIGHT} و ${MAX_WEIGHT} كجم.`,
       )
     }
-    if (form.bodyFat.trim()) {
-      const bf = Number(form.bodyFat)
-      if (Number.isNaN(bf) || bf < MIN_BODY_FAT || bf > MAX_BODY_FAT) {
-        return t(
-          locale,
-          `Body fat must be between ${MIN_BODY_FAT} and ${MAX_BODY_FAT} %.`,
-          `نسبة الدهون يجب أن تكون بين ${MIN_BODY_FAT} و ${MAX_BODY_FAT}%.`,
-        )
-      }
-    }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(form.date)) {
       return t(locale, "Invalid date.", "تاريخ غير صالح.")
     }
@@ -153,13 +138,11 @@ export default function WeightPage() {
     if (!user) return
     setSaving(true)
     const weightKg = Number(form.weight)
-    const bodyFatPct = form.bodyFat.trim() ? Number(form.bodyFat) : undefined
     let ok = false
     if (form.editingId) {
       // Editing an existing (non-today) row.
       ok = await editWeight(form.editingId, {
         weightKg,
-        bodyFatPct: bodyFatPct ?? null,
         date: form.date,
       })
     } else {
@@ -169,7 +152,6 @@ export default function WeightPage() {
         id: `w_${Date.now()}`,
         date: form.date,
         weightKg,
-        bodyFatPct,
       }
       ok = await logWeight(log)
     }
@@ -185,7 +167,6 @@ export default function WeightPage() {
   function beginEdit(log: WeightLog) {
     setForm({
       weight: String(log.weightKg),
-      bodyFat: log.bodyFatPct != null ? String(log.bodyFatPct) : "",
       date: log.date,
       editingId: log.id,
     })
@@ -298,9 +279,9 @@ export default function WeightPage() {
           <p className="mt-1 text-sm text-neutral-500">
             {form.editingId
               ? t(locale, "Update the values below then save.", "حدّث القيم بالأسفل ثم احفظ.")
-              : t(locale, "Weight is required. Body fat percentage is optional.", "الوزن مطلوب. نسبة الدهون اختيارية.")}
+              : t(locale, "Enter your weight and pick the date.", "أدخل وزنك واختر التاريخ.")}
           </p>
-          <form onSubmit={onSave} className="mt-5 grid gap-4 sm:grid-cols-3">
+          <form onSubmit={onSave} className="mt-5 grid gap-4 sm:grid-cols-2">
             <NumberField
               label={t(locale, "Weight", "الوزن")}
               suffix={t(locale, "kg", "كجم")}
@@ -311,15 +292,6 @@ export default function WeightPage() {
               step="0.1"
               required
               autoFocus
-            />
-            <NumberField
-              label={t(locale, "Body fat %", "نسبة الدهون %")}
-              suffix="%"
-              value={form.bodyFat}
-              onChange={(v) => setForm((p) => ({ ...p, bodyFat: v }))}
-              min={MIN_BODY_FAT}
-              max={MAX_BODY_FAT}
-              step="0.1"
             />
             <div>
               <label className="mb-1.5 block text-sm font-semibold text-neutral-700">{t(locale, "Date", "التاريخ")}</label>
@@ -335,11 +307,11 @@ export default function WeightPage() {
               </div>
             </div>
             {err && (
-              <div role="alert" className="sm:col-span-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+              <div role="alert" className="sm:col-span-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
                 {err}
               </div>
             )}
-            <div className="sm:col-span-3">
+            <div className="sm:col-span-2">
               <button
                 type="submit"
                 disabled={saving}
@@ -385,9 +357,6 @@ export default function WeightPage() {
                       </span>
                       <div className="mt-0.5 flex items-center gap-2">
                         <span className="text-lg font-bold text-neutral-900">{log.weightKg.toFixed(1)} {t(locale, "kg", "كجم")}</span>
-                        {log.bodyFatPct != null && (
-                          <span className="text-xs font-medium text-neutral-500">· {log.bodyFatPct.toFixed(1)}% {t(locale, "fat", "دهون")}</span>
-                        )}
                         {prev && change !== 0 && (
                           <span className={cn("inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold", change < 0 ? "bg-emerald-50 text-emerald-700" : "bg-orange-50 text-orange-600")}>
                             {change < 0 ? <TrendingDown className="size-3" /> : <TrendingUp className="size-3" />}

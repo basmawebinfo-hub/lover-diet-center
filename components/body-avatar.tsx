@@ -84,27 +84,45 @@ export function BodyAvatar({
 
   return (
     <div className={cn("flex flex-col items-center gap-2", className)}>
-      {/* Avatar image with smooth transition */}
+      {/* Avatar image with smooth transition. The stage photos ship with a
+          white background, so in fullBody mode we blend the white away with
+          mix-blend-multiply over a soft themed backdrop instead of showing
+          a hard white box. */}
       <div
         className={cn(
-          "relative overflow-hidden bg-gradient-to-b from-neutral-50 to-white",
-          fullBody ? "w-full rounded-2xl" : cn("rounded-3xl shadow-sm", cls),
+          "relative overflow-hidden",
+          fullBody
+            ? "w-full rounded-2xl bg-gradient-to-b from-emerald-50/60 via-[#f6faf8] to-emerald-100/50"
+            : cn("rounded-3xl shadow-sm bg-gradient-to-b from-neutral-50 to-white", cls),
           improved && "ring-2 ring-emerald-400 ring-offset-2"
         )}
         style={fullBody ? { aspectRatio: "3 / 4" } : undefined}
       >
-        <Image
-          key={current.stage}
-          src={`/body-stages/${current.gender}/${current.stage}.png`}
-          alt={`Body stage: ${current.label}`}
-          fill
-          className={cn(
-            "transition-all duration-700 ease-in-out",
-            fullBody ? "object-contain object-bottom" : "object-cover object-top"
-          )}
-          priority
-          sizes={fullBody ? "(max-width:640px) 33vw, 220px" : `${px}px`}
-        />
+        {fullBody && (
+          <>
+            {/* Decorative aura rings behind the figure */}
+            <div aria-hidden className="absolute left-1/2 top-1/2 size-[78%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-dashed border-emerald-200/70 animate-spin-slow" />
+            <div aria-hidden className="absolute left-1/2 top-1/2 size-[58%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-200/30 blur-2xl animate-pulse-glow" />
+            {/* Ground shadow under the feet */}
+            <div aria-hidden className="absolute bottom-[4%] left-1/2 h-3 w-1/2 -translate-x-1/2 rounded-[100%] bg-emerald-900/15 blur-[6px]" />
+          </>
+        )}
+        <div className={cn("absolute inset-0", fullBody && "animate-float-soft")}>
+          <Image
+            key={current.stage}
+            src={`/body-stages/${current.gender}/${current.stage}.png`}
+            alt={`Body stage: ${current.label}`}
+            fill
+            className={cn(
+              "transition-all duration-700 ease-in-out",
+              fullBody
+                ? "object-contain object-bottom mix-blend-multiply drop-shadow-md"
+                : "object-cover object-top"
+            )}
+            priority
+            sizes={fullBody ? "(max-width:640px) 33vw, 220px" : `${px}px`}
+          />
+        </div>
 
         {/* Improvement badge */}
         {improved && (

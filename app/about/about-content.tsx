@@ -397,6 +397,49 @@ export function AboutContent() {
             </div>
           </figure>
 
+          {/* Featured award — MBZ Frontline Heroes gold medal (image second on desktop for visual rhythm) */}
+          <figure className="mb-8 overflow-hidden rounded-3xl border border-amber-200 bg-gradient-to-bl from-amber-50/60 via-white to-[#f0faf7] shadow-sm">
+            <div className="grid items-center gap-6 sm:grid-cols-[1fr_auto]">
+              <figcaption className="order-2 px-6 pb-8 text-center sm:order-1 sm:px-8 sm:py-8 sm:text-start">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                  <Medal className="size-3.5" aria-hidden="true" />
+                  {t(locale, 'National Honor', 'تكريم وطني')}
+                </span>
+                <h3 className="mt-3 text-xl font-bold text-neutral-900 text-balance">
+                  {t(locale, 'Frontline Heroes Gold Medal', 'الميدالية الذهبية لأبطال خط الدفاع الأول')}
+                </h3>
+                <p className="mt-1 text-sm font-semibold text-[#4d7c0f]">
+                  {t(
+                    locale,
+                    'Awarded by H.H. Sheikh Mohamed bin Zayed Al Nahyan — UAE, March 2023',
+                    'مُنحت من صاحب السمو الشيخ محمد بن زايد آل نهيان — الإمارات، مارس 2023',
+                  )}
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-neutral-600 text-pretty">
+                  {t(
+                    locale,
+                    '"To Our Frontline Heroes" — a national gold medal honoring Dr. Wael Mousa\u2019s heroic role during the COVID-19 pandemic in protecting the health and safety of the UAE community, accompanied by a personal letter of gratitude.',
+                    '"لأبطالنا في خط الدفاع الأول" — ميدالية ذهبية وطنية تكريماً للدور البطولي للدكتور وائل موسى خلال جائحة كوفيد-19 في حماية صحة مجتمع دولة الإمارات وسلامته، مصحوبة بخطاب شكر وتقدير شخصي.',
+                  )}
+                </p>
+              </figcaption>
+              <div className="relative order-1 mx-auto flex h-64 w-52 items-center justify-center p-4 sm:order-2 sm:h-72 sm:w-60">
+                <div aria-hidden className="absolute left-1/2 top-1/2 size-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300/40 blur-2xl" />
+                <Image
+                  src="/images/awards/frontline-heroes-medal.jpeg"
+                  alt={t(
+                    locale,
+                    'Gold "To Our Frontline Heroes" medal with a letter of appreciation from Sheikh Mohamed bin Zayed Al Nahyan for Dr. Wael Mousa\u2019s role during COVID-19',
+                    'الميدالية الذهبية "لأبطالنا في خط الدفاع الأول" مع خطاب شكر من الشيخ محمد بن زايد آل نهيان للدكتور وائل موسى عن دوره خلال جائحة كوفيد-19',
+                  )}
+                  fill
+                  sizes="(max-width: 640px) 208px, 240px"
+                  className="rounded-2xl object-cover object-top shadow-md"
+                />
+              </div>
+            </div>
+          </figure>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {awards.map((item, i) => {
               const Icon = item.icon

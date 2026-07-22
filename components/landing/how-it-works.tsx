@@ -29,8 +29,8 @@ export function HowItWorks({ locale }: { locale: Locale }) {
       title: t(locale, 'Track & transform', 'تابع وتحوّل'),
       desc: t(
         locale,
-        'Log your weight daily, watch your body avatar change, and get weekly check-ins from your nutritionist.',
-        'سجّل وزنك يومياً، وشاهد مجسّم جسمك يتغيّر، واحصل على متابعة أسبوعية من أخصائي التغذية.'
+        'Log your weight weekly, watch your body avatar change, and get weekly check-ins from your nutritionist.',
+        'سجّل وزنك أسبوعياً، وشاهد مجسّم جسمك يتغيّر، واحصل على متابعة أسبوعية من أخصائي التغذية.'
       ),
     },
   ]

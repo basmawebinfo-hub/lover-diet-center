@@ -1,0 +1,31 @@
+import { cookies } from "next/headers"
+import { createServerClient } from "@supabase/ssr"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+
+export type AdminAuthResult =
+  | { ok: true; user: { id: string }; service: SupabaseClient }
+  | { ok: false; reason: "missing_env" | "not_authenticated" | "not_admin" }
+
+export async function requireAdmin(): Promise<AdminAuthResult> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const publishable = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !publishable || !serviceKey) return { ok: false, reason: "missing_env" }
+
+  const store = await cookies()
+  const auth = createServerClient(url, publishable, {
+    cookies: { getAll: () => store.getAll(), setAll: () => {} },
+  })
+  const {
+    data: { user },
+  } = await auth.auth.getUser()
+  if (!user) return { ok: false, reason: "not_authenticated" }
+
+  const service = createClient(url, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+  const { data: profile } = await service.from("profiles").select("role").eq("id", user.id).single()
+  if (profile?.role !== "admin") return { ok: false, reason: "not_admin" }
+
+  return { ok: true, user, service }
+}

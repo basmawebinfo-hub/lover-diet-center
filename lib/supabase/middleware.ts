@@ -49,15 +49,24 @@ export async function updateSession(request: NextRequest) {
   //
   // Route contract:
   //   /en -> English mirror. Force ldc_locale=en for this request + persist
-  //          the cookie so subsequent hits stay in English. The user can
-  //          still toggle via the header switcher (which rewrites the cookie).
+  //          the cookie so subsequent hits stay in English.
+  //   /ar -> Arabic mirror. Same deal with 'ar'.
   //   /   -> Cookie-driven. Leave whatever the user has.
+  //
+  // The user can still toggle via the header switcher (which rewrites the
+  // cookie). Both mirrors are route-locked in their page components, so the
+  // path always wins over the cookie for the rendered content.
   // ---------------------------------------------------------------------
-  if (earlyPath === '/en' || earlyPath.startsWith('/en/')) {
+  const localeFromPath: 'en' | 'ar' | null =
+    earlyPath === '/en' || earlyPath.startsWith('/en/') ? 'en'
+    : earlyPath === '/ar' || earlyPath.startsWith('/ar/') ? 'ar'
+    : null
+
+  if (localeFromPath) {
     const current = request.cookies.get(LOCALE_COOKIE)?.value
-    if (current !== 'en') {
-      request.cookies.set(LOCALE_COOKIE, 'en')
-      response.cookies.set(LOCALE_COOKIE, 'en', {
+    if (current !== localeFromPath) {
+      request.cookies.set(LOCALE_COOKIE, localeFromPath)
+      response.cookies.set(LOCALE_COOKIE, localeFromPath, {
         httpOnly: false,
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production',

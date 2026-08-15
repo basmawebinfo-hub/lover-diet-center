@@ -9,11 +9,11 @@ import type { Metadata } from 'next'
 import { canonical } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'Lover Diet Center — Science-Based Nutrition in UAE',
+  title: 'مركز التغذية — تغذية مبنية على العلم في الإمارات',
   description:
-    'Personalized nutrition consultations, chef-prepared healthy meals, healthy snacks, body sculpting sessions, and training courses.',
+    'استشارات تغذية مخصصة، ووجبات صحية من إعداد الشيف، وسناكس صحية، وجلسات نحت القوام، ودورات تدريبية.',
   alternates: {
-    canonical: canonical('/en'),
+    canonical: canonical('/ar'),
     languages: {
       en: canonical('/en'),
       ar: canonical('/ar'),
@@ -22,19 +22,13 @@ export const metadata: Metadata = {
   },
 }
 
-// /en is the English mirror, route-locked to `en` regardless of the visitor's
-// saved cookie — the URL contract itself signals the language choice. The
-// Arabic twin lives at /ar. The middleware persists ldc_locale to match the
-// path, so the root layout renders <html lang="en" dir="ltr"> here.
-//
-// This used to render `ar` while the middleware wrote an `en` cookie and the
-// sitemap advertised /en as the Arabic URL — three files disagreeing at once.
-// Visitors landed on Arabic content at an /en URL, then saw English on every
-// page they clicked through to.
+// /ar is the Arabic mirror, route-locked to `ar` regardless of the visitor's
+// saved cookie — the twin of /en. The middleware persists ldc_locale to match
+// the path, so the root layout renders <html lang="ar" dir="rtl"> here.
 //
 // Server Component: no client JS beyond the widgets that need it (FAQ, header).
-export default function EnHomePage() {
-  const locale = 'en' as const
+export default function ArHomePage() {
+  const locale = 'ar' as const
   return (
     <>
       <HeroSection locale={locale} />

@@ -29,6 +29,18 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return <div><label className="mb-1.5 block text-sm font-semibold text-neutral-700">{label}</label>{children}</div>
 }
 
+// Module scope, like Field above. Declaring this inside the page component
+// made it a fresh component type on every render, so React remounted all
+// eight rows instead of updating them. It closes over nothing — props only.
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-3 py-2.5">
+      <span className="flex size-9 items-center justify-center rounded-xl bg-neutral-50 text-neutral-400">{icon}</span>
+      <div className="min-w-0"><p className="text-xs text-neutral-400">{label}</p><p className="truncate text-sm font-semibold text-neutral-900">{value || "—"}</p></div>
+    </div>
+  )
+}
+
 export default function AdminClientDetailPage() {
   const params = useParams()
   const id = String(params?.id ?? "")
@@ -126,13 +138,6 @@ export default function AdminClientDetailPage() {
 
   const sessionCls: Record<string, string> = { scheduled: "bg-emerald-50 text-emerald-700", completed: "bg-neutral-100 text-neutral-500", cancelled: "bg-red-50 text-red-500" }
   const orderCls: Record<string, string> = { pending: "bg-amber-50 text-amber-600", processing: "bg-blue-50 text-blue-600", shipped: "bg-indigo-50 text-indigo-600", confirmed: "bg-blue-50 text-blue-600", delivered: "bg-emerald-50 text-emerald-700", cancelled: "bg-red-50 text-red-500" }
-
-  const InfoRow = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-    <div className="flex items-center gap-3 py-2.5">
-      <span className="flex size-9 items-center justify-center rounded-xl bg-neutral-50 text-neutral-400">{icon}</span>
-      <div className="min-w-0"><p className="text-xs text-neutral-400">{label}</p><p className="truncate text-sm font-semibold text-neutral-900">{value || "—"}</p></div>
-    </div>
-  )
 
   return (
     <AdminShell>

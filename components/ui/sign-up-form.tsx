@@ -3,9 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, UserPlus, User, Mail, Lock, Phone } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
-import { checkRateLimitClient } from '@/lib/security/rate-limit-client'
 import { COUNTRIES, DEFAULT_COUNTRY } from '@/lib/countries'
 import { GoogleButton } from '@/components/ui/google-button'
 
@@ -61,44 +59,42 @@ export function SignUpForm() {
 
     setIsLoading(true)
     try {
-      // Rate-limit pre-check (Phase 4 · M-01). 5/min per IP. Fails-open.
-      const gate = await checkRateLimitClient('sign_up', form.email.toLowerCase().trim())
-      if (!gate.ok) {
+      // Registration runs server-side (/api/auth/sign-up) so the rate limit
+      // is enforced in the same request that creates the account, and the
+      // profile write happens with the freshly-issued session.
+      const dial = COUNTRIES.find((c) => c.code === country)?.dial ?? ''
+      const fullPhone = `${dial}${form.phone.replace(/[^0-9]/g, '')}`
+
+      const res = await fetch('/api/auth/sign-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: form.email.toLowerCase().trim(),
+          password: form.password,
+          name: form.name.trim(),
+          phone: fullPhone,
+          country,
+          emailRedirectTo: '/dashboard',
+        }),
+        cache: 'no-store',
+      })
+
+      if (res.status === 429) {
+        const body = await res.json().catch(() => ({}))
+        const retry = body.retryAfterSec ?? 60
         setError(
           t(
             locale,
-            `${gate.message} (retry in ${gate.retryAfterSec}s)`,
-            `طلبات كثيرة. يرجى الانتظار قليلاً ثم إعادة المحاولة (${gate.retryAfterSec} ثانية).`,
+            `Too many attempts. Please wait ${retry}s and try again.`,
+            `محاولات كثيرة. يرجى الانتظار ${retry} ثانية ثم إعادة المحاولة.`,
           ),
         )
         return
       }
-
-      const supabase = createClient()
-      const dial = COUNTRIES.find((c) => c.code === country)?.dial ?? ''
-      const fullPhone = `${dial}${form.phone.replace(/[^0-9]/g, '')}`
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: form.email.toLowerCase().trim(),
-        password: form.password,
-        options: {
-          data: { name: form.name.trim(), phone: fullPhone, country },
-          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined,
-        },
-      })
-
-      if (signUpError) {
-        setError(signUpError.message)
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setError(body.error || t(locale, 'Could not create your account.', 'تعذّر إنشاء حسابك.'))
         return
-      }
-
-      // Write the phone + name into the profile right away (session is active; email confirmation OFF)
-      const { data: auth } = await supabase.auth.getUser()
-      if (auth.user) {
-        await supabase.from('profiles').update({
-          phone: fullPhone,
-          name_en: form.name.trim(),
-          country,
-        }).eq('id', auth.user.id)
       }
 
       // Go to onboarding.

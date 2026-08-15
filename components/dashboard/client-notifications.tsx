@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
 import { Bell, Scale, Calendar, ClipboardList, Truck, CheckCircle2 } from "lucide-react"
 import { useApp } from "@/lib/store"
@@ -13,9 +13,15 @@ export function ClientNotifications() {
   const { locale } = useLocale()
   const { state } = useApp()
 
+  // Pinned at mount instead of read during render. Both the "logged today"
+  // check and the upcoming-session window read the clock, so an impure memo
+  // could produce different notifications on the server render and on
+  // hydration — a visible flicker of the notification list.
+  const [mountedAt] = useState(() => Date.now())
+
   const notes = useMemo<Note[]>(() => {
     const out: Note[] = []
-    const today = new Date().toISOString().slice(0, 10)
+    const today = new Date(mountedAt).toISOString().slice(0, 10)
 
     // 1) Weight not logged today
     const loggedToday = state.weightLogs.some((w) => w.date === today)
@@ -31,7 +37,7 @@ export function ClientNotifications() {
     const soon = state.sessions.find((s) => {
       if (s.status !== "scheduled") return false
       const d = new Date(s.date).getTime()
-      const diff = (d - Date.now()) / (1000 * 3600 * 24)
+      const diff = (d - mountedAt) / (1000 * 3600 * 24)
       return diff >= -0.5 && diff <= 3
     })
     if (soon) {
@@ -62,7 +68,7 @@ export function ClientNotifications() {
     }
 
     return out
-  }, [state.weightLogs, state.sessions, state.doctorPlan, state.orders, locale])
+  }, [state.weightLogs, state.sessions, state.doctorPlan, state.orders, locale, mountedAt])
 
   const toneCls: Record<string, { wrap: string; ic: string; cta: string }> = {
     amber:   { wrap: "border-amber-200 bg-amber-50",     ic: "bg-amber-100 text-amber-600",     cta: "bg-amber-500 hover:bg-amber-600" },

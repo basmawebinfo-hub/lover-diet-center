@@ -176,7 +176,13 @@ export async function POST(req: Request) {
       amountMinor,
     })
   } catch (e) {
-    const msg = (e as Error).message ?? "Paymob error"
-    return NextResponse.json({ error: msg }, { status: 502 })
+    // The upstream text can carry Paymob's raw response — integration ids,
+    // account hints, key-validation detail. Log it for us, return a generic
+    // message to the browser.
+    console.error("[checkout-paymob] session creation failed", (e as Error).message)
+    return NextResponse.json(
+      { error: "Could not start the payment session. Please try again." },
+      { status: 502 },
+    )
   }
 }

@@ -61,6 +61,13 @@ export function LocaleProvider({
     }
 
     // No cookie yet — fall back to localStorage (legacy visitors).
+    //
+    // The setState below has to stay inside this effect. Moving the read into
+    // a lazy useState initializer would make the client's first render use the
+    // stored locale while the server HTML used `initialLocale`, and the whole
+    // page would hydrate against mismatched text and dir. Updating *after*
+    // hydration is the correct sequence here, and this path only runs once per
+    // legacy visitor — the branch above returns for everyone with a cookie.
     try {
       const saved = window.localStorage.getItem(STORAGE_KEY) as Locale | null
       if (saved === "ar" || saved === "en") {

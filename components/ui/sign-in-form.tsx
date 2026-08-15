@@ -3,9 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, LogIn } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { useLocale, t } from '@/lib/locale'
-import { checkRateLimitClient } from '@/lib/security/rate-limit-client'
 import { GoogleButton } from '@/components/ui/google-button'
 
 export function SignIn2() {
@@ -51,41 +49,38 @@ export function SignIn2() {
         return
       }
 
-      // Rate-limit pre-check (Phase 4 · M-01). Fails-open on network error.
-      // Admin sign-in is auto-upgraded to admin_auth server-side when the
-      // submitted email matches the known admin address.
-      const gate = await checkRateLimitClient('sign_in', email.toLowerCase().trim())
-      if (!gate.ok) {
+      // Sign-in runs server-side (/api/auth/sign-in) so the rate limit is
+      // enforced in the same request as the credential check. Calling
+      // supabase.auth.signInWithPassword() from here would let anyone skip
+      // the limiter simply by not calling it.
+      const res = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.toLowerCase().trim(), password }),
+        cache: 'no-store',
+      })
+
+      if (res.status === 429) {
+        const body = await res.json().catch(() => ({}))
+        const retry = body.retryAfterSec ?? 60
         setError(
           t(
             locale,
-            `${gate.message} (retry in ${gate.retryAfterSec}s)`,
-            `طلبات كثيرة. يرجى الانتظار قليلاً ثم إعادة المحاولة (${gate.retryAfterSec} ثانية).`,
+            `Too many attempts. Please wait ${retry}s and try again.`,
+            `محاولات كثيرة. يرجى الانتظار ${retry} ثانية ثم إعادة المحاولة.`,
           ),
         )
         return
       }
-
-      const supabase = createClient()
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.toLowerCase().trim(),
-        password,
-      })
-
-      if (signInError) {
+      if (!res.ok) {
         setError(t(locale, 'Invalid email or password. Please try again.', 'البريد الإلكتروني أو كلمة المرور غير صحيحة. حاول مرة أخرى.'))
         return
       }
 
-      // Admins go straight to the admin dashboard
-      const { data: auth } = await supabase.auth.getUser()
-      let dest = redirect
-      if (auth.user) {
-        const { data: prof } = await supabase.from('profiles').select('role').eq('id', auth.user.id).single()
-        if ((prof as { role?: string } | null)?.role === 'admin') dest = '/admin'
-      }
-
-      router.push(dest)
+      // The server picks /admin for admins; otherwise honour the validated
+      // ?redirect= path the visitor arrived with.
+      const { dest } = (await res.json()) as { dest?: string }
+      router.push(dest === '/admin' ? dest : redirect)
       router.refresh()
     } catch {
       setError(t(locale, 'Something went wrong. Please try again.', 'حدث خطأ ما. حاول مرة أخرى.'))

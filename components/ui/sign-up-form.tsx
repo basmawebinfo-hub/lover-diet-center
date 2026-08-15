@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, UserPlus, User, Mail, Lock, Phone } from 'lucide-react'
 import { useLocale, t } from '@/lib/locale'
@@ -245,9 +246,9 @@ export function SignUpForm() {
 
       <p className="text-center text-sm text-neutral-500 mt-6">
         {t(locale, 'Already have an account?', 'لديك حساب بالفعل؟')}{' '}
-        <a href="/sign-in" className="text-[#4d7c0f] font-semibold hover:underline">
+        <Link href="/sign-in" className="text-[#4d7c0f] font-semibold hover:underline">
           {t(locale, 'Sign in', 'تسجيل الدخول')}
-        </a>
+        </Link>
       </p>
     </div>
   )

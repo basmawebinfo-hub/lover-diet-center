@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback, useSyncExternalStore } from 'react'
-import { usePathname } from 'next/navigation'
-import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { LocaleLink as Link } from '@/components/ui/locale-link'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react'
 import { WHATSAPP_NUMBER } from '@/lib/site'
 import { useLocale, t } from '@/lib/locale'
+import { localeHref, swapLocaleInPath } from '@/lib/locale-href'
 
 // Pages that hide the header completely
 const HIDE_ON = ['/sign-in', '/sign-up', '/onboarding']
@@ -71,7 +72,28 @@ export function SegmentedHeader() {
   const menuRef    = useRef<HTMLDivElement>(null)
   const toggleRef  = useRef<HTMLButtonElement>(null)
   const dropRef    = useRef<HTMLDivElement>(null)
-  const { locale, toggleLocale } = useLocale()
+  const { locale } = useLocale()
+  const router = useRouter()
+
+  // Switching language is a navigation now, not just a context flip: each
+  // language is a real URL, so /ar/shop becomes /en/shop and the visitor stays
+  // on the page they were reading. The middleware rewrites the ldc_locale
+  // cookie on arrival, so the choice still sticks for the bare root later.
+  //
+  // On a non-localized page (dashboard, sign-in) swapLocaleInPath returns the
+  // path unchanged, so we fall back to setting the cookie directly.
+  const switchLocale = useCallback(() => {
+    const next = locale === 'en' ? 'ar' : 'en'
+    const target = swapLocaleInPath(pathname, next)
+    if (target !== pathname) {
+      router.push(target)
+    } else {
+      document.cookie = `ldc_locale=${next}; Path=/; Max-Age=${365 * 24 * 60 * 60}; SameSite=Lax${
+        window.location.protocol === 'https:' ? '; Secure' : ''
+      }`
+      router.refresh()
+    }
+  }, [locale, pathname, router])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -133,7 +155,10 @@ export function SegmentedHeader() {
   const hide = HIDE_ON.some((p) => pathname === p || pathname.startsWith(p + '?'))
   if (hide) return null
 
-  const isActive = (href?: string) => href && pathname === href
+  // Nav tables store unprefixed routes ('/about'), but the URL now carries a
+  // language ('/ar/about'). Compare against the prefixed form so the active
+  // item stays highlighted.
+  const isActive = (href?: string) => Boolean(href) && pathname === localeHref(locale, href!)
 
   return (
     <header
@@ -222,7 +247,7 @@ export function SegmentedHeader() {
         <div className="hidden items-center gap-2 md:flex">
           <button
             type="button"
-            onClick={toggleLocale}
+            onClick={switchLocale}
             aria-label="Switch language"
             className="rounded-full border border-neutral-200 px-3 py-2 text-sm font-bold text-neutral-700 transition-colors hover:border-lime-300 hover:text-lime-700"
           >
@@ -293,7 +318,7 @@ export function SegmentedHeader() {
           {/* Language toggle (mobile) */}
           <button
             type="button"
-            onClick={() => { toggleLocale(); closeMenu() }}
+            onClick={() => { switchLocale(); closeMenu() }}
             className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-neutral-200 py-3 text-base font-bold text-neutral-700"
           >
             {locale === 'en' ? 'التبديل إلى العربية' : 'Switch to English'}

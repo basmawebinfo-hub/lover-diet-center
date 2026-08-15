@@ -8,6 +8,20 @@
 
 export type Locale = 'en' | 'ar'
 
+/** Every locale the site is published in. Drives generateStaticParams and
+ *  the sitemap, so adding a language starts here. */
+export const LOCALES = ['en', 'ar'] as const
+
+/** Narrowing guard for untrusted values — route params, cookies, headers. */
+export function isLocale(value: string): value is Locale {
+  return value === 'en' || value === 'ar'
+}
+
+/** Text direction for a locale. */
+export function dirFor(locale: Locale): 'ltr' | 'rtl' {
+  return locale === 'ar' ? 'rtl' : 'ltr'
+}
+
 /** Pick the right string for the current locale. Pure function. */
 export function t(locale: Locale, en: string, ar: string): string {
   return locale === 'ar' ? ar : en

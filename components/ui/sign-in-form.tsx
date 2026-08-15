@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, LogIn } from 'lucide-react'
 import { useLocale, t } from '@/lib/locale'
@@ -139,9 +140,9 @@ export function SignIn2() {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-sm font-semibold text-neutral-700">{t(locale, 'Password', 'كلمة المرور')}</label>
-            <a href="/forgot-password" className="text-xs text-[#4d7c0f] hover:underline">
+            <Link href="/forgot-password" className="text-xs text-[#4d7c0f] hover:underline">
               {t(locale, 'Forgot password?', 'نسيت كلمة المرور؟')}
-            </a>
+            </Link>
           </div>
           <input
             type="password"
@@ -176,9 +177,9 @@ export function SignIn2() {
       {/* Sign up link */}
       <p className="text-center text-sm text-neutral-500 mt-6">
         {t(locale, "Don't have an account?", 'ليس لديك حساب؟')}{' '}
-        <a href="/sign-up" className="text-[#4d7c0f] font-semibold hover:underline">
+        <Link href="/sign-up" className="text-[#4d7c0f] font-semibold hover:underline">
           {t(locale, 'Create one', 'أنشئ حساباً')}
-        </a>
+        </Link>
       </p>
     </div>
   )

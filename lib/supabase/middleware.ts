@@ -39,6 +39,44 @@ function matches(path: string, prefixes: readonly string[]): boolean {
   return prefixes.some((r) => path === r || path.startsWith(r + '/'))
 }
 
+/**
+ * Marketing routes as they existed before the /en + /ar prefix.
+ *
+ * These URLs are indexed and shared, so they are redirected rather than
+ * dropped. Keep in sync with LOCALIZED_ROOTS in lib/locale-href.ts.
+ */
+const LEGACY_MARKETING_ROOTS = [
+  '/about',
+  '/contact',
+  '/shop',
+  '/nutrition-consultations',
+  '/healthy-meals',
+  '/healthy-snacks',
+  '/body-sculpting',
+  '/training-courses',
+] as const
+
+function isLegacyMarketingPath(path: string): boolean {
+  return LEGACY_MARKETING_ROOTS.some((r) => path === r || path.startsWith(r + '/'))
+}
+
+/**
+ * First language we publish that the browser asked for, else English.
+ *
+ * Deliberately simple: we only ship two languages, so a full RFC 4647 q-value
+ * negotiation would be more code than the decision is worth. Any tag starting
+ * with `ar` (ar, ar-AE, ar-EG…) counts as Arabic.
+ */
+function preferredLocale(acceptLanguage: string | null): 'en' | 'ar' {
+  if (!acceptLanguage) return 'en'
+  for (const part of acceptLanguage.split(',')) {
+    const tag = part.trim().split(';')[0].toLowerCase()
+    if (tag.startsWith('ar')) return 'ar'
+    if (tag.startsWith('en')) return 'en'
+  }
+  return 'en'
+}
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request })
   const { pathname: earlyPath } = request.nextUrl
@@ -48,14 +86,14 @@ export async function updateSession(request: NextRequest) {
   // preview environments without Supabase credentials).
   //
   // Route contract:
-  //   /en -> English mirror. Force ldc_locale=en for this request + persist
-  //          the cookie so subsequent hits stay in English.
-  //   /ar -> Arabic mirror. Same deal with 'ar'.
-  //   /   -> Cookie-driven. Leave whatever the user has.
+  //   /            -> redirect to /en or /ar. The bare root serves no content.
+  //   /en, /ar ... -> the real pages. Language comes from the path, and the
+  //                   cookie is updated to match so the next bare-root visit
+  //                   lands in the same language.
   //
-  // The user can still toggle via the header switcher (which rewrites the
-  // cookie). Both mirrors are route-locked in their page components, so the
-  // path always wins over the cookie for the rendered content.
+  // Content is only ever served from a locale-prefixed URL, so every page has
+  // exactly one language per URL — which is what makes the hreflang cluster
+  // valid and lets Next prerender the pages as static HTML.
   // ---------------------------------------------------------------------
   const localeFromPath: 'en' | 'ar' | null =
     earlyPath === '/en' || earlyPath.startsWith('/en/') ? 'en'
@@ -74,6 +112,29 @@ export async function updateSession(request: NextRequest) {
         maxAge: 365 * 24 * 60 * 60,
       })
     }
+  } else if (earlyPath === '/' || isLegacyMarketingPath(earlyPath)) {
+    // Root and pre-locale URLs both land here.
+    //
+    // The legacy paths (/about, /shop, /healthy-meals…) were the live, indexed
+    // URLs before the locale prefix existed. They are in Google's index, in
+    // shared links and in printed material, so they must keep working — a 404
+    // here would drop every existing inbound link on the floor.
+    //
+    // Saved choice wins; otherwise fall back to the browser's Accept-Language,
+    // then English.
+    //
+    // 307 rather than 308: the destination depends on who is asking, so it
+    // must not be cached as a permanent rule by a browser or a proxy. A 308
+    // would pin the first visitor's language onto that client forever — and
+    // onto any shared CDN entry. Google consolidates these fine via the
+    // sitemap and the hreflang cluster.
+    const saved = request.cookies.get(LOCALE_COOKIE)?.value
+    const target =
+      saved === 'ar' || saved === 'en' ? saved : preferredLocale(request.headers.get('accept-language'))
+
+    const url = request.nextUrl.clone()
+    url.pathname = earlyPath === '/' ? `/${target}` : `/${target}${earlyPath}`
+    return NextResponse.redirect(url, 307)
   }
 
   // Preview/dev environments may not have Supabase configured. In that case

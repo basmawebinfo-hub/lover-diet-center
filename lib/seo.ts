@@ -1,6 +1,9 @@
 // Centralized SEO constants and helpers.
 // Import from here to keep canonical URLs, OG images, and structured data in sync.
 
+import type { Metadata } from 'next'
+import { isLocale, type Locale } from '@/lib/locale-shared'
+
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://www.loversdc.com'
 
@@ -22,6 +25,56 @@ export const OG_IMAGE = {
 export function canonical(path: string): string {
   if (!path.startsWith('/')) path = '/' + path
   return `${SITE_URL}${path === '/' ? '' : path}`
+}
+
+/**
+ * hreflang cluster for a path that exists in both languages.
+ *
+ * `path` is the route WITHOUT the locale prefix — pass '' for the homepage,
+ * '/about' for /en/about and /ar/about. x-default points at the bare root,
+ * which redirects each visitor to their language.
+ *
+ * Google ignores an hreflang cluster entirely if the URLs do not each serve
+ * one language, so these must stay in lockstep with the actual routes.
+ */
+export function localeAlternates(path: string): Record<string, string> {
+  const suffix = path && !path.startsWith('/') ? `/${path}` : path
+  return {
+    en: `${SITE_URL}/en${suffix}`,
+    ar: `${SITE_URL}/ar${suffix}`,
+    'x-default': SITE_URL,
+  }
+}
+
+export type LocaleCopy = Record<Locale, { title: string; description: string }>
+
+/**
+ * Build the `generateMetadata` export for a page under app/[locale].
+ *
+ * `path` is the route without the locale prefix ('' for the homepage,
+ * '/about' for /en/about). Each language gets its own title and description
+ * rather than the bilingual "About Us | من نحن" strings these pages used to
+ * ship — a single title stuffed with both languages dilutes the match for
+ * either query, and now that each language has its own URL there is no reason
+ * to keep them fused.
+ */
+export function makeLocaleMetadata(path: string, copy: LocaleCopy) {
+  return async function generateMetadata({
+    params,
+  }: {
+    params: Promise<{ locale: string }>
+  }): Promise<Metadata> {
+    const { locale } = await params
+    const l: Locale = isLocale(locale) ? locale : 'en'
+    return {
+      title: copy[l].title,
+      description: copy[l].description,
+      alternates: {
+        canonical: canonical(`/${l}${path}`),
+        languages: localeAlternates(path),
+      },
+    }
+  }
 }
 
 // Structured data snippets. Returned as plain JS objects — serialize with

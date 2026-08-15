@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
   // We don't know the final destination yet — we'll compute it after
   // exchange + profile lookup. Prepare a mutable holder.
-  let response = NextResponse.redirect(new URL(safeNext, url))
+  const response = NextResponse.redirect(new URL(safeNext, url))
 
   const cookieStore = await cookies()
   const supabase = createServerClient(

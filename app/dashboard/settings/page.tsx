@@ -46,6 +46,15 @@ export default function SettingsPage() {
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  // These two MUST stay above the `if (!user || !draft) return null` guard
+  // below. They used to sit further down next to the photo-picker handler,
+  // which meant the first render (store not hydrated yet, user === null) bailed
+  // out early and never called them — then the render after hydration did.
+  // React saw the hook count grow and threw "Rendered more hooks than during
+  // the previous render", crashing the whole settings page.
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploadingPhoto, setUploadingPhoto] = useState(false)
+
   useEffect(() => {
     if (state.authChecked && !user) router.replace("/onboarding")
   }, [state.authChecked, user, router])
@@ -93,8 +102,6 @@ export default function SettingsPage() {
   }
 
   const initials = (draft.nameEn || "U").trim().charAt(0).toUpperCase()
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [uploadingPhoto, setUploadingPhoto] = useState(false)
 
   async function onPickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]

@@ -11,12 +11,19 @@ export function WeightChart({ logs, goalKg }: { logs: WeightLog[]; goalKg?: numb
   const { locale } = useLocale()
   const [range, setRange] = useState<Range>(30)
 
+  // Captured once per mount rather than read during every render. Calling
+  // Date.now() inside useMemo made the memo impure: the server render and the
+  // hydration render each computed a different "now", so the cutoff could
+  // disagree across the boundary. A lazy initializer pins it for the lifetime
+  // of the component.
+  const [mountedAt] = useState(() => Date.now())
+
   const data = useMemo(() => {
-    const cutoff = Date.now() - range * 24 * 60 * 60 * 1000
+    const cutoff = mountedAt - range * 24 * 60 * 60 * 1000
     return [...logs]
       .filter((l) => new Date(l.date).getTime() >= cutoff)
       .sort((a, b) => (a.date < b.date ? -1 : 1))
-  }, [logs, range])
+  }, [logs, range, mountedAt])
 
   const ranges: { v: Range; label: string }[] = [
     { v: 7, label: t(locale, "7d", "7ي") },

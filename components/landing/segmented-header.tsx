@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useSyncExternalStore } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -11,6 +11,18 @@ import { useLocale, t } from '@/lib/locale'
 
 // Pages that hide the header completely
 const HIDE_ON = ['/sign-in', '/sign-up', '/onboarding']
+
+// --- Supabase session cookie, read as an external store -------------------
+// Kept out of the component so the snapshot/subscribe identities stay stable
+// across renders, which is what useSyncExternalStore expects.
+function hasAuthCookie(): boolean {
+  return document.cookie.split(';').some((c) => /^\s*sb-[^=]+-auth-token/.test(c))
+}
+
+function subscribeToAuthCookie(onChange: () => void): () => void {
+  window.addEventListener('focus', onChange)
+  return () => window.removeEventListener('focus', onChange)
+}
 
 // Main nav — direct links to real pages
 type NavItem = {
@@ -59,7 +71,6 @@ export function SegmentedHeader() {
   const menuRef    = useRef<HTMLDivElement>(null)
   const toggleRef  = useRef<HTMLButtonElement>(null)
   const dropRef    = useRef<HTMLDivElement>(null)
-  const [isAuthed, setIsAuthed] = useState(false)
   const { locale, toggleLocale } = useLocale()
 
   useEffect(() => {
@@ -83,22 +94,13 @@ export function SegmentedHeader() {
   // a redirect param. The full-page navigation then reconciles state.
   //
   // Cross-tab sign-out no longer flips the header live — same worst case.
-  useEffect(() => {
-    if (typeof document === 'undefined') return
-    const hasSbAuth = document.cookie
-      .split(';')
-      .some((c) => /^\s*sb-[^=]+-auth-token/.test(c))
-    setIsAuthed(hasSbAuth)
-    // Re-check on window focus (covers most real-world sign-out flows).
-    const onFocus = () => {
-      const now = document.cookie
-        .split(';')
-        .some((c) => /^\s*sb-[^=]+-auth-token/.test(c))
-      setIsAuthed(now)
-    }
-    window.addEventListener('focus', onFocus)
-    return () => window.removeEventListener('focus', onFocus)
-  }, [])
+  //
+  // Read through useSyncExternalStore rather than an effect that seeds state:
+  // the cookie is external mutable state, which is precisely what that hook is
+  // for. It also removes the extra render the effect version cost on every
+  // landing-page mount. Re-checked on window focus, which covers the common
+  // sign-out-in-another-tab case.
+  const isAuthed = useSyncExternalStore(subscribeToAuthCookie, hasAuthCookie, () => false)
 
   // Close dropdown on outside click
   useEffect(() => {

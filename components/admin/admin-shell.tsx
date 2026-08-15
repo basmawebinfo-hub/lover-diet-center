@@ -43,6 +43,63 @@ const NAV_GROUPS: { titleEn: string; titleAr: string; items: NavItem[] }[] = [
 ]
 const ALL_ITEMS = NAV_GROUPS.flatMap((g) => g.items)
 
+// Defined at module scope on purpose. This used to be an arrow function
+// declared inside AdminShell's body, which meant every AdminShell render
+// produced a brand-new component type — React then tore down the whole nav
+// subtree and rebuilt it instead of updating it, throwing away the sidebar's
+// scroll position on each render. Taking `locale` and `isActive` as props
+// keeps the identity stable across renders.
+function NavList({
+  locale,
+  isActive,
+}: {
+  locale: ReturnType<typeof useLocale>["locale"]
+  isActive: (href: string) => boolean
+}) {
+  return (
+    <nav className="flex-1 space-y-5 px-3 py-2">
+      {NAV_GROUPS.map((group) => (
+        <div key={group.titleEn}>
+          <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-neutral-300">
+            {locale === "ar" ? group.titleAr : group.titleEn}
+          </p>
+          <div className="space-y-1">
+            {group.items.map((item) => {
+              const Icon = item.icon
+              const active = isActive(item.href)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300",
+                    active ? "bg-emerald-50 text-emerald-700" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                  )}
+                >
+                  {/* active indicator bar */}
+                  <span className={cn(
+                    "absolute inset-y-1.5 start-0 w-1 rounded-full bg-emerald-500 transition-all duration-200",
+                    active ? "opacity-100" : "opacity-0"
+                  )} />
+                  <span className={cn(
+                    "flex size-8 items-center justify-center rounded-lg transition-colors",
+                    active ? "bg-emerald-100 text-emerald-700" : "bg-neutral-100 text-neutral-400 group-hover:bg-neutral-200 group-hover:text-neutral-600"
+                  )}>
+                    <Icon className="size-4" />
+                  </span>
+                  <span className="flex-1">{locale === "ar" ? item.ar : item.en}</span>
+                  {active && <ChevronLeft className="size-4 text-emerald-400 rtl:rotate-0 rotate-180" />}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      ))}
+    </nav>
+  )
+}
+
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
@@ -90,49 +147,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     )
   }
 
-  const NavList = () => (
-    <nav className="flex-1 space-y-5 px-3 py-2">
-      {NAV_GROUPS.map((group) => (
-        <div key={group.titleEn}>
-          <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-wider text-neutral-300">
-            {locale === "ar" ? group.titleAr : group.titleEn}
-          </p>
-          <div className="space-y-1">
-            {group.items.map((item) => {
-              const Icon = item.icon
-              const active = isActive(item.href)
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300",
-                    active ? "bg-emerald-50 text-emerald-700" : "text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                  )}
-                >
-                  {/* active indicator bar */}
-                  <span className={cn(
-                    "absolute inset-y-1.5 start-0 w-1 rounded-full bg-emerald-500 transition-all duration-200",
-                    active ? "opacity-100" : "opacity-0"
-                  )} />
-                  <span className={cn(
-                    "flex size-8 items-center justify-center rounded-lg transition-colors",
-                    active ? "bg-emerald-100 text-emerald-700" : "bg-neutral-100 text-neutral-400 group-hover:bg-neutral-200 group-hover:text-neutral-600"
-                  )}>
-                    <Icon className="size-4" />
-                  </span>
-                  <span className="flex-1">{locale === "ar" ? item.ar : item.en}</span>
-                  {active && <ChevronLeft className="size-4 text-emerald-400 rtl:rotate-0 rotate-180" />}
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      ))}
-    </nav>
-  )
-
   return (
     <div className="min-h-screen bg-[#f6faf8] lg:grid lg:grid-cols-[264px_1fr]">
       {/* Desktop sidebar */}
@@ -144,7 +158,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <p className="text-[11px] font-semibold text-emerald-600">loversdc</p>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto"><NavList /></div>
+        <div className="flex-1 overflow-y-auto"><NavList locale={locale} isActive={isActive} /></div>
         <div className="border-t border-neutral-100 p-3">
           <Link href="/" className="mb-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
             <span className="flex size-8 items-center justify-center rounded-lg bg-neutral-100 text-neutral-400"><Home className="size-4" /></span>
@@ -187,7 +201,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </div>
             <button onClick={() => setOpen(false)} aria-label={t(locale, "Close menu", "إغلاق القائمة")} className="rounded-lg p-1 text-neutral-500 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"><X className="size-5" aria-hidden="true" /></button>
           </div>
-          <div className="flex-1 overflow-y-auto"><NavList /></div>
+          <div className="flex-1 overflow-y-auto"><NavList locale={locale} isActive={isActive} /></div>
         </div>
       </div>
 

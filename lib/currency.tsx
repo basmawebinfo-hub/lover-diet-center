@@ -3,7 +3,7 @@
 // Currency context — all prices are stored in USD (base). The user picks a
 // display currency; we fetch live rates (free, no key) and convert on the fly.
 
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react"
+import { createContext, useContext, useEffect, useMemo, useState, useCallback, useSyncExternalStore } from "react"
 
 export type CurrencyCode = "USD" | "AED" | "SAR" | "EGP" | "KWD" | "QAR" | "JOD" | "EUR" | "GBP"
 
@@ -35,18 +35,59 @@ type CurrencyValue = {
 
 const Ctx = createContext<CurrencyValue | null>(null)
 
+// --- Saved currency choice, modelled as an external store -----------------
+//
+// localStorage is external mutable state, so it is read through
+// useSyncExternalStore rather than seeded by setState in an effect. That
+// matters for more than lint: getServerSnapshot pins the SSR *and* hydration
+// render to "USD", then React re-renders with the real choice once hydration
+// finishes. Reading localStorage in a lazy useState initializer instead would
+// make the client's first render disagree with the server HTML and trip a
+// hydration mismatch on every page that prints a price.
+
+const CURRENCY_KEY = "ldc_currency"
+const currencyListeners = new Set<() => void>()
+
+function subscribeToCurrency(onChange: () => void): () => void {
+  currencyListeners.add(onChange)
+  // `storage` fires for changes made in OTHER tabs; same-tab writes notify
+  // through emitCurrencyChange() below.
+  window.addEventListener("storage", onChange)
+  return () => {
+    currencyListeners.delete(onChange)
+    window.removeEventListener("storage", onChange)
+  }
+}
+
+function emitCurrencyChange() {
+  currencyListeners.forEach((l) => l())
+}
+
+function getCurrencySnapshot(): CurrencyCode {
+  try {
+    const saved = window.localStorage.getItem(CURRENCY_KEY) as CurrencyCode | null
+    if (saved && CURRENCIES.some((c) => c.code === saved)) return saved
+  } catch { /* storage disabled */ }
+  return "USD"
+}
+
+function getCurrencyServerSnapshot(): CurrencyCode {
+  return "USD"
+}
+
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const [currency, setCurrencyState] = useState<CurrencyCode>("USD")
+  const currency = useSyncExternalStore(
+    subscribeToCurrency,
+    getCurrencySnapshot,
+    getCurrencyServerSnapshot,
+  )
   const [rates, setRates] = useState<Record<string, number>>(FALLBACK)
 
-  // restore saved choice
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    const saved = window.localStorage.getItem("ldc_currency") as CurrencyCode | null
-    if (saved && CURRENCIES.some((c) => c.code === saved)) setCurrencyState(saved)
-  }, [])
-
   // fetch live rates (USD base), cached 1h
+  //
+  // Left as an effect on purpose. Rates change the *numbers* rendered into the
+  // HTML, so seeding them from cache during the first client render would
+  // desync from the server render for the same reason as the currency choice.
   useEffect(() => {
     let active = true
     const cacheRaw = typeof window !== "undefined" ? window.localStorage.getItem("ldc_rates") : null
@@ -68,8 +109,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const setCurrency = useCallback((c: CurrencyCode) => {
-    setCurrencyState(c)
-    if (typeof window !== "undefined") window.localStorage.setItem("ldc_currency", c)
+    // Write first, then notify — subscribers re-read the snapshot from
+    // localStorage, so the value has to be there before they run.
+    try { window.localStorage.setItem(CURRENCY_KEY, c) } catch { /* storage disabled */ }
+    emitCurrencyChange()
   }, [])
 
   const rate = rates[currency] ?? FALLBACK[currency] ?? 1

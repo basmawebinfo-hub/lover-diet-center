@@ -14,13 +14,16 @@ export const config = {
   // rendered on demand — `next build` reported zero static pages — which threw
   // away CDN caching on the pages that need it most.
   //
-  // Two groups run through the middleware now:
+  // Three groups run through the middleware now:
   //   - auth/session gating: /dashboard, /admin, /onboarding, /sign-in,
   //     /sign-up, /reset-password, /auth/*
-  //   - locale pinning for the two language mirrors: /en, /ar
+  //   - the bare root, which redirects to /en or /ar
+  //   - locale pinning under /en and /ar, so the cookie follows the URL
   //
-  // Anything not listed here is public, cookie-driven, and cacheable.
+  // The locale pages themselves render from the path alone, so they stay
+  // statically prerenderable — the middleware only writes a cookie on them.
   matcher: [
+    '/',
     '/dashboard/:path*',
     '/admin/:path*',
     '/onboarding/:path*',
@@ -33,5 +36,19 @@ export const config = {
     '/en',
     '/ar/:path*',
     '/ar',
+
+    // Pre-locale marketing URLs. Still indexed and shared, so they are
+    // redirected to the visitor's language rather than 404'd.
+    '/about/:path*',
+    '/about',
+    '/contact/:path*',
+    '/contact',
+    '/shop/:path*',
+    '/shop',
+    '/nutrition-consultations',
+    '/healthy-meals',
+    '/healthy-snacks',
+    '/body-sculpting',
+    '/training-courses',
   ],
 }

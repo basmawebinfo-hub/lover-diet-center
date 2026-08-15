@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Link from 'next/link'
+import { LocaleLink as Link } from '@/components/ui/locale-link'
 import { socialLinks } from '@/lib/site'
 import { t, type Locale } from '@/lib/locale-shared'
 

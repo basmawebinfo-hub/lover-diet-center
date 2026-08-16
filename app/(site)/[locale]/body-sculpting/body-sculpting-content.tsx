@@ -1,6 +1,6 @@
 "use client"
 
-import { InAppActionButton } from '@/components/in-app-action-button'
+import { BookConsultationButton } from '@/components/book-consultation-button'
 import { Activity, CheckCircle } from 'lucide-react'
 import { useLocale, t } from '@/lib/locale'
 
@@ -56,7 +56,7 @@ export function BodySculptingContent() {
             )}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <InAppActionButton mode="session" sessionType="body_sculpting" label={t(locale, 'Book a Session', 'احجز جلسة')} />
+            <BookConsultationButton type="body_sculpting" label={t(locale, 'Book a Session', 'احجز جلسة')} />
           </div>
         </div>
       </section>
@@ -98,7 +98,7 @@ export function BodySculptingContent() {
                 <h3 className="text-xl font-bold text-neutral-900">{pkg.name}</h3>
                 <p className="text-3xl font-bold text-[#4d7c0f] mb-1 mt-3">{pkg.price} <span className="text-base font-normal">{aed}</span></p>
                 <p className="text-sm text-neutral-500 mb-6">{sessionsLabel(pkg.sessions)}</p>
-                <div className="mt-2"><InAppActionButton mode="session" sessionType="body_sculpting" label={t(locale, 'Book Now', 'احجز الآن')} className="w-full px-4 py-3 text-sm" /></div>
+                <div className="mt-2"><BookConsultationButton type="body_sculpting" label={t(locale, 'Book Now', 'احجز الآن')} className="w-full px-4 py-3 text-sm" /></div>
               </div>
             ))}
           </div>

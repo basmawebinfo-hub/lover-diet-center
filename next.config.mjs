@@ -10,6 +10,12 @@ const csp = [
   "frame-ancestors 'none'",
   "object-src 'none'",
   "img-src 'self' data: blob: https: https://*.supabase.co https://*.supabase.in",
+  // YouTube embeds for the TV episodes on /about. Without an explicit
+  // frame-src these fall back to default-src 'self' and every player is
+  // blocked outright. -nocookie is the privacy-preserving player host; the
+  // plain domain is listed because it is where -nocookie redirects some
+  // playback requests.
+  "frame-src https://www.youtube-nocookie.com https://www.youtube.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live",

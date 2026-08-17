@@ -89,7 +89,7 @@ function SessionsInner() {
       <div className="mx-auto max-w-4xl space-y-6">
         <header className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900">{t(locale,"My Sessions","جلساتي")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale,"My Sessions","جلساتي")}</h1>
             <p className="mt-1 text-sm text-neutral-500">
               {t(locale,"Book and manage your appointments with Dr. Wael Mostafa.","احجز وأدر مواعيدك مع الدكتور وائل مصطفى.")}
             </p>

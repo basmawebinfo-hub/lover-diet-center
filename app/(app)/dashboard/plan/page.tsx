@@ -101,7 +101,7 @@ export default function PlanPage() {
       <DashboardShell>
         <div className="mx-auto max-w-5xl space-y-6">
           <header>
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
             <p className="mt-1 text-sm text-neutral-500">{t(locale, "Loading your latest plan...", "جارٍ تحميل آخر نسخة من خطتك...")}</p>
           </header>
           <SkeletonPlan />
@@ -116,7 +116,7 @@ export default function PlanPage() {
       <DashboardShell>
         <div className="mx-auto max-w-2xl">
           <header className="mb-6">
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
           </header>
           <div className="rounded-3xl border border-red-100 bg-red-50 p-8 text-center">
             <h2 className="text-lg font-bold text-red-700">{t(locale, "Could not load your plan", "تعذّر تحميل خطتك")}</h2>
@@ -140,7 +140,7 @@ export default function PlanPage() {
       <DashboardShell>
         <div className="mx-auto max-w-2xl">
           <header className="mb-6">
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
           </header>
           <div className="flex flex-col items-center rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-10 text-center">
             <span className="flex size-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
@@ -250,7 +250,7 @@ function PlanView({
         {/* Header */}
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
             <p className="mt-1 text-sm text-neutral-500">
               {t(locale, "Designed by", "إعداد")} <span className="font-semibold text-neutral-700">{plan.doctorName || t(locale, "your nutritionist", "أخصائي التغذية")}</span>
               {plan.startDate && (

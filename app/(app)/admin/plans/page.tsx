@@ -335,8 +335,8 @@ export default function AdminMealsAndPlansPage() {
               </p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto rounded-3xl border border-neutral-100 bg-white shadow-sm">
+              <table className="w-full min-w-[34rem] text-sm">
                 <thead>
                   <tr className="border-b border-neutral-100 text-xs uppercase tracking-wider text-neutral-400">
                     <th className="p-4 text-start font-medium">{t(locale, "Client", "العميل")}</th>
@@ -406,8 +406,8 @@ export default function AdminMealsAndPlansPage() {
               {t(locale, "No clients yet.", "لا يوجد عملاء بعد.")}
             </p>
           ) : (
-            <div className="overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto rounded-3xl border border-neutral-100 bg-white shadow-sm">
+              <table className="w-full min-w-[34rem] text-sm">
                 <thead>
                   <tr className="border-b border-neutral-100 text-xs uppercase tracking-wider text-neutral-400">
                     <th className="p-4 text-start font-medium">{t(locale, "Client", "العميل")}</th>

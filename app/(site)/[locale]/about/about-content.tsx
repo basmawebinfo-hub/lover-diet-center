@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { LocaleLink as Link } from '@/components/ui/locale-link'
 import { BookConsultationButton } from '@/components/book-consultation-button'
+import { TvEpisodes } from '@/components/about/tv-episodes'
 import { WHATSAPP_DIRECT } from '@/lib/site'
 import {
   ArrowRight, Award, GraduationCap, BadgeCheck, Stethoscope, Briefcase,
@@ -348,6 +349,11 @@ export function AboutContent() {
                 </div>
               )
             })}
+          </div>
+
+          {/* The badges above claim TV and radio work; this is the evidence. */}
+          <div className="mt-14">
+            <TvEpisodes />
           </div>
         </div>
       </section>

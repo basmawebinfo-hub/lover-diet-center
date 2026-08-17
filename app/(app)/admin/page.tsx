@@ -127,7 +127,7 @@ export default function AdminOverviewPage() {
             <p className="py-10 text-center text-sm text-neutral-400">{t(locale, "No orders yet.", "لا توجد طلبات بعد.")}</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[34rem] text-sm">
                 <thead>
                   <tr className="border-b border-neutral-100 text-start text-xs uppercase tracking-wider text-neutral-400">
                     <th className="pb-3 text-start font-medium">{t(locale, "Order", "الطلب")}</th>

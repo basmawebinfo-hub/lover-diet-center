@@ -103,7 +103,7 @@ export default function AdminClientsPage() {
 
         <div className="overflow-hidden rounded-3xl border border-neutral-100 bg-white shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[34rem] text-sm">
               <thead>
                 <tr className="border-b border-neutral-100 text-xs uppercase tracking-wider text-neutral-400">
                   <th className="p-4 text-start font-medium">{t(locale,"Client","العميل")}</th>

@@ -18,6 +18,7 @@ const LOCALIZED_ROOTS = [
   'healthy-snacks',
   'body-sculpting',
   'training-courses',
+  'privacy',
 ] as const
 
 /**

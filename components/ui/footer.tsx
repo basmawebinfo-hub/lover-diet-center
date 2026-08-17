@@ -69,6 +69,7 @@ export function FooterSimple({ locale }: { locale: Locale }) {
         { label: t(locale, 'About Us', 'من نحن'),       href: '/about' },
         { label: t(locale, 'Contact', 'تواصل معنا'),     href: '/contact' },
         { label: t(locale, 'FAQ', 'الأسئلة الشائعة'),    href: '/#faq' },
+        { label: t(locale, 'Privacy Policy', 'سياسة الخصوصية'), href: '/privacy' },
       ],
     },
     {

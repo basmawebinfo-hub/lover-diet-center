@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, ShoppingCart, Minus, Plus, Check, ShieldCheck, Truck } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
 import type { Product } from "@/lib/types"
 import { useLocale, t } from "@/lib/locale"
@@ -34,8 +34,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   if (!state.hydrated) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-4xl space-y-6 pb-24 lg:pb-0">
+        <div className="mx-auto max-w-4xl space-y-6">
           <div className="grid gap-8 lg:grid-cols-2">
             <div className="aspect-square animate-pulse rounded-3xl bg-neutral-100" />
             <div className="space-y-4">
@@ -52,7 +51,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   if (!product) {
     return (
       <DashboardShell>
-        <MobileNav />
         <div className="mx-auto max-w-3xl py-20 text-center">
           <p className="text-lg font-semibold text-neutral-700">
             {t(locale, "Product not found.", "المنتج غير موجود.")}
@@ -83,8 +81,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-4xl space-y-6 pb-24 lg:pb-0">
+      <div className="mx-auto max-w-4xl space-y-6">
 
         {/* Breadcrumb */}
         <nav

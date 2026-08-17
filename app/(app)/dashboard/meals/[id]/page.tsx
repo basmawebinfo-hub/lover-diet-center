@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Flame, Beef, Wheat, Droplet, ShoppingCart, CalendarPlus, Check } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
 import type { Meal } from "@/lib/types"
 import { useLocale, t } from "@/lib/locale"
@@ -32,7 +32,6 @@ export default function MealDetailPage({ params }: { params: Promise<{ id: strin
   if (!meal) {
     return (
       <DashboardShell>
-        <MobileNav />
         <div className="mx-auto max-w-3xl py-20 text-center">
           <p className="text-lg font-semibold text-neutral-700">{t(locale,"Meal not found.","الوجبة غير موجودة.")}</p>
           <Link href="/dashboard/plan" className="mt-4 inline-block text-sm font-semibold text-lime-700 hover:underline">
@@ -57,8 +56,7 @@ export default function MealDetailPage({ params }: { params: Promise<{ id: strin
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-4xl space-y-6 pb-24 lg:pb-0">
+      <div className="mx-auto max-w-4xl space-y-6">
 
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-neutral-500">

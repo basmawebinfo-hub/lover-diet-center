@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Calendar, Clock, Video, MapPin, Check, X, Plus } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
 import { useToast } from "@/components/ui/toast"
 import type { Session } from "@/lib/types"
@@ -86,8 +86,7 @@ function SessionsInner() {
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-4xl space-y-6 pb-24 lg:pb-0">
+      <div className="mx-auto max-w-4xl space-y-6">
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-neutral-900">{t(locale,"My Sessions","جلساتي")}</h1>

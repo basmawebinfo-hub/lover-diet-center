@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import {
   Trash2, Minus, Plus, CreditCard, ShoppingBag, Loader2, AlertCircle, ShieldCheck, Package,
 } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import Link from "next/link"
 import Image from "next/image"
 import { useApp } from "@/lib/store"
@@ -131,8 +131,7 @@ export default function CartPage() {
   if (!state.hydrated) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-4xl space-y-6 pb-32 lg:pb-0">
+        <div className="mx-auto max-w-4xl space-y-6 pb-32">
           <header>
             <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "Your Cart", "سلتك")}</h1>
           </header>
@@ -151,8 +150,7 @@ export default function CartPage() {
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-4xl space-y-6 pb-32 lg:pb-0">
+      <div className="mx-auto max-w-4xl space-y-6 pb-32">
         {/* Header */}
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>

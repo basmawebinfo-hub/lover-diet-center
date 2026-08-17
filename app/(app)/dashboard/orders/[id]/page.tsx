@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { fetchUserOrders } from "@/lib/supabase/db"
 import { useCurrency } from "@/lib/currency"
 import { useLocale, t } from "@/lib/locale"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import type { Order } from "@/lib/types"
 import { CheckCircle2, XCircle, Clock, ArrowLeft, Loader2 } from "lucide-react"
 
@@ -88,7 +88,6 @@ function OrderDetailInner() {
   if (!ready) {
     return (
       <DashboardShell>
-        <MobileNav />
         <div className="mx-auto flex min-h-[60vh] max-w-4xl items-center justify-center">
           <Loader2 className="size-8 animate-spin text-emerald-500" />
         </div>
@@ -99,8 +98,7 @@ function OrderDetailInner() {
   if (notFound || !order) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-2xl px-4 pb-24 pt-8">
+        <div className="mx-auto max-w-2xl px-4 pt-8">
           <h1 className="text-2xl font-semibold text-slate-900">
             {t(locale, "Order not found", "الطلب غير موجود")}
           </h1>
@@ -128,8 +126,7 @@ function OrderDetailInner() {
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-4xl px-4 pb-24 pt-6">
+      <div className="mx-auto max-w-4xl px-4 pt-6">
         <button
           onClick={() => router.push("/dashboard/orders")}
           className="mb-4 inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded"
@@ -249,7 +246,6 @@ export default function OrderDetailPage() {
     <Suspense
       fallback={
         <DashboardShell>
-          <MobileNav />
           <div className="mx-auto flex min-h-[60vh] max-w-4xl items-center justify-center">
             <Loader2 className="size-8 animate-spin text-emerald-500" />
           </div>

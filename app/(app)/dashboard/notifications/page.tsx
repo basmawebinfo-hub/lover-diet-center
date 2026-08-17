@@ -6,7 +6,7 @@ import Link from "next/link"
 import {
   Bell, CheckCheck, RefreshCw, Loader2, AlertCircle, Package, ClipboardList, Calendar, CreditCard, Activity, Info, Check,
 } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -108,8 +108,7 @@ export default function NotificationsPage() {
   if (initialLoad && notifications.length === 0) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-3xl space-y-6 pb-28 lg:pb-0">
+        <div className="mx-auto max-w-3xl space-y-6">
           <header>
             <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "Notifications", "الإشعارات")}</h1>
             <p className="mt-1 text-sm text-neutral-500">{t(locale, "Loading your latest updates...", "جارٍ تحميل آخر التحديثات...")}</p>
@@ -124,8 +123,7 @@ export default function NotificationsPage() {
   if (error && notifications.length === 0) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-2xl pb-28 lg:pb-0">
+        <div className="mx-auto max-w-2xl">
           <header className="mb-6">
             <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "Notifications", "الإشعارات")}</h1>
           </header>
@@ -150,8 +148,7 @@ export default function NotificationsPage() {
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-3xl space-y-6 pb-28 lg:pb-0">
+      <div className="mx-auto max-w-3xl space-y-6">
         {/* Header */}
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>

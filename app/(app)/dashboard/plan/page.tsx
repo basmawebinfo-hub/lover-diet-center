@@ -6,7 +6,7 @@ import Image from "next/image"
 import {
   Flame, Beef, Wheat, Droplet, ChefHat, ClipboardList, MessageCircle, RefreshCw, Loader2, Utensils, Target, Sparkles,
 } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -99,8 +99,7 @@ export default function PlanPage() {
   if (initialLoad && !plan) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-5xl space-y-6 pb-24 lg:pb-0">
+        <div className="mx-auto max-w-5xl space-y-6">
           <header>
             <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
             <p className="mt-1 text-sm text-neutral-500">{t(locale, "Loading your latest plan...", "جارٍ تحميل آخر نسخة من خطتك...")}</p>
@@ -115,8 +114,7 @@ export default function PlanPage() {
   if (error && !plan) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-2xl pb-24 lg:pb-0">
+        <div className="mx-auto max-w-2xl">
           <header className="mb-6">
             <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
           </header>
@@ -140,8 +138,7 @@ export default function PlanPage() {
   if (!plan) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-2xl pb-24 lg:pb-0">
+        <div className="mx-auto max-w-2xl">
           <header className="mb-6">
             <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Plan", "خطتي")}</h1>
           </header>
@@ -249,8 +246,7 @@ function PlanView({
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-5xl space-y-6 pb-24 lg:pb-0">
+      <div className="mx-auto max-w-5xl space-y-6">
         {/* Header */}
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>

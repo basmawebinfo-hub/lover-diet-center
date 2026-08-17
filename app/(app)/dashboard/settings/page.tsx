@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Save, User as UserIcon, Target, ShieldCheck, Camera, Loader2, KeyRound, Sliders, Eye, EyeOff } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { TransformationSlider } from "@/components/dashboard/transformation-slider"
 import { useApp } from "@/lib/store"
 import { analyzeUser, buildAvatarConfig, idealWeightKg } from "@/lib/analysis"
@@ -138,8 +138,7 @@ export default function SettingsPage() {
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-5xl space-y-6 pb-28 lg:pb-0">
+      <div className="mx-auto max-w-5xl space-y-6">
 
         {/* Profile header (no banner) */}
         <section className="flex flex-col gap-4 rounded-3xl border border-neutral-100 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">

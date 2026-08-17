@@ -8,7 +8,7 @@ import {
   Scale, Apple, Calendar, ShoppingBag, Target, Flame, Droplets,
   Plus, Minus, Search, ArrowUpRight,
 } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { BodyAvatar } from "@/components/body-avatar"
 import { WeightChart } from "@/components/dashboard/weight-chart"
 import { Donut, StatChip } from "@/components/dashboard/stat-widgets"
@@ -80,8 +80,7 @@ export default function DashboardOverviewPage() {
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-6xl space-y-5 pb-28 lg:pb-6">
+      <div className="mx-auto max-w-6xl space-y-5">
 
         {/* Top bar */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

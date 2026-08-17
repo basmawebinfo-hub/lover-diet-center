@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import {
   Scale, TrendingDown, TrendingUp, Save, Loader2, Plus, Pencil, Trash2, X, Target, Activity, CalendarDays, Sparkles,
 } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
 import { calculateBMI } from "@/lib/analysis"
 import type { WeightLog } from "@/lib/types"
@@ -216,8 +216,7 @@ export default function WeightPage() {
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-5xl space-y-6 pb-28 lg:pb-0">
+      <div className="mx-auto max-w-5xl space-y-6">
 
         <header>
           <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "Weight Tracker", "متابعة الوزن")}</h1>

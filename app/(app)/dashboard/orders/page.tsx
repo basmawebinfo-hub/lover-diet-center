@@ -7,7 +7,7 @@ import Link from "next/link"
 import {
   Package, ShoppingBag, RefreshCw, Loader2, RotateCcw, ChevronDown, ChevronUp, AlertCircle, Check, XCircle,
 } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
 import { cn } from "@/lib/utils"
 import { useLocale, t } from "@/lib/locale"
@@ -131,8 +131,7 @@ export default function OrdersPage() {
   if (initialLoad && orders.length === 0) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-4xl space-y-6 pb-28 lg:pb-0">
+        <div className="mx-auto max-w-4xl space-y-6">
           <header>
             <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Orders", "طلباتي")}</h1>
             <p className="mt-1 text-sm text-neutral-500">{t(locale, "Loading your latest orders...", "جارٍ تحميل آخر الطلبات...")}</p>
@@ -147,8 +146,7 @@ export default function OrdersPage() {
   if (error && orders.length === 0) {
     return (
       <DashboardShell>
-        <MobileNav />
-        <div className="mx-auto max-w-2xl pb-28 lg:pb-0">
+        <div className="mx-auto max-w-2xl">
           <header className="mb-6">
             <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Orders", "طلباتي")}</h1>
           </header>
@@ -173,8 +171,7 @@ export default function OrdersPage() {
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-4xl space-y-6 pb-28 lg:pb-0">
+      <div className="mx-auto max-w-4xl space-y-6">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Orders", "طلباتي")}</h1>

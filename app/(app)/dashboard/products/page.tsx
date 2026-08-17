@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { Search, ShoppingCart, Filter, Check } from "lucide-react"
-import { DashboardShell, MobileNav } from "@/components/dashboard/dashboard-shell"
+import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { useApp } from "@/lib/store"
 import type { Product } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -62,8 +62,7 @@ export default function ProductsPage() {
 
   return (
     <DashboardShell>
-      <MobileNav />
-      <div className="mx-auto max-w-5xl space-y-6 pb-24 lg:pb-0">
+      <div className="mx-auto max-w-5xl space-y-6">
         <header>
           <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">
             {t(locale, "Healthy Products", "المنتجات الصحية")}

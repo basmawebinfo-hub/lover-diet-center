@@ -219,7 +219,7 @@ export default function WeightPage() {
       <div className="mx-auto max-w-5xl space-y-6">
 
         <header>
-          <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "Weight Tracker", "متابعة الوزن")}</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "Weight Tracker", "متابعة الوزن")}</h1>
           <p className="mt-1 text-sm text-neutral-500">{t(locale, "Log your weight, follow your trend, close the gap to your goal.", "سجّل وزنك، تابع تطوّرك، واقترب من هدفك.")}</p>
         </header>
 

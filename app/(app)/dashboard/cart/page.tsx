@@ -11,6 +11,7 @@ import Image from "next/image"
 import { useApp } from "@/lib/store"
 import type { Order, Product } from "@/lib/types"
 import { useToast } from "@/components/ui/toast"
+import { ConfirmSheet } from "@/components/ui/sheet"
 import { createClient } from "@/lib/supabase/client"
 import { placeOrder } from "@/lib/supabase/db"
 import { cn } from "@/lib/utils"
@@ -133,7 +134,7 @@ export default function CartPage() {
       <DashboardShell>
         <div className="mx-auto max-w-4xl space-y-6 pb-32">
           <header>
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "Your Cart", "سلتك")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "Your Cart", "سلتك")}</h1>
           </header>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
             <div className="space-y-3">
@@ -154,7 +155,7 @@ export default function CartPage() {
         {/* Header */}
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "Your Cart", "سلتك")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "Your Cart", "سلتك")}</h1>
             <p className="mt-1 text-sm text-neutral-500">
               {cartItems.length === 0
                 ? t(locale, "Nothing here yet.", "لا شيء هنا بعد.")
@@ -165,39 +166,15 @@ export default function CartPage() {
                   )}
             </p>
           </div>
-          {cartItems.length > 0 && !confirmClear && (
+          {cartItems.length > 0 && (
             <button
               type="button"
               onClick={() => setConfirmClear(true)}
-              className="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-500 transition hover:border-red-200 hover:text-red-600"
+              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3.5 text-xs font-semibold text-neutral-500 transition hover:border-red-200 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-200"
             >
-              <Trash2 className="size-3.5" />
+              <Trash2 className="size-4" />
               {t(locale, "Clear all", "تفريغ الكل")}
             </button>
-          )}
-          {confirmClear && (
-            <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs">
-              <span className="font-semibold text-red-700">{t(locale, "Are you sure?", "هل أنت متأكد؟")}</span>
-              <button
-                type="button"
-                onClick={() => {
-                  clearCart()
-                  setConfirmClear(false)
-                  notify(t(locale, "Cart cleared", "تم تفريغ السلة"), "success")
-                }}
-                className="inline-flex items-center gap-1 rounded-md bg-red-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-red-700"
-              >
-                <Trash2 className="size-3" />
-                {t(locale, "Clear", "تفريغ")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmClear(false)}
-                className="rounded-md border border-neutral-200 px-2.5 py-1 text-xs font-semibold text-neutral-600 hover:bg-neutral-50"
-              >
-                {t(locale, "Cancel", "إلغاء")}
-              </button>
-            </div>
           )}
         </header>
 
@@ -321,6 +298,27 @@ export default function CartPage() {
           </div>
         </div>
       )}
+
+      {/*
+        Emptying the cart used to confirm through a strip of ~24px buttons
+        wedged into the header row — the smallest targets on the page guarding
+        the most destructive action on it.
+      */}
+      <ConfirmSheet
+        open={confirmClear}
+        onClose={() => setConfirmClear(false)}
+        onConfirm={() => {
+          clearCart()
+          notify(t(locale, "Cart cleared", "تم تفريغ السلة"), "success")
+        }}
+        title={t(locale, "Clear your cart?", "تفريغ السلة؟")}
+        description={t(
+          locale,
+          "This removes every item. You can always add them again.",
+          "ده هيشيل كل المنتجات. تقدر تضيفهم تاني في أي وقت.",
+        )}
+        confirmLabel={t(locale, "Clear cart", "تفريغ السلة")}
+      />
     </DashboardShell>
   )
 }
@@ -389,26 +387,31 @@ function CartRow({
       </div>
 
       {/* Qty controls */}
-      <div className="flex items-center gap-1 rounded-lg border border-neutral-200 bg-white">
+      {/*
+        44px targets. These were 32px — the most-tapped control in the whole
+        checkout flow and the easiest to miss on a phone, which on a cart means
+        the customer either buys the wrong quantity or gives up.
+      */}
+      <div className="flex items-center rounded-xl border border-neutral-200 bg-white">
         <button
           type="button"
           onClick={onDecrement}
           disabled={item.quantity <= 1}
-          className="flex size-8 items-center justify-center text-neutral-600 transition hover:text-emerald-700 disabled:cursor-not-allowed disabled:text-neutral-300"
+          className="flex size-11 items-center justify-center rounded-s-xl text-neutral-600 transition hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed disabled:text-neutral-300"
           aria-label={t(locale, "Decrease quantity", "إنقاص الكمية")}
         >
-          <Minus className="size-3.5" />
+          <Minus className="size-4" />
         </button>
-        <span className="w-6 text-center text-sm font-semibold text-neutral-900" aria-live="polite">
+        <span className="w-8 text-center text-sm font-bold tabular-nums text-neutral-900" aria-live="polite">
           {item.quantity}
         </span>
         <button
           type="button"
           onClick={onIncrement}
-          className="flex size-8 items-center justify-center text-neutral-600 transition hover:text-emerald-700"
+          className="flex size-11 items-center justify-center rounded-e-xl text-neutral-600 transition hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
           aria-label={t(locale, "Increase quantity", "زيادة الكمية")}
         >
-          <Plus className="size-3.5" />
+          <Plus className="size-4" />
         </button>
       </div>
 

@@ -164,7 +164,7 @@ export default function SettingsPage() {
               </button>
             </div>
             <div>
-              <h1 className="text-xl font-extrabold text-neutral-900 sm:text-2xl">{draft.nameEn}</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{draft.nameEn}</h1>
               <p className="text-sm text-neutral-500">{draft.email}</p>
             </div>
           </div>

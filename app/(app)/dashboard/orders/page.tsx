@@ -133,7 +133,7 @@ export default function OrdersPage() {
       <DashboardShell>
         <div className="mx-auto max-w-4xl space-y-6">
           <header>
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Orders", "طلباتي")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "My Orders", "طلباتي")}</h1>
             <p className="mt-1 text-sm text-neutral-500">{t(locale, "Loading your latest orders...", "جارٍ تحميل آخر الطلبات...")}</p>
           </header>
           <SkeletonOrders />
@@ -148,7 +148,7 @@ export default function OrdersPage() {
       <DashboardShell>
         <div className="mx-auto max-w-2xl">
           <header className="mb-6">
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Orders", "طلباتي")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "My Orders", "طلباتي")}</h1>
           </header>
           <div className="rounded-3xl border border-red-100 bg-red-50 p-8 text-center">
             <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-red-100 text-red-600">
@@ -174,7 +174,7 @@ export default function OrdersPage() {
       <div className="mx-auto max-w-4xl space-y-6">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900 sm:text-3xl">{t(locale, "My Orders", "طلباتي")}</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">{t(locale, "My Orders", "طلباتي")}</h1>
             <p className="mt-1 text-sm text-neutral-500">{t(locale, "Track your purchases and delivery status.", "تابع مشترياتك وحالة التوصيل.")}</p>
           </div>
           <button

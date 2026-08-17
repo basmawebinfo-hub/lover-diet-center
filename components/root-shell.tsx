@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next'
 import { ConditionalShell } from '@/components/conditional-shell'
 import { AppProvider } from '@/lib/store'
 import { LocaleProvider } from '@/lib/locale'
@@ -54,6 +55,12 @@ export function RootShell({
             </CurrencyProvider>
           </AppProvider>
         </LocaleProvider>
+        {/*
+          Lives here so both root layouts get it. It was on the single root
+          layout before that layout was split in two, and the split dropped
+          it — analytics silently stopped recording.
+        */}
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </>
   )

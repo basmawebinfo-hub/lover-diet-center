@@ -18,6 +18,7 @@ const ROUTES = [
   '/body-sculpting',
   '/training-courses',
   '/shop',
+  '/privacy',
 ] as const
 
 export default function sitemap(): MetadataRoute.Sitemap {

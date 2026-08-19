@@ -58,6 +58,10 @@ export const rootMetadata: Metadata = {
 }
 
 export const rootViewport: Viewport = {
+  // Emits <meta name="color-scheme" content="light">. Chrome on Android reads
+  // this before first paint and skips auto-darkening; the CSS declaration
+  // alone is applied slightly later.
+  colorScheme: 'light',
   width: 'device-width',
   initialScale: 1,
   themeColor: '#f5f8f7',

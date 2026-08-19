@@ -1,6 +1,26 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+
+/* =====================================================================
+   Colour scheme
+   ---------------------------------------------------------------------
+   The site has exactly one theme: light. There is not a single `dark:`
+   variant in the codebase.
+
+   Android applies "auto dark theme" to any page that does not say
+   otherwise — it algorithmically inverts backgrounds and text. Inside the
+   installed app that turned the light-green hero dark green, white cards
+   into grey, and the lime CTA into a muddy glow. Declaring the scheme opts
+   the page out: the browser stops guessing and renders what we designed.
+
+   If a real dark theme is ever built, this becomes `light dark` and the
+   tokens get dark values — but it must be designed, not inverted.
+   ===================================================================== */
+:root {
+  color-scheme: light;
+}
+
 @custom-variant dark (&:is(.dark *));
 @custom-variant light-mode (&:is(:not(.dark) *));
 

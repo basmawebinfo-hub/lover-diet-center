@@ -29,10 +29,10 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
-const [, , pkg, rawFingerprint] = process.argv
+const [, , pkg, ...rawFingerprints] = process.argv
 
-if (!pkg || !rawFingerprint) {
-  console.error('usage: node scripts/make-assetlinks.mjs <packageName> <sha256Fingerprint>')
+if (!pkg || rawFingerprints.length === 0) {
+  console.error('usage: node scripts/make-assetlinks.mjs <packageName> <sha256...>')
   process.exit(1)
 }
 
@@ -41,18 +41,23 @@ if (!/^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/i.test(pkg)) {
   process.exit(1)
 }
 
-// Accept the fingerprint with or without colons, any case.
-const fingerprint = rawFingerprint.replace(/^SHA256:/i, '').replace(/[^0-9a-f]/gi, '').toUpperCase()
+// Accept fingerprints with or without colons, in any case.
+const formatted = rawFingerprints.map((raw, i) => {
+  const hex = raw.replace(/^SHA-?256:/i, '').replace(/[^0-9a-f]/gi, '').toUpperCase()
+  if (hex.length !== 64) {
+    console.error(
+      `error: fingerprint #${i + 1} is ${hex.length} hex characters, expected 64. ` +
+        `A SHA-1 fingerprint is 40 - make sure you copied the SHA256: line.`,
+    )
+    process.exit(1)
+  }
+  return hex.match(/.{2}/g).join(':')
+})
 
-if (fingerprint.length !== 64) {
-  console.error(
-    `error: expected a SHA-256 fingerprint (64 hex characters, got ${fingerprint.length}).\n` +
-      '       Did you copy the SHA-1 line by mistake? It must be the SHA256: line.',
-  )
-  process.exit(1)
+const unique = [...new Set(formatted)]
+if (unique.length !== formatted.length) {
+  console.error('note: duplicate fingerprints given, keeping one of each')
 }
-
-const formatted = fingerprint.match(/.{2}/g).join(':')
 
 const payload = [
   {
@@ -60,7 +65,7 @@ const payload = [
     target: {
       namespace: 'android_app',
       package_name: pkg,
-      sha256_cert_fingerprints: [formatted],
+      sha256_cert_fingerprints: unique,
     },
   },
 ]
@@ -70,7 +75,17 @@ mkdirSync(dirname(out), { recursive: true })
 writeFileSync(out, JSON.stringify(payload, null, 2) + '\n')
 
 console.log('wrote', out)
-console.log('  package    ', pkg)
-console.log('  fingerprint', formatted)
-console.log('\nNext: deploy, then confirm it is served as JSON:')
+console.log('  package', pkg)
+unique.forEach((f, n) => console.log(`  key ${n + 1}   ${f}`))
+
+if (unique.length === 1) {
+  console.log(
+    `
+Only one key listed. If this app also ships through Google Play, add the ` +
+      `Play App Signing fingerprint too, or Play installs will show the address bar.`,
+  )
+}
+
+console.log(`
+Next: deploy, then confirm it is served as JSON:`)
 console.log('  curl -sI https://www.loversdc.com/.well-known/assetlinks.json')

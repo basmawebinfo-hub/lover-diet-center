@@ -1,4 +1,5 @@
 import { Analytics } from '@vercel/analytics/next'
+import { ServiceWorkerRegistrar } from '@/components/service-worker'
 import { ConditionalShell } from '@/components/conditional-shell'
 import { AppProvider } from '@/lib/store'
 import { LocaleProvider } from '@/lib/locale'
@@ -61,6 +62,7 @@ export function RootShell({
           it — analytics silently stopped recording.
         */}
         {process.env.NODE_ENV === 'production' && <Analytics />}
+        <ServiceWorkerRegistrar />
       </body>
     </>
   )

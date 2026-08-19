@@ -363,3 +363,60 @@
   }
 
 }
+
+/* =====================================================================
+   App mode
+   ---------------------------------------------------------------------
+   Everything below applies only when the site is running as the installed
+   Android app (a Trusted Web Activity reports display-mode: standalone).
+   In a browser tab none of it exists.
+
+   Done in CSS rather than JavaScript on purpose. Detecting standalone with
+   matchMedia means the server renders one thing and the client corrects it
+   after hydration, so the marketing header appears for a frame and then
+   vanishes — the exact flicker that makes a wrapped site feel like a
+   wrapped site. A media query is decided before the first paint.
+   ===================================================================== */
+
+@media all and (display-mode: standalone) {
+  /* The marketing header and its hamburger are the single biggest tell that
+     this is a website in a frame. The app navigates from the bottom bar. */
+  [data-site-chrome] {
+    display: none !important;
+  }
+
+  /* The floating WhatsApp bubble overlaps the bottom tab bar on a phone. */
+  [data-site-fab] {
+    display: none !important;
+  }
+
+  /* Native feel: no blue flash on tap, no text selection on chrome, and
+     momentum scrolling like a native list. */
+  body {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
+  }
+
+  button,
+  a,
+  [role='button'] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Text inside content still needs to be selectable. */
+  p, h1, h2, h3, h4, li, td, input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
+/* Safe areas — applies in the app and in browsers with a gesture bar. */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}

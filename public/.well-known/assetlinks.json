@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.loversdc.www.twa",
+      "sha256_cert_fingerprints": [
+        "70:90:59:0F:6C:B2:4E:BE:F4:01:DE:5E:C8:CB:54:D1:21:48:B4:BE:56:9C:B9:EA:06:8A:47:DD:03:D2:AF:AC"
+      ]
+    }
+  }
+]

@@ -6,7 +6,7 @@ import Link from "next/link"
 import Image from "next/image"
 import {
   Scale, Apple, Calendar, ShoppingBag, Target, Flame, Droplets,
-  Plus, Minus, ArrowUpRight, ArrowRight, Package, MessageCircle, Sparkles,
+  Plus, Minus, ArrowUpRight, ArrowRight, Package, MessageCircle, Sparkles, Stethoscope,
 } from "lucide-react"
 import { DashboardShell } from "@/components/dashboard/dashboard-shell"
 import { BodyAvatar } from "@/components/body-avatar"
@@ -80,7 +80,21 @@ export default function DashboardOverviewPage() {
   const initial = firstName.charAt(0).toUpperCase()
   const addWater = (d: number) => logWater(todayStr, Math.max(0, Math.round((waterToday + d) * 10) / 10))
   const loggedToday = state.weightLogs.some((w) => w.date === todayStr)
+
+  // Written out rather than the raw ISO date: the card is the one thing on the
+  // page a client is meant to act on today, and "12 July" anchors it to today
+  // in a way "2026-07-12" does not.
+  const todayLabel = new Date().toLocaleDateString(locale === "ar" ? "ar-EG" : "en-GB", {
+    day: "numeric",
+    month: "long",
+  })
   const upcomingSessions = state.sessions.filter((s) => s.status === "scheduled").length
+
+  // Only a note the dietitian actually wrote counts. Empty strings are common
+  // in the plan rows, so trim before deciding.
+  const dietitianNote = (
+    locale === "ar" ? state.doctorPlan?.notesAr : state.doctorPlan?.notesEn
+  )?.trim() || null
 
   return (
     <DashboardShell>
@@ -97,7 +111,7 @@ export default function DashboardOverviewPage() {
           <div className="min-w-0">
             <p className="text-sm font-medium text-emerald-600">{greeting(locale)} 👋</p>
             <h1 className="truncate text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">
-              {t(locale, `Welcome back, ${firstName}`, `أهلاً بعودتك، ${firstName}`)}
+              {firstName}
             </h1>
           </div>
           <Link
@@ -137,34 +151,39 @@ export default function DashboardOverviewPage() {
               </Link>
             </div>
           </Card>
-        ) : !loggedToday ? (
-          <Link
-            href="/dashboard/weight"
-            className="flex items-center gap-3 rounded-3xl border border-emerald-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-          >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-              <Scale className="size-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-bold text-neutral-900">{t(locale, "Log today's weight", "سجّل وزن النهاردة")}</p>
-              <p className="truncate text-sm text-neutral-500">{t(locale, "Takes a few seconds — keeps your chart honest.", "ثواني معدودة — بيخلّي الرسم البياني دقيق.")}</p>
-            </div>
-            <ArrowRight className="size-4 shrink-0 text-neutral-300 rtl:rotate-180" />
-          </Link>
         ) : (
-          <Link
-            href="/dashboard/plan"
-            className="flex items-center gap-3 rounded-3xl border border-emerald-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
-          >
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-              <Apple className="size-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="font-bold text-neutral-900">{t(locale, "Today's weight is logged ✓", "وزن النهاردة اتسجّل ✓")}</p>
-              <p className="truncate text-sm text-neutral-500">{t(locale, "See what's on your plan today.", "شوف خطة أكلك النهاردة.")}</p>
+          /* "Your next step" — the mockup's lead card. One card, one action,
+             dated so it reads as today's job rather than a standing menu
+             item. Its content changes with what the client has already done. */
+          <Card className="border-emerald-100">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-700">
+                {t(locale, "Your next step", "خطوتك التالية")}
+              </p>
+              <time className="text-xs font-medium text-neutral-400">{todayLabel}</time>
             </div>
-            <ArrowRight className="size-4 shrink-0 text-neutral-300 rtl:rotate-180" />
-          </Link>
+            <Link
+              href={loggedToday ? "/dashboard/plan" : "/dashboard/weight"}
+              className="-m-1 flex items-center gap-3 rounded-2xl p-1 transition-colors hover:bg-neutral-50"
+            >
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+                {loggedToday ? <Apple className="size-5" /> : <Scale className="size-5" />}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-neutral-900">
+                  {loggedToday
+                    ? t(locale, "See today's plan", "شوف خطة النهاردة")
+                    : t(locale, "Log today's weight", "سجّل وزن النهاردة")}
+                </p>
+                <p className="truncate text-sm text-neutral-500">
+                  {loggedToday
+                    ? t(locale, "Today's weight is logged ✓", "وزن النهاردة اتسجّل ✓")
+                    : t(locale, "A few seconds — it keeps your chart honest.", "ثواني معدودة — بيخلّي الرسم البياني دقيق.")}
+                </p>
+              </div>
+              <ArrowRight className="size-4 shrink-0 text-neutral-300 rtl:rotate-180" />
+            </Link>
+          </Card>
         )}
 
         {/* -------------------------------------------------------- Stats --- */}
@@ -282,13 +301,46 @@ export default function DashboardOverviewPage() {
           the label was claiming something the product does not do — on a
           clinically licensed brand, of all places.
         */}
+        {/*
+          Two different things, and the difference matters on a licensed
+          clinic's product:
+
+          - If the dietitian has written a note on the plan, that is a real
+            person's clinical reading and is attributed to them by name.
+          - Otherwise this falls back to the calculated summary, which is
+            deterministic arithmetic from lib/analysis.ts and is labelled as
+            a reading of the numbers, not advice from anyone.
+
+          Never present the second as the first.
+        */}
         <div className="rounded-3xl border border-neutral-100 bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white shadow-sm">
-          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-100">
-            <Sparkles className="size-3.5" aria-hidden="true" />
-            {t(locale, "Your analysis", "تحليل حالتك")}
-          </p>
-          <h2 className="mt-2 text-lg font-bold leading-snug">{locale === "ar" ? analysis.summaryAr : analysis.summaryEn}</h2>
-          <p className="mt-2 text-sm leading-relaxed text-white/80">{locale === "ar" ? analysis.motivationAr : analysis.motivationEn}</p>
+          {dietitianNote ? (
+            <>
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-100">
+                <Stethoscope className="size-3.5" aria-hidden="true" />
+                {t(locale, "Your dietitian's note", "قراءة أخصائي التغذية")}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-white/90">{dietitianNote}</p>
+              {state.doctorPlan?.doctorName && (
+                <p className="mt-4 text-xs font-semibold text-emerald-100">
+                  {state.doctorPlan.doctorName}
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-100">
+                <Sparkles className="size-3.5" aria-hidden="true" />
+                {t(locale, "Reading your numbers", "قراءة أرقامك")}
+              </p>
+              <h2 className="mt-2 text-lg font-bold leading-snug">
+                {locale === "ar" ? analysis.summaryAr : analysis.summaryEn}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/80">
+                {locale === "ar" ? analysis.motivationAr : analysis.motivationEn}
+              </p>
+            </>
+          )}
         </div>
 
         {/* ------------------------------------------------- Quick links ---- */}

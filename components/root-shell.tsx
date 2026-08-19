@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import { ServiceWorkerRegistrar } from '@/components/service-worker'
+import { AppSplash } from '@/components/app-splash'
 import { ConditionalShell } from '@/components/conditional-shell'
 import { AppProvider } from '@/lib/store'
 import { LocaleProvider } from '@/lib/locale'
@@ -63,6 +64,8 @@ export function RootShell({
         */}
         {process.env.NODE_ENV === 'production' && <Analytics />}
         <ServiceWorkerRegistrar />
+        {/* Installed-app only; renders nothing in a browser tab. */}
+        <AppSplash />
       </body>
     </>
   )

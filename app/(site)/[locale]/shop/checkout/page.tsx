@@ -1,19 +1,29 @@
 "use client"
 
-// Public checkout — works for BOTH guests and signed-in users.
+// Public checkout.
+//
+// On the WEB it works for guests and signed-in users alike — that guest path
+// is deliberate and stays, because a registration wall in front of a cart
+// costs sales from people who have not committed to the clinic yet.
+//
+// In the INSTALLED APP a purchase requires an account. Someone who installed
+// the app is a client, their orders belong on their record next to their plan
+// and weight history, and an app order with no account cannot be shown back
+// to them anywhere.
 // Guests: fill the form → COD order via /api/orders/guest → success screen
 //         with an optional "create an account" prompt.
 // Signed-in: fields prefill from the profile; the same endpoint attaches
 //         their user_id so the order appears in their dashboard.
 
 import { useEffect, useMemo, useState, type ReactNode } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import {
   ArrowLeft, ShoppingBag, Loader2, ShieldCheck, CheckCircle2, UserPlus, Package,
 } from "lucide-react"
 import { useApp } from "@/lib/store"
+import { useIsApp } from "@/lib/app-mode"
 import { useLocale, t } from "@/lib/locale"
 import { useCurrency } from "@/lib/currency"
 import { useToast } from "@/components/ui/toast"
@@ -33,6 +43,7 @@ type FormState = {
 
 export default function ShopCheckoutPage() {
   const router = useRouter()
+  const pathname = usePathname()
   const { locale } = useLocale()
   const { format } = useCurrency()
   const { notify } = useToast()
@@ -46,6 +57,9 @@ export default function ShopCheckoutPage() {
   const [placedAsGuest, setPlacedAsGuest] = useState(false)
 
   const isSignedIn = Boolean(state.user)
+  const isApp = useIsApp()
+  // Gate only where both are true — the web guest path is untouched.
+  const mustSignIn = isApp && !isSignedIn
 
   // Prefill for signed-in users
   useEffect(() => {
@@ -99,6 +113,12 @@ export default function ShopCheckoutPage() {
 
   async function submit() {
     if (!isValid || cartItems.length === 0) return
+    // Defence in depth: the button is already hidden for this case, but a
+    // stale render or a keyboard submit must not slip past.
+    if (mustSignIn) {
+      router.push(`/sign-in?redirect=${encodeURIComponent(pathname)}`)
+      return
+    }
     setSubmitting(true)
     try {
       const res = await fetch("/api/orders/guest", {
@@ -383,6 +403,37 @@ export default function ShopCheckoutPage() {
                   <dd className="tabular-nums">{format(total)}</dd>
                 </div>
               </dl>
+              {mustSignIn ? (
+                /* Explain, do not just disable. A dead button with no reason
+                   reads as a broken app; this says what is needed and why,
+                   and keeps the cart so nothing is lost on the way. */
+                <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-center">
+                  <p className="font-bold text-neutral-900">
+                    {t(locale, "Sign in to place your order", "سجّل دخولك عشان تكمّل الطلب")}
+                  </p>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    {t(
+                      locale,
+                      "Your order is saved to your record with your plan and progress. Your cart is kept.",
+                      "طلبك بيتسجّل في ملفك مع خطتك ومتابعتك. سلتك محفوظة زي ما هي.",
+                    )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/sign-in?redirect=${encodeURIComponent(pathname)}`)}
+                    className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white transition hover:bg-emerald-700"
+                  >
+                    {t(locale, "Sign in", "تسجيل الدخول")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/sign-up?redirect=${encodeURIComponent(pathname)}`)}
+                    className="mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-xl text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                  >
+                    {t(locale, "Create an account", "إنشاء حساب")}
+                  </button>
+                </div>
+              ) : (
               <button
                 type="button"
                 onClick={submit}
@@ -401,6 +452,7 @@ export default function ShopCheckoutPage() {
                   </>
                 )}
               </button>
+              )}
               <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-neutral-400">
                 <ShieldCheck className="size-3.5" aria-hidden />
                 {t(locale, "Your details are only used for delivery.", "بياناتك تُستخدم للتوصيل فقط.")}

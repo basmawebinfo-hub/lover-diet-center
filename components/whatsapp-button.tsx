@@ -5,7 +5,7 @@ import { WHATSAPP_SUPPORT } from '@/lib/site'
 
 export function WhatsAppButton() {
   return (
-    <div className="fixed bottom-5 end-5 z-50">
+    <div data-site-fab className="fixed bottom-5 end-5 z-50">
       {/* Continuous glow ring — outer */}
       <span className="absolute -inset-3 animate-ping rounded-full bg-lime-400/20" style={{ animationDuration: '2.5s' }} />
       {/* Glow ring — middle */}

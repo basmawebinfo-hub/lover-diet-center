@@ -2,7 +2,7 @@
   "name": "Lover Diet Center — Science-Based Nutrition",
   "short_name": "LoverDiet",
   "description": "Personalized diet plans, healthy meals, premium supplements, and expert nutrition guidance in the UAE.",
-  "start_url": "/",
+  "start_url": "/ar",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -45,5 +45,6 @@
       "sizes": "any",
       "type": "image/svg+xml"
     }
-  ]
+  ],
+  "id": "/ar"
 }

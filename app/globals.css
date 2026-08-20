@@ -398,6 +398,14 @@
    wrapped site. A media query is decided before the first paint.
    ===================================================================== */
 
+/* iOS before 16.4 has no display-mode media query — Safari exposes
+   navigator.standalone instead. lib/app-mode.ts stamps data-app on <html> in
+   that case so the same rules apply on older iPhones. */
+html[data-app] [data-site-chrome],
+html[data-app] [data-site-fab] {
+  display: none !important;
+}
+
 @media all and (display-mode: standalone) {
   /* The marketing header and its hamburger are the single biggest tell that
      this is a website in a frame. The app navigates from the bottom bar. */

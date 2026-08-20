@@ -15,6 +15,12 @@ export const rootMetadata: Metadata = {
     title: 'LoverDiet',
     statusBarStyle: 'default',
   },
+  other: {
+    // Next emits the modern `mobile-web-app-capable`. iOS before 16.4 only
+    // reads the apple-prefixed spelling, and without it those devices open
+    // the Home Screen shortcut inside Safari's chrome instead of standalone.
+    'apple-mobile-web-app-capable': 'yes',
+  },
   title: {
     default: 'Lover Diet Center — Science-Based Nutrition in UAE',
     template: '%s | Lover Diet Center',

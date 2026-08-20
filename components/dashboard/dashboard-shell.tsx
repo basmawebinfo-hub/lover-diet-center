@@ -235,14 +235,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         ))}
 
         {/*
-          Centre slot, reserved for the daily action. Food logging is not built
-          yet, so it points at weight logging — the one thing a client is meant
-          to do every day today. When photo logging ships it takes this slot
-          without the bar needing to be redesigned.
+          Centre slot: the daily action. This is what the raised button was
+          reserved for from the start — photographing a meal is the habit the
+          whole product depends on, so it gets the most confident control on
+          the screen.
         */}
         <Link
-          href="/dashboard/weight"
-          aria-label={t(locale, "Log today", "سجّل اليوم")}
+          href="/dashboard/log"
+          aria-label={t(locale, "Log a meal", "سجّل وجبة")}
           className="flex flex-col items-center gap-1 focus:outline-none"
         >
           <span className="flex size-12 -translate-y-3 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 transition-transform active:scale-95">

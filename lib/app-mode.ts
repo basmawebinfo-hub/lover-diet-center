@@ -29,6 +29,9 @@ function subscribe(onChange: () => void): () => void {
 function getSnapshot(): boolean {
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
+    // iOS: Safari exposes this instead, and only supported the display-mode
+    // query from 16.4 onward.
+    (navigator as Navigator & { standalone?: boolean }).standalone === true ||
     document.referrer.startsWith('android-app://')
   )
 }

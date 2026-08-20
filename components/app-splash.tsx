@@ -28,10 +28,17 @@ export function AppSplash() {
   useEffect(() => {
     const standalone =
       window.matchMedia('(display-mode: standalone)').matches ||
+      // iOS: Safari exposes this rather than the media query, which it only
+      // supported from 16.4 onward.
+      (navigator as Navigator & { standalone?: boolean }).standalone === true ||
       // Trusted Web Activity: Chrome reports the launching Android app here.
       document.referrer.startsWith('android-app://')
 
     if (!standalone) return
+
+    // Marks the document for the CSS fallback that hides site chrome on iOS
+    // versions without the display-mode query.
+    document.documentElement.setAttribute('data-app', '')
 
     // Once per launch, not once per navigation.
     if (sessionStorage.getItem('ldc:splash-shown')) return
